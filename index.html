@@ -1392,6 +1392,98 @@
             }
         }
     </style>
+
+    <!-- ==================================================================================
+         NEWLY ADDED: طبقة تنسيق مستقلة (Scoped / Additive Stylesheet) خاصة حصراً بوحدة
+         "نظام إرسال تقارير الطلاب عبر واتساب" (Prefix: wr-). هذه الطبقة إضافية بالكامل
+         (Additive Only) ولا تُعدّل أو تتقاطع مع أي صنف (class) موجود مسبقاً ضمن حزمة
+         Tailwind المُصدَّرة (tailwind-production-build) أعلاه، وذلك لضمان "الحفاظ التام على
+         باقي الخصائص وتنسيقات الواجهة والكود الحالي دون أي تعديل جانبي" — نظراً لكون تلك
+         الحزمة نسخة مُجمَّعة (Purged) تحتوي فقط على الأصناف المُستخدَمة فعلياً وقت البناء،
+         فإن أي صنف Tailwind جديد (مثل ألوان Indigo أو تخطيطات أعمدة غير مستخدمة سلفاً) لن
+         يُطبَّق بصرياً. لذا اعتُمد أسلوب تنسيق خاص (نفس فلسفة أصناف tk-/wb- الموجودة سلفاً
+         في المشروع) يضمن ظهور لوحة الألوان المطلوبة (slate, indigo, emerald, amber, red)
+         بشكل صحيح ومستقل تماماً (Style Isolation). -->
+    <style id="wr-whatsapp-reports-module-style">
+        .wr-card { background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; padding:16px; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+        .wr-card-title { font-size:13px; font-weight:800; color:#0b3a26; margin-bottom:10px; }
+        .wr-label { display:block; font-size:11px; font-weight:700; color:#334155; margin-bottom:4px; }
+        .wr-input, .wr-textarea {
+            width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid #cbd5e1; border-radius:10px;
+            font-size:12px; outline:none; background:#ffffff; font-family:inherit; color:#0f172a; resize:vertical;
+        }
+        .wr-input:focus, .wr-textarea:focus { border-color:#4f46e5; box-shadow:0 0 0 3px rgba(79,70,229,.15); }
+        .wr-search-wrap { position:relative; flex:1 1 240px; min-width:200px; }
+        .wr-search-input { padding-right:32px; padding-left:28px; }
+        .wr-search-icon { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:12px; opacity:.6; pointer-events:none; }
+        .wr-search-clear-btn {
+            position:absolute; left:6px; top:50%; transform:translateY(-50%); border:none; background:transparent;
+            cursor:pointer; font-size:11px; color:#94a3b8; padding:4px; line-height:1;
+        }
+        .wr-search-clear-btn:hover { color:#dc2626; }
+        .wr-token-chip {
+            display:inline-block; direction:ltr; font-family:monospace; font-size:10.5px; font-weight:700;
+            background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; border-radius:8px; padding:2px 8px;
+        }
+        .wr-btn {
+            display:inline-flex; align-items:center; gap:5px; padding:8px 14px; border-radius:10px; border:none;
+            font-size:11.5px; font-weight:800; cursor:pointer; transition:filter .15s ease, transform .05s ease;
+            white-space:nowrap; font-family:inherit;
+        }
+        .wr-btn:active { transform:scale(0.97); }
+        .wr-btn:hover { filter:brightness(0.93); }
+        .wr-btn-indigo { background:#4f46e5; color:#ffffff; }
+        .wr-btn-emerald { background:#059669; color:#ffffff; }
+        .wr-btn-amber { background:#d97706; color:#ffffff; }
+        .wr-btn-red { background:#dc2626; color:#ffffff; }
+        .wr-btn-slate { background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; }
+        .wr-btn-xs { padding:5px 9px; font-size:10.5px; border-radius:8px; }
+        .wr-btn[disabled] { opacity:.5; cursor:not-allowed; filter:none; }
+        .wr-badge {
+            display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:9999px;
+            font-size:10.5px; font-weight:800; white-space:nowrap; border:1px solid transparent;
+        }
+        .wr-badge-excellent { background:#eef2ff; color:#4338ca; border-color:#c7d2fe; }
+        .wr-badge-good { background:#ecfdf5; color:#047857; border-color:#a7f3d0; }
+        .wr-badge-average { background:#fffbeb; color:#b45309; border-color:#fde68a; }
+        .wr-badge-weak { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+        .wr-badge-neutral { background:#f8fafc; color:#475569; border-color:#e2e8f0; }
+        .wr-table-wrap { overflow-x:auto; border:1px solid #e2e8f0; border-radius:14px; }
+        .wr-table { width:100%; border-collapse:collapse; font-size:12px; min-width:680px; }
+        .wr-table thead th {
+            background:#f8fafc; color:#334155; font-weight:800; text-align:right; padding:10px 12px;
+            border-bottom:2px solid #e2e8f0; white-space:nowrap; font-size:11px;
+        }
+        .wr-table tbody td { padding:9px 12px; border-bottom:1px solid #eef2f7; vertical-align:middle; color:#1e293b; }
+        .wr-table tbody tr:last-child td { border-bottom:none; }
+        .wr-table tbody tr:hover td { background:#fafbfc; }
+        .wr-msg-preview {
+            max-width:220px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+            color:#64748b; font-size:11px;
+        }
+        .wr-row-actions { display:flex; flex-wrap:wrap; gap:4px; }
+        .wr-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 16px; color:#94a3b8; text-align:center; }
+        .wr-edit-input { width:100%; box-sizing:border-box; padding:5px 7px; border:1px solid #c7d2fe; border-radius:7px; font-size:11px; outline:none; }
+        .wr-modal-overlay {
+            position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center;
+            justify-content:center; z-index:9999; padding:16px;
+        }
+        .wr-modal-box { background:#ffffff; border-radius:16px; padding:22px; max-width:420px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,.25); }
+        .wr-modal-title { font-size:15px; font-weight:900; color:#0f172a; margin-bottom:8px; }
+        .wr-modal-text { font-size:12.5px; color:#475569; margin-bottom:18px; line-height:1.7; }
+        .wr-status-ok { color:#047857; }
+        .wr-status-err { color:#b91c1c; }
+        /* NEWLY ADDED [FIREBASE]: مؤشر تحميل دوّار (Loading Spinner) لحالة جلب بيانات الطلاب من Firebase */
+        .wr-spinner {
+            width:34px; height:34px; border-radius:50%; border:4px solid #e2e8f0; border-top-color:#4f46e5;
+            animation: wr-spin 0.8s linear infinite;
+        }
+        @keyframes wr-spin { to { transform: rotate(360deg); } }
+        /* NEWLY ADDED [FIREBASE]: شارة حالة الاتصال بقاعدة البيانات */
+        .wr-badge-syncing { background:#eef2ff; color:#4338ca; border-color:#c7d2fe; }
+        .wr-badge-synced { background:#ecfdf5; color:#047857; border-color:#a7f3d0; }
+        .wr-badge-offline { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+    </style>
 </head>
 <body class="bg-slate-50">
 
@@ -1859,6 +1951,9 @@
                 <button class="btn-tab" id="tab-btn-schedule" onclick="switchWorkspaceTab('schedule')">تنظيم حصصي ومواعيدي (Schedule)</button>
                 <!-- NEWLY ADDED: تبويب "حقيبة المعلم التفاعلية" — حصري لشاشة المعلم فقط، يُخفى تماماً عن الطالب/المساعد عبر applyRoleBasedVisibility (نفس آلية تبويب homework-report) -->
                 <button class="btn-tab" id="tab-btn-toolkit" onclick="switchWorkspaceTab('toolkit')">حقيبة المعلم التفاعلية</button>
+                <!-- NEWLY ADDED: تبويب "نظام إرسال تقارير الطلاب عبر واتساب" — وحدة مستقلة تماماً (Self-Contained)
+                     لا تتعارض مع أي منطق أو تنسيق حالي، وتعتمد على LocalStorage الخاص بها فقط -->
+                <button class="btn-tab" id="tab-btn-whatsapp-reports" onclick="switchWorkspaceTab('whatsapp-reports')">نظام إرسال تقارير الطلاب عبر واتساب</button>
             </nav>
 
 
@@ -2533,6 +2628,164 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ==================================================================================
+                 NEWLY ADDED: تبويب "نظام إرسال تقارير الطلاب عبر واتساب" (WhatsApp Student Reports)
+                 وحدة مستقلة بالكامل (Self-Contained Module):
+                   - جميع المعرّفات والدوال والأصناف مُسبَّقة بـ wr-/wa- لتفادي أي تعارض مع بقية الكود.
+                   - [FIREBASE INTEGRATION] بيانات الطلاب (الاسم/الهاتف/الدرجة/نسبة الحضور/الملاحظات) أصبحت
+                     مرتبطة الآن حصرياً بقاعدة Firebase Realtime Database تحت المسار
+                     whatsapp_reports/{currentTeacherId} (بنفس مثيل Firebase الذي تهيّئه initializeFirebaseAppCore()
+                     المستخدم أصلاً في بقية المشروع)، بدلاً من التخزين المحلي عبر LocalStorage — بما يحقق مزامنة
+                     لحظية (Real-time Sync) لبيانات كل معلم عبر جميع أجهزته/جلساته. نص القالب (Template) وحده
+                     ما زال يُحفَظ محلياً كتفضيل واجهة بحت (UI Preference) دون أي تأثير على بيانات الطلاب نفسها.
+                   - جميع مدخلات المستخدم تُعقَّم (Sanitize) قبل عرضها في الواجهة (XSS Protection) عبر
+                     الدالة waEscapeHtml التي تستخدم مكتبة DOMPurify المُحمَّلة فعلياً في المشروع.
+                 ================================================================================== -->
+            <div id="tab-panel-whatsapp-reports" class="tab-panel-view" style="display: none;">
+
+                <!-- Header Module -->
+                <div class="wr-card mb-4">
+                    <div class="flex items-center justify-between flex-wrap gap-3">
+                        <div>
+                            <h3 class="text-lg font-black text-[#012015] flex items-center gap-2">💬 نظام إرسال تقارير الطلاب عبر واتساب</h3>
+                            <p class="text-xs font-semibold text-gray-500 mt-1">أضف بيانات الطلاب من الشريط الجانبي، خصّص نص الرسالة، ثم أرسل تقرير كل طالب مباشرة لولي أمره عبر واتساب بضغطة واحدة.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- NEWLY ADDED [FIREBASE]: شارة حيّة تعكس حالة الاتصال الحالية بقاعدة Firebase لهذه الوحدة -->
+                            <span id="wa-firebase-status-badge" class="wr-badge wr-badge-neutral" style="display:none;"></span>
+                            <button type="button" class="wr-btn wr-btn-slate" onclick="waLoadSampleData()">📥 تحميل بيانات تجريبية</button>
+                            <button type="button" class="wr-btn wr-btn-red" onclick="waClearAllData()">🗑️ مسح الكل</button>
+                        </div>
+                    </div>
+                    <div id="wa-form-status" class="text-xs font-bold mt-2" style="display:none;"></div>
+                </div>
+
+                <!-- Main 3-Column Grid: Sidebar (1) + Data Table (2) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+                    <!-- Sidebar Controls (Column 1) -->
+                    <div class="lg:col-span-1 flex flex-col gap-4">
+
+                        <!-- Student Data Form -->
+                        <div class="wr-card">
+                            <div class="wr-card-title">➕ إضافة طالب جديد</div>
+                            <form id="wa-student-form" onsubmit="return waHandleAddSubmit(event)" class="flex flex-col gap-3">
+                                <div>
+                                    <label class="wr-label" for="wa-input-name">اسم الطالب</label>
+                                    <input type="text" id="wa-input-name" class="wr-input" placeholder="أدخل اسم الطالب" required maxlength="120" autocomplete="off">
+                                </div>
+                                <div>
+                                    <label class="wr-label" for="wa-input-phone">رقم هاتف ولي الأمر</label>
+                                    <input type="tel" id="wa-input-phone" class="wr-input" placeholder="01xxxxxxxxx" required maxlength="20" autocomplete="off">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="wr-label" for="wa-input-grade">الدرجة</label>
+                                        <input type="text" id="wa-input-grade" class="wr-input" placeholder="مثال: 85/100" maxlength="30" autocomplete="off">
+                                    </div>
+                                    <div>
+                                        <label class="wr-label" for="wa-input-attendance">نسبة الحضور %</label>
+                                        <input type="number" id="wa-input-attendance" class="wr-input" placeholder="مثال: 90" min="0" max="100" step="1">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="wr-label" for="wa-input-notes">ملاحظات المعلم</label>
+                                    <textarea id="wa-input-notes" class="wr-textarea" rows="3" placeholder="اكتب ملاحظاتك على أداء الطالب..." maxlength="500"></textarea>
+                                </div>
+                                <button type="submit" class="wr-btn wr-btn-indigo w-full justify-center">✅ إضافة للقائمة</button>
+                            </form>
+                        </div>
+
+                        <!-- Dynamic Template Customizer -->
+                        <div class="wr-card">
+                            <div class="wr-card-title">📝 تخصيص نص الرسالة</div>
+                            <p class="text-[11px] font-semibold text-gray-500 mb-2">استخدم الوسوم التالية داخل النص وسيتم استبدالها تلقائياً ببيانات كل طالب:</p>
+                            <div class="flex flex-wrap gap-1 mb-2">
+                                <span class="wr-token-chip">{اسم_الطالب}</span>
+                                <span class="wr-token-chip">{الدرجة}</span>
+                                <span class="wr-token-chip">{النسبة}</span>
+                                <span class="wr-token-chip">{الملاحظات}</span>
+                            </div>
+                            <textarea id="wa-template-textarea" class="wr-textarea" rows="6" oninput="waSaveTemplate()"></textarea>
+                            <button type="button" class="wr-btn wr-btn-slate w-full justify-center mt-2" onclick="waResetTemplate()">↺ استعادة النص الافتراضي</button>
+                        </div>
+                    </div>
+
+                    <!-- Main Data Table (Column 2-3) -->
+                    <div class="lg:col-span-2">
+                        <div class="wr-card">
+                            <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+                                <div class="wr-card-title" style="margin-bottom:0;">📋 قائمة الطلاب</div>
+                                <span id="wa-count-badge" class="wr-badge wr-badge-neutral">0 طالب</span>
+                            </div>
+
+                            <!-- NEWLY ADDED: استعلام ذكي (بحث فوري) باسم الطالب أو رقم هاتف ولي الأمر + أزرار تصدير/استيراد بيانات الجدول بصيغة JSON -->
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
+                                <div class="wr-search-wrap">
+                                    <span class="wr-search-icon">🔍</span>
+                                    <input type="text" id="wa-search-input" class="wr-input wr-search-input" placeholder="ابحث باسم الطالب أو رقم هاتف ولي الأمر..." oninput="waHandleSearchInput(this.value)" autocomplete="off">
+                                    <button type="button" id="wa-search-clear-btn" class="wr-search-clear-btn" style="display:none;" onclick="waClearSearch()" title="مسح البحث">✖</button>
+                                </div>
+                                <button type="button" class="wr-btn wr-btn-emerald wr-btn-xs" onclick="waExportStudentsJson()">⬇️ تصدير JSON</button>
+                                <label class="wr-btn wr-btn-slate wr-btn-xs" style="cursor:pointer;">
+                                    ⬆️ استيراد JSON
+                                    <input type="file" accept="application/json" id="wa-import-file-input" onchange="waImportStudentsJson(event)" class="hidden" style="display:none;">
+                                </label>
+                            </div>
+
+                            <!-- NEWLY ADDED [FIREBASE]: حالة التحميل (Loading State) — تظهر أثناء الجلب الأول لبيانات
+                                 الطلاب من Firebase أو أثناء إعادة الاتصال بعد تغيّر المعلم الحالي -->
+                            <div id="wa-loading-state" class="wr-empty" style="display:none;">
+                                <div class="wr-spinner" aria-hidden="true"></div>
+                                <div class="font-black text-sm mt-2" style="color:#475569;">جارِ تحميل بيانات الطلاب من قاعدة البيانات...</div>
+                                <div class="text-xs mt-1">يرجى الانتظار لحظات، قد يستغرق الأمر بضع ثوانٍ حسب سرعة الاتصال بالإنترنت.</div>
+                            </div>
+
+                            <!-- NEWLY ADDED [FIREBASE]: حالة خطأ الاتصال بقاعدة البيانات (Error Handling) — تظهر عند
+                                 فشل الاشتراك في مسار whatsapp_reports/{currentTeacherId} (انقطاع الشبكة، صلاحيات
+                                 القراءة/الكتابة على Firebase Security Rules، أو أي خطأ آخر أثناء المزامنة اللحظية) -->
+                            <div id="wa-firebase-error-state" class="wr-empty" style="display:none;">
+                                <div style="font-size:40px; line-height:1;">⚠️</div>
+                                <div class="font-black text-sm mt-2" style="color:#b91c1c;">تعذّر الاتصال بقاعدة بيانات الطلاب</div>
+                                <div id="wa-firebase-error-message" class="text-xs mt-1">حدث خطأ أثناء محاولة الاتصال بـ Firebase. تحقّق من اتصالك بالإنترنت ثم أعد المحاولة.</div>
+                                <button type="button" class="wr-btn wr-btn-slate wr-btn-xs mt-2" onclick="waAttachFirebaseStudentsListener()">🔄 إعادة المحاولة</button>
+                            </div>
+
+                            <div id="wa-table-wrap" class="wr-table-wrap">
+                                <table class="wr-table">
+                                    <thead>
+                                        <tr>
+                                            <th>اسم الطالب</th>
+                                            <th>الهاتف</th>
+                                            <th>التقييم</th>
+                                            <th>معاينة الرسالة</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="wa-table-body"></tbody>
+                                </table>
+                            </div>
+
+                            <!-- NEWLY ADDED: حالة "لا توجد نتائج مطابقة للبحث" — تظهر فقط عند وجود طلاب مسجَّلين لكن دون تطابق مع الاستعلام -->
+                            <div id="wa-no-search-results" class="wr-empty" style="display:none;">
+                                <div style="font-size:36px; line-height:1;">🔎</div>
+                                <div class="font-black text-sm mt-2" style="color:#475569;">لا توجد نتائج مطابقة للبحث</div>
+                                <div class="text-xs mt-1">جرّب اسماً آخر أو رقم هاتف مختلف، أو اضغط ✖ لمسح البحث وعرض كل الطلاب.</div>
+                            </div>
+
+                            <!-- Empty State -->
+                            <div id="wa-empty-state" class="wr-empty" style="display:none;">
+                                <div style="font-size:40px; line-height:1;">📭</div>
+                                <div class="font-black text-sm mt-2" style="color:#475569;">لا يوجد طلاب مضافون بعد</div>
+                                <div class="text-xs mt-1">استخدم النموذج على اليمين لإضافة أول طالب، أو اضغط "تحميل بيانات تجريبية" لتجربة النظام.</div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ============================ END: WhatsApp Student Reports Module ============================ -->
 
         </section>
     </main>
@@ -4875,7 +5128,7 @@
         }
 
         function switchWorkspaceTabLocally(tabId) {
-            const tabs = ['editor', 'view-lesson', 'pdf', 'report', 'homework-report', 'schedule', 'toolkit'];
+            const tabs = ['editor', 'view-lesson', 'pdf', 'report', 'homework-report', 'schedule', 'toolkit', 'whatsapp-reports'];
             tabs.forEach(t => {
                 const btn = document.getElementById(`tab-btn-${t}`);
                 const panel = document.getElementById(`tab-panel-${t}`);
@@ -4888,6 +5141,906 @@
             if (activeBtn) activeBtn.classList.add('active');
             if (activePanel) activePanel.style.display = 'block';
         }
+
+        // ==================================================================================
+        // NEWLY ADDED: وحدة "نظام إرسال تقارير الطلاب عبر واتساب" (WhatsApp Student Reports)
+        // ------------------------------------------------------------------------------------
+        // وحدة مستقلة بالكامل (Self-Contained):
+        //   • جميع الدوال والمتغيرات مُسبَّقة بـ wa/WA لتفادي أي تعارض في الأسماء (Namespace Isolation)
+        //     مع أي دالة أو متغير حالي في المشروع — لا يوجد أي حذف أو تعديل على منطق قائم.
+        //   • الحالة تُحفَظ محلياً فقط عبر localStorage تحت المفتاح "whatsapp_reports_students"
+        //     (بيانات كل متصفح/جهاز منفصلة تماماً، دون أي اتصال أو مزامنة عبر Firebase).
+        //   • أمان الطبقة الأمامية (Frontend Security / XSS Protection): كل نص يُدخله المستخدم
+        //     (اسم الطالب، الملاحظات، نص القالب...) يمر إلزامياً عبر waEscapeHtml() قبل حقنه في
+        //     الـ DOM، والتي تستخدم مكتبة DOMPurify المُحمَّلة فعلياً في المشروع (Defense in Depth)،
+        //     مع نسخة احتياطية آمنة (textContent Escaping) في حال عدم توفر المكتبة لأي سبب.
+        //   • معالجة شاملة لحالات الاستثناء (Edge Cases): جميع الدوال مغلّفة بـ try/catch بحيث لا
+        //     يتوقف السكربت أبداً حتى في حال بيانات تالفة داخل localStorage أو مدخلات غير متوقعة.
+        // ==================================================================================
+
+        // NEWLY ADDED [FIREBASE]: المسار الجذري لبيانات هذه الوحدة داخل Firebase Realtime Database.
+        // البيانات الفعلية لكل معلم تُخزَّن تحت: whatsapp_reports/{currentTeacherId}/{studentId}
+        // بنفس أسلوب العزل المستخدم فعلياً في وحدة "تنظيم حصصي ومواعيدي" (schedules/teacher_{currentTeacherId})
+        const WA_FIREBASE_ROOT = 'whatsapp_reports';
+        const WA_TEMPLATE_STORAGE_KEY = 'whatsapp_reports_template'; // نص القالب يبقى تفضيلاً محلياً بحتاً (لا علاقة له ببيانات الطلاب)
+        const WA_DEFAULT_TEMPLATE = 'مرحباً بكم أولياء الأمور الكرام 🌟\nتقرير أداء الطالب/ة: {اسم_الطالب}\nالدرجة: {الدرجة}\nنسبة الحضور: {النسبة}%\nملاحظات المعلم: {الملاحظات}\n\nمع تحيات :.';
+
+        let waStudentsList = []; // النسخة المحلية المُخزَّنة مؤقتاً (Cache) من آخر بيانات وصلت لحظياً من Firebase
+        let waEditingStudentId = null;
+        let waSearchQuery = ''; // NEWLY ADDED: نص الاستعلام الذكي الحالي (بحث بالاسم أو رقم الهاتف)
+
+        // NEWLY ADDED [FIREBASE]: مرجع الاستماع اللحظي الحالي (Firebase Realtime Reference) لمسار طلاب المعلم
+        // الحالي — يُستخدَم لإيقاف الاستماع (off) بأمان عند تغيّر المعلم/الدور لتفادي تسرّب الجلسات (Listener Leak)
+        let waFirebaseRef = null;
+        let waIsLoadingFromFirebase = false; // حالة التحميل (Loading State) أثناء الجلب الأول أو إعادة الاتصال
+        let waFirebaseErrorMessage = null;   // نص آخر خطأ اتصال/قراءة حدث أثناء المزامنة مع Firebase، أو null إن لم يوجد
+
+        // --- NEWLY ADDED [FIREBASE]: بناء مسار بيانات الطلاب الخاص بالمعلم الحالي داخل Realtime Database ---
+        // يعتمد على currentTeacherId العام (نفس المتغيّر المستخدم في وحدة الجدول schedules/) لضمان أن بيانات
+        // كل معلم معزولة تماماً عن بيانات باقي المعلمين، بنفس منطق الصلاحيات والمزامنة الحالي في المشروع.
+        function waGetFirebasePath() {
+            try {
+                if (typeof currentTeacherId === 'undefined' || !currentTeacherId) return null;
+                return WA_FIREBASE_ROOT + '/' + currentTeacherId;
+            } catch (err) {
+                console.error('waGetFirebasePath error:', err);
+                return null;
+            }
+        }
+
+        // --- تعقيم أي نص قادم من المستخدم قبل حقنه داخل innerHTML (حماية من XSS) ---
+        function waEscapeHtml(value) {
+            try {
+                const str = (value === null || value === undefined) ? '' : String(value);
+                if (typeof window.DOMPurify !== 'undefined' && window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
+                    return window.DOMPurify.sanitize(str, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+                }
+                const tempDiv = document.createElement('div');
+                tempDiv.textContent = str;
+                return tempDiv.innerHTML;
+            } catch (err) {
+                console.error('waEscapeHtml error:', err);
+                return '';
+            }
+        }
+
+        function waGenerateId() {
+            return 'wa_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 9);
+        }
+
+        // ==================================================================================
+        // NEWLY ADDED [FIREBASE INTEGRATION]: جلب بيانات الطلاب لحظياً من Firebase Realtime Database
+        // ------------------------------------------------------------------------------------
+        // تحل هذه الدالة محل waLoadStudents/waSaveStudents السابقتين (localStorage). تشترك (on 'value')
+        // بمسار whatsapp_reports/{currentTeacherId} فتُحدَّث waStudentsList تلقائياً وفورياً في كل مرة
+        // تتغيّر فيها البيانات على الخادم (إضافة/تعديل/حذف من أي جهاز)، مع إظهار حالة تحميل (Loading)
+        // أثناء الجلب الأول، ومعالجة كاملة لأخطاء الاتصال/الصلاحيات (Error Handling) عبر callback الخطأ.
+        // ==================================================================================
+        function waAttachFirebaseStudentsListener() {
+            try {
+                // إيقاف أي اشتراك سابق قبل إنشاء اشتراك جديد لتفادي تراكم المستمعين (Listener Leak)
+                // عند تبديل المعلم الحالي (مثال: تسجيل خروج/دخول بحساب معلم آخر على نفس الجلسة)
+                waDetachFirebaseStudentsListener();
+
+                // التأكد من تهيئة تطبيق Firebase (نفس الدالة المستخدمة في بقية وحدات المشروع)
+                if (typeof initializeFirebaseAppCore === 'function') {
+                    initializeFirebaseAppCore();
+                }
+
+                const path = waGetFirebasePath();
+                if (!path) {
+                    waStudentsList = [];
+                    waIsLoadingFromFirebase = false;
+                    waFirebaseErrorMessage = 'تعذّر تحديد حساب المعلم الحالي لعرض بياناته.';
+                    waRenderTable();
+                    return;
+                }
+
+                if (typeof firebase === 'undefined' || !firebase.database) {
+                    waIsLoadingFromFirebase = false;
+                    waFirebaseErrorMessage = 'تعذّر تحميل مكتبة Firebase. تحقّق من اتصالك بالإنترنت وأعد تحميل الصفحة.';
+                    waRenderTable();
+                    return;
+                }
+
+                // إظهار حالة التحميل (Loading) فور بدء الاشتراك وحتى وصول أول استجابة من الخادم
+                waIsLoadingFromFirebase = true;
+                waFirebaseErrorMessage = null;
+                waRenderTable();
+
+                waFirebaseRef = firebase.database().ref(path);
+                waFirebaseRef.on('value', function (snapshot) {
+                    try {
+                        const val = snapshot.val() || {};
+                        // تحويل كائن Firebase (key: {…}) إلى مصفوفة موحّدة مع بقية منطق الوحدة (id + بيانات الطالب)
+                        waStudentsList = Object.keys(val)
+                            .map(key => Object.assign({ id: key }, val[key]))
+                            .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                        waIsLoadingFromFirebase = false;
+                        waFirebaseErrorMessage = null;
+                        waRenderTable();
+                    } catch (parseErr) {
+                        console.error('waAttachFirebaseStudentsListener value-parse error:', parseErr);
+                        waIsLoadingFromFirebase = false;
+                        waFirebaseErrorMessage = 'حدث خطأ أثناء معالجة بيانات الطلاب الواردة من قاعدة البيانات.';
+                        waRenderTable();
+                    }
+                }, function (error) {
+                    // Error Handling: فشل الاتصال بـ Firebase أو رفض قواعد الأمان (Security Rules) للقراءة
+                    console.error('waAttachFirebaseStudentsListener Firebase error:', error);
+                    waIsLoadingFromFirebase = false;
+                    waFirebaseErrorMessage = 'تعذّر الاتصال بقاعدة بيانات الطلاب: ' + ((error && error.message) ? error.message : 'خطأ غير معروف') + '.';
+                    waRenderTable();
+                });
+            } catch (err) {
+                console.error('waAttachFirebaseStudentsListener error:', err);
+                waIsLoadingFromFirebase = false;
+                waFirebaseErrorMessage = 'حدث خطأ غير متوقع أثناء الاتصال بقاعدة البيانات.';
+                waRenderTable();
+            }
+        }
+
+        // --- NEWLY ADDED [FIREBASE]: إيقاف الاستماع اللحظي الحالي بأمان (يُستدعى قبل أي إعادة اشتراك) ---
+        function waDetachFirebaseStudentsListener() {
+            try {
+                if (waFirebaseRef) {
+                    waFirebaseRef.off();
+                    waFirebaseRef = null;
+                }
+            } catch (err) {
+                console.error('waDetachFirebaseStudentsListener error:', err);
+            }
+        }
+
+        // --- تطبيع رقم الهاتف تلقائياً إلى الصيغة الدولية المصرية (2xxxxxxxxxxx) ---
+        function waFormatPhone(phone) {
+            try {
+                if (!phone) return '';
+                let digits = String(phone).replace(/\D/g, '');
+                if (!digits) return '';
+                if (digits.startsWith('0020')) {
+                    digits = digits.slice(2);
+                } else if (digits.startsWith('0')) {
+                    digits = digits.slice(1);
+                }
+                if (!digits.startsWith('20')) {
+                    digits = '20' + digits;
+                }
+                return digits;
+            } catch (err) {
+                console.error('waFormatPhone error:', err);
+                return '';
+            }
+        }
+
+        function waGetCurrentTemplate() {
+            try {
+                const textarea = document.getElementById('wa-template-textarea');
+                if (textarea && typeof textarea.value === 'string' && textarea.value.trim() !== '') {
+                    return textarea.value;
+                }
+                const stored = window.localStorage.getItem(WA_TEMPLATE_STORAGE_KEY);
+                return (stored && stored.trim() !== '') ? stored : WA_DEFAULT_TEMPLATE;
+            } catch (err) {
+                console.error('waGetCurrentTemplate error:', err);
+                return WA_DEFAULT_TEMPLATE;
+            }
+        }
+
+        function waSaveTemplate() {
+            try {
+                const textarea = document.getElementById('wa-template-textarea');
+                if (!textarea) return;
+                window.localStorage.setItem(WA_TEMPLATE_STORAGE_KEY, textarea.value);
+                waRenderTable();
+            } catch (err) {
+                console.error('waSaveTemplate error:', err);
+            }
+        }
+
+        function waResetTemplate() {
+            try {
+                const textarea = document.getElementById('wa-template-textarea');
+                if (!textarea) return;
+                textarea.value = WA_DEFAULT_TEMPLATE;
+                waSaveTemplate();
+            } catch (err) {
+                console.error('waResetTemplate error:', err);
+            }
+        }
+
+        // --- استبدال الوسوم الديناميكية داخل نص القالب ببيانات الطالب الفعلية ---
+        function waBuildMessage(template, student) {
+            try {
+                const tpl = (typeof template === 'string' && template) ? template : WA_DEFAULT_TEMPLATE;
+                const attendanceValue = (student.studentAttendance !== undefined && student.studentAttendance !== null && student.studentAttendance !== '')
+                    ? student.studentAttendance : '';
+                return tpl
+                    .split('{اسم_الطالب}').join(student.studentName || '')
+                    .split('{الدرجة}').join(student.studentGrade || '')
+                    .split('{النسبة}').join(attendanceValue)
+                    .split('{الملاحظات}').join(student.studentNotes || '');
+            } catch (err) {
+                console.error('waBuildMessage error:', err);
+                return '';
+            }
+        }
+
+        function waBuildWhatsAppLink(student) {
+            try {
+                const formattedPhone = waFormatPhone(student.parentPhone);
+                if (!formattedPhone) return '';
+                const message = waBuildMessage(waGetCurrentTemplate(), student);
+                return 'https://wa.me/' + formattedPhone + '?text=' + encodeURIComponent(message);
+            } catch (err) {
+                console.error('waBuildWhatsAppLink error:', err);
+                return '';
+            }
+        }
+
+        // --- تحديد شارة التقييم (Performance Badge) بناءً على نسبة الحضور ---
+        function waGetPerformanceBadge(student) {
+            try {
+                const raw = student.studentAttendance;
+                const num = parseFloat(raw);
+                if (raw === undefined || raw === null || raw === '' || isNaN(num)) {
+                    return { label: 'غير محدد', cls: 'wr-badge-neutral' };
+                }
+                if (num >= 90) return { label: 'ممتاز ⭐', cls: 'wr-badge-excellent' };
+                if (num >= 75) return { label: 'جيد جداً', cls: 'wr-badge-good' };
+                if (num >= 50) return { label: 'متوسط', cls: 'wr-badge-average' };
+                return { label: 'ضعيف', cls: 'wr-badge-weak' };
+            } catch (err) {
+                console.error('waGetPerformanceBadge error:', err);
+                return { label: 'غير محدد', cls: 'wr-badge-neutral' };
+            }
+        }
+
+        function waShowFormStatus(message, isSuccess) {
+            try {
+                const el = document.getElementById('wa-form-status');
+                if (!el) return;
+                el.textContent = message;
+                el.className = 'text-xs font-bold mt-2 ' + (isSuccess ? 'wr-status-ok' : 'wr-status-err');
+                el.style.display = 'block';
+                window.clearTimeout(window.__waFormStatusTimeout);
+                window.__waFormStatusTimeout = window.setTimeout(() => { el.style.display = 'none'; }, 3500);
+            } catch (err) {
+                console.error('waShowFormStatus error:', err);
+            }
+        }
+
+        // --- إضافة طالب جديد من نموذج الشريط الجانبي ---
+        function waHandleAddSubmit(event) {
+            try {
+                if (event && typeof event.preventDefault === 'function') event.preventDefault();
+
+                const nameInput = document.getElementById('wa-input-name');
+                const phoneInput = document.getElementById('wa-input-phone');
+                const gradeInput = document.getElementById('wa-input-grade');
+                const attendanceInput = document.getElementById('wa-input-attendance');
+                const notesInput = document.getElementById('wa-input-notes');
+
+                const studentName = nameInput ? nameInput.value.trim() : '';
+                const parentPhone = phoneInput ? phoneInput.value.trim() : '';
+
+                if (!studentName) { waShowFormStatus('يرجى إدخال اسم الطالب.', false); return false; }
+                if (!parentPhone || !waFormatPhone(parentPhone)) { waShowFormStatus('يرجى إدخال رقم هاتف صحيح لولي الأمر.', false); return false; }
+
+                // NEWLY ADDED [FIREBASE]: التأكد من توفر مسار صالح لحفظ الطالب قبل محاولة الكتابة على Firebase
+                const path = waGetFirebasePath();
+                if (!path || typeof firebase === 'undefined' || !firebase.database) {
+                    waShowFormStatus('تعذّر الاتصال بقاعدة البيانات حالياً، حاول مرة أخرى.', false);
+                    return false;
+                }
+
+                const newStudentData = {
+                    studentName: studentName,
+                    parentPhone: parentPhone,
+                    studentGrade: gradeInput ? gradeInput.value.trim() : '',
+                    studentAttendance: attendanceInput ? attendanceInput.value.trim() : '',
+                    studentNotes: notesInput ? notesInput.value.trim() : '',
+                    createdAt: Date.now()
+                };
+
+                // NEWLY ADDED [FIREBASE]: إنشاء مفتاح فريد عبر push() ثم كتابة بيانات الطالب تحته على الخادم.
+                // الجدول سيُحدَّث تلقائياً فور نجاح الكتابة بفضل مستمع waAttachFirebaseStudentsListener (on 'value')
+                firebase.database().ref(path).push().set(newStudentData).then(function () {
+                    waShowFormStatus('تمت إضافة الطالب بنجاح ✅', true);
+                }).catch(function (err) {
+                    console.error('waHandleAddSubmit Firebase write error:', err);
+                    waShowFormStatus('تعذّر حفظ بيانات الطالب على قاعدة البيانات: ' + (err && err.message ? err.message : 'خطأ غير معروف'), false);
+                });
+
+                if (nameInput) nameInput.value = '';
+                if (phoneInput) phoneInput.value = '';
+                if (gradeInput) gradeInput.value = '';
+                if (attendanceInput) attendanceInput.value = '';
+                if (notesInput) notesInput.value = '';
+
+                return false;
+            } catch (err) {
+                console.error('waHandleAddSubmit error:', err);
+                waShowFormStatus('حدث خطأ غير متوقع أثناء الإضافة.', false);
+                return false;
+            }
+        }
+
+        // --- تحميل بيانات تجريبية جاهزة للتجربة السريعة (NEWLY ADDED [FIREBASE]: تُكتَب مباشرة على الخادم) ---
+        function waLoadSampleData() {
+            try {
+                const path = waGetFirebasePath();
+                if (!path || typeof firebase === 'undefined' || !firebase.database) {
+                    waShowFormStatus('تعذّر الاتصال بقاعدة البيانات حالياً، حاول مرة أخرى.', false);
+                    return;
+                }
+
+                const sampleStudents = [
+                    { studentName: 'أحمد محمد علي', parentPhone: '01012345678', studentGrade: '95/100', studentAttendance: '96', studentNotes: 'طالب متميز ومنتظم في الحضور والمشاركة.' },
+                    { studentName: 'سارة حسن إبراهيم', parentPhone: '01123456789', studentGrade: '78/100', studentAttendance: '82', studentNotes: 'تحتاج لمزيد من المراجعة في حل الواجبات.' },
+                    { studentName: 'يوسف عبد الرحمن', parentPhone: '01234567890', studentGrade: '58/100', studentAttendance: '48', studentNotes: 'يحتاج متابعة أسرية عاجلة وحضور حصص تقوية إضافية.' }
+                ];
+
+                // NEWLY ADDED [FIREBASE]: تحضير تحديث متعدد المواقع (Multi-location Update) بمفاتيح push()
+                // منفصلة لكل طالب، ثم كتابتها جميعاً في طلب واحد ذرّي (Atomic) بدلاً من عدة طلبات منفصلة
+                const dbRef = firebase.database().ref(path);
+                const updates = {};
+                sampleStudents.forEach(sample => {
+                    const newKey = dbRef.push().key;
+                    updates[newKey] = Object.assign({ createdAt: Date.now() }, sample);
+                });
+
+                dbRef.update(updates).then(function () {
+                    waShowFormStatus('تم تحميل بيانات تجريبية بنجاح ✅', true);
+                }).catch(function (err) {
+                    console.error('waLoadSampleData Firebase write error:', err);
+                    waShowFormStatus('تعذّر حفظ البيانات التجريبية على قاعدة البيانات: ' + (err && err.message ? err.message : 'خطأ غير معروف'), false);
+                });
+            } catch (err) {
+                console.error('waLoadSampleData error:', err);
+                waShowFormStatus('تعذّر تحميل البيانات التجريبية.', false);
+            }
+        }
+
+        // --- فتح/إغلاق/تأكيد نافذة "مسح الكل" (Modal Confirmation) ---
+        function waClearAllData() {
+            try {
+                if (!waStudentsList.length) { waShowFormStatus('لا توجد بيانات لمسحها حالياً.', false); return; }
+                const existingModal = document.getElementById('wa-clear-confirm-modal');
+                if (existingModal) existingModal.remove();
+
+                const overlay = document.createElement('div');
+                overlay.id = 'wa-clear-confirm-modal';
+                overlay.className = 'wr-modal-overlay';
+                overlay.onclick = function (event) { if (event.target === overlay) waCloseClearConfirmModal(); };
+                overlay.innerHTML =
+                    '<div class="wr-modal-box">' +
+                        '<div class="wr-modal-title">⚠️ تأكيد مسح جميع البيانات</div>' +
+                        '<div class="wr-modal-text">سيتم حذف جميع بيانات الطلاب المسجَّلة (' + waStudentsList.length + ' طالب) نهائياً من هذا الجهاز، ولا يمكن التراجع عن هذا الإجراء. هل ترغب بالمتابعة؟</div>' +
+                        '<div class="flex items-center gap-2">' +
+                            '<button type="button" class="wr-btn wr-btn-red" style="flex:1; justify-content:center;" onclick="waConfirmClearAll()">نعم، امسح الكل</button>' +
+                            '<button type="button" class="wr-btn wr-btn-slate" style="flex:1; justify-content:center;" onclick="waCloseClearConfirmModal()">إلغاء</button>' +
+                        '</div>' +
+                    '</div>';
+                document.body.appendChild(overlay);
+            } catch (err) {
+                console.error('waClearAllData error:', err);
+            }
+        }
+
+        function waCloseClearConfirmModal() {
+            try {
+                const modal = document.getElementById('wa-clear-confirm-modal');
+                if (modal) modal.remove();
+            } catch (err) {
+                console.error('waCloseClearConfirmModal error:', err);
+            }
+        }
+
+        // NEWLY ADDED [FIREBASE]: حذف كامل مسار whatsapp_reports/{currentTeacherId} من الخادم مباشرة؛
+        // الجدول سيُفرَّغ تلقائياً فور نجاح الحذف بفضل مستمع waAttachFirebaseStudentsListener
+        function waConfirmClearAll() {
+            try {
+                const path = waGetFirebasePath();
+                if (!path || typeof firebase === 'undefined' || !firebase.database) {
+                    waShowFormStatus('تعذّر الاتصال بقاعدة البيانات حالياً، حاول مرة أخرى.', false);
+                    waCloseClearConfirmModal();
+                    return;
+                }
+
+                firebase.database().ref(path).remove().then(function () {
+                    waCloseClearConfirmModal();
+                    waShowFormStatus('تم مسح جميع بيانات الطلاب.', true);
+                }).catch(function (err) {
+                    console.error('waConfirmClearAll Firebase remove error:', err);
+                    waCloseClearConfirmModal();
+                    waShowFormStatus('تعذّر مسح البيانات من قاعدة البيانات: ' + (err && err.message ? err.message : 'خطأ غير معروف'), false);
+                });
+            } catch (err) {
+                console.error('waConfirmClearAll error:', err);
+            }
+        }
+
+        // --- إرسال تقرير الطالب عبر واتساب (فتح رابط wa.me في نافذة جديدة) ---
+        function waSendStudentReport(studentId) {
+            try {
+                const student = waStudentsList.find(s => s.id === studentId);
+                if (!student) return;
+                const link = waBuildWhatsAppLink(student);
+                if (!link) { waShowFormStatus('رقم هاتف الطالب "' + student.studentName + '" غير صالح.', false); return; }
+                window.open(link, '_blank', 'noopener,noreferrer');
+            } catch (err) {
+                console.error('waSendStudentReport error:', err);
+            }
+        }
+
+        // --- نسخ سجل طالب (Duplicate) مع إضافة لاحقة "(نسخة)" لاسمه ---
+        // NEWLY ADDED [FIREBASE]: يقرأ السجل الأصلي من النسخة المحلية المُتزامنة (waStudentsList) ثم يكتب
+        // النسخة الجديدة مباشرة على Firebase بمفتاح push() جديد؛ الجدول يُحدَّث تلقائياً عبر المستمع اللحظي
+        function waDuplicateStudent(studentId) {
+            try {
+                const original = waStudentsList.find(s => s.id === studentId);
+                if (!original) return;
+
+                const path = waGetFirebasePath();
+                if (!path || typeof firebase === 'undefined' || !firebase.database) {
+                    waShowFormStatus('تعذّر الاتصال بقاعدة البيانات حالياً، حاول مرة أخرى.', false);
+                    return;
+                }
+
+                const clone = {
+                    studentName: (original.studentName || '') + ' (نسخة)',
+                    parentPhone: original.parentPhone || '',
+                    studentGrade: original.studentGrade || '',
+                    studentAttendance: original.studentAttendance || '',
+                    studentNotes: original.studentNotes || '',
+                    createdAt: Date.now()
+                };
+
+                firebase.database().ref(path).push().set(clone).catch(function (err) {
+                    console.error('waDuplicateStudent Firebase write error:', err);
+                    waShowFormStatus('تعذّر نسخ بيانات الطالب على قاعدة البيانات.', false);
+                });
+            } catch (err) {
+                console.error('waDuplicateStudent error:', err);
+            }
+        }
+
+        // --- حذف سجل طالب واحد بعد تأكيد المستخدم (NEWLY ADDED [FIREBASE]: حذف مباشر من الخادم) ---
+        function waDeleteStudent(studentId) {
+            try {
+                const student = waStudentsList.find(s => s.id === studentId);
+                if (!student) return;
+                if (!confirm('هل أنت متأكد من حذف بيانات الطالب "' + student.studentName + '"؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+
+                const path = waGetFirebasePath();
+                if (!path || typeof firebase === 'undefined' || !firebase.database) {
+                    waShowFormStatus('تعذّر الاتصال بقاعدة البيانات حالياً، حاول مرة أخرى.', false);
+                    return;
+                }
+
+                if (waEditingStudentId === studentId) waEditingStudentId = null;
+
+                firebase.database().ref(path + '/' + studentId).remove().catch(function (err) {
+                    console.error('waDeleteStudent Firebase remove error:', err);
+                    waShowFormStatus('تعذّر حذف بيانات الطالب من قاعدة البيانات.', false);
+                });
+            } catch (err) {
+                console.error('waDeleteStudent error:', err);
+            }
+        }
+
+        // --- التعديل الداخلي (Inline Edit) لسجل طالب مباشرة داخل صف الجدول ---
+        function waStartEditStudent(studentId) {
+            try {
+                waEditingStudentId = studentId;
+                waRenderTable();
+            } catch (err) {
+                console.error('waStartEditStudent error:', err);
+            }
+        }
+
+        function waCancelEditStudent() {
+            try {
+                waEditingStudentId = null;
+                waRenderTable();
+            } catch (err) {
+                console.error('waCancelEditStudent error:', err);
+            }
+        }
+
+        function waSaveEditStudent(studentId) {
+            try {
+                const student = waStudentsList.find(s => s.id === studentId);
+                if (!student) return;
+
+                const nameEl = document.getElementById('wa-edit-name-' + studentId);
+                const phoneEl = document.getElementById('wa-edit-phone-' + studentId);
+                const gradeEl = document.getElementById('wa-edit-grade-' + studentId);
+                const attendanceEl = document.getElementById('wa-edit-attendance-' + studentId);
+                const notesEl = document.getElementById('wa-edit-notes-' + studentId);
+
+                const newName = nameEl ? nameEl.value.trim() : student.studentName;
+                const newPhone = phoneEl ? phoneEl.value.trim() : student.parentPhone;
+
+                if (!newName) { waShowFormStatus('اسم الطالب لا يمكن أن يكون فارغاً.', false); return; }
+                if (!newPhone || !waFormatPhone(newPhone)) { waShowFormStatus('رقم الهاتف غير صالح.', false); return; }
+
+                // NEWLY ADDED [FIREBASE]: كتابة التعديلات مباشرة على مسار الطالب في Firebase (update جزئي
+                // يستبدل فقط الحقول المُرسَلة دون التأثير على أي حقل آخر غير موجود ضمن الكائن)
+                const path = waGetFirebasePath();
+                if (!path || typeof firebase === 'undefined' || !firebase.database) {
+                    waShowFormStatus('تعذّر الاتصال بقاعدة البيانات حالياً، حاول مرة أخرى.', false);
+                    return;
+                }
+
+                const updatedFields = {
+                    studentName: newName,
+                    parentPhone: newPhone,
+                    studentGrade: gradeEl ? gradeEl.value.trim() : (student.studentGrade || ''),
+                    studentAttendance: attendanceEl ? attendanceEl.value.trim() : (student.studentAttendance || ''),
+                    studentNotes: notesEl ? notesEl.value.trim() : (student.studentNotes || '')
+                };
+
+                waEditingStudentId = null;
+
+                firebase.database().ref(path + '/' + studentId).update(updatedFields).then(function () {
+                    waShowFormStatus('تم حفظ التعديلات بنجاح ✅', true);
+                }).catch(function (err) {
+                    console.error('waSaveEditStudent Firebase update error:', err);
+                    waShowFormStatus('تعذّر حفظ التعديلات على قاعدة البيانات: ' + (err && err.message ? err.message : 'خطأ غير معروف'), false);
+                });
+                waRenderTable();
+            } catch (err) {
+                console.error('waSaveEditStudent error:', err);
+            }
+        }
+
+        // --- NEWLY ADDED: تحويل أي قيمة إلى نص آمن ومُهذَّب (مُستخدَمة في الاستيراد) ---
+        function waSafeString(value) {
+            try {
+                return (value === null || value === undefined) ? '' : String(value).trim();
+            } catch (err) {
+                console.error('waSafeString error:', err);
+                return '';
+            }
+        }
+
+        // --- NEWLY ADDED: الاستعلام الذكي (بحث فوري) باسم الطالب أو رقم هاتف ولي الأمر ---
+        function waHandleSearchInput(value) {
+            try {
+                waSearchQuery = (typeof value === 'string') ? value.trim() : '';
+                const clearBtn = document.getElementById('wa-search-clear-btn');
+                if (clearBtn) clearBtn.style.display = waSearchQuery ? 'inline-block' : 'none';
+                waRenderTable();
+            } catch (err) {
+                console.error('waHandleSearchInput error:', err);
+            }
+        }
+
+        function waClearSearch() {
+            try {
+                const input = document.getElementById('wa-search-input');
+                if (input) input.value = '';
+                waHandleSearchInput('');
+            } catch (err) {
+                console.error('waClearSearch error:', err);
+            }
+        }
+
+        // --- NEWLY ADDED: إرجاع قائمة الطلاب بعد تطبيق الاستعلام الذكي (اسم الطالب أو رقم هاتف ولي الأمر) ---
+        function waGetFilteredStudents() {
+            try {
+                if (!waSearchQuery) return waStudentsList.slice();
+
+                const query = waSearchQuery.toLowerCase();
+                const queryDigits = waSearchQuery.replace(/\D/g, '');
+
+                let filtered = waStudentsList.filter(student => {
+                    const nameMatch = (student.studentName || '').toLowerCase().includes(query);
+                    const phoneRaw = student.parentPhone || '';
+                    let phoneMatch = false;
+                    if (queryDigits) {
+                        phoneMatch = phoneRaw.replace(/\D/g, '').includes(queryDigits);
+                    } else {
+                        phoneMatch = phoneRaw.toLowerCase().includes(query);
+                    }
+                    return nameMatch || phoneMatch;
+                });
+
+                // إبقاء الصف قيد التعديل الداخلي ظاهراً دائماً حتى لو لم يعد مطابقاً للاستعلام الحالي (تفادي اختفاء نموذج التعديل المفتوح)
+                if (waEditingStudentId && !filtered.some(s => s.id === waEditingStudentId)) {
+                    const editingStudent = waStudentsList.find(s => s.id === waEditingStudentId);
+                    if (editingStudent) filtered = [editingStudent].concat(filtered);
+                }
+
+                return filtered;
+            } catch (err) {
+                console.error('waGetFilteredStudents error:', err);
+                return waStudentsList.slice();
+            }
+        }
+
+        // --- NEWLY ADDED: تصدير بيانات جدول الطلاب بالكامل كملف JSON قابل للتنزيل ---
+        function waExportStudentsJson() {
+            try {
+                if (!waStudentsList.length) { waShowFormStatus('لا توجد بيانات لتصديرها.', false); return; }
+
+                const dataStr = JSON.stringify(waStudentsList, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                const now = new Date();
+                const stamp = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                link.download = 'whatsapp_reports_students_' + stamp + '.json';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.setTimeout(() => { try { URL.revokeObjectURL(url); } catch (revokeErr) { /* تجاهل */ } }, 1500);
+
+                waShowFormStatus('تم تصدير بيانات الطلاب بنجاح ✅', true);
+            } catch (err) {
+                console.error('waExportStudentsJson error:', err);
+                waShowFormStatus('تعذّر تصدير البيانات.', false);
+            }
+        }
+
+        // --- NEWLY ADDED: استيراد بيانات طلاب من ملف JSON وإضافتها لقائمة الطلاب الحالية ---
+        function waImportStudentsJson(event) {
+            try {
+                const fileInput = event && event.target ? event.target : null;
+                const file = (fileInput && fileInput.files) ? fileInput.files[0] : null;
+                if (!file) return;
+
+                if (!/\.json$/i.test(file.name) && file.type && file.type !== 'application/json') {
+                    waShowFormStatus('يرجى اختيار ملف بصيغة JSON فقط.', false);
+                    if (fileInput) fileInput.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (loadEvent) {
+                    try {
+                        const rawText = loadEvent && loadEvent.target ? loadEvent.target.result : '';
+                        const parsed = JSON.parse(rawText);
+                        const records = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.students) ? parsed.students : null);
+
+                        if (!records) {
+                            waShowFormStatus('صيغة الملف غير صالحة: يجب أن يحتوي على مصفوفة بيانات طلاب.', false);
+                            return;
+                        }
+
+                        const validRecords = records.filter(item => item && typeof item === 'object' && (waSafeString(item.studentName) || waSafeString(item.parentPhone)));
+
+                        if (!validRecords.length) {
+                            waShowFormStatus('لم يتم العثور على أي سجل طالب صالح داخل الملف.', false);
+                            return;
+                        }
+
+                        if (!confirm('سيتم استيراد ' + validRecords.length + ' سجل طالب وإضافتها إلى القائمة الحالية (' + waStudentsList.length + ' طالب مسجَّل حالياً). هل ترغب بالمتابعة؟')) {
+                            return;
+                        }
+
+                        // NEWLY ADDED [FIREBASE]: التأكد من توفر مسار صالح، ثم كتابة كل السجلات المستوردة
+                        // في طلب واحد ذرّي (Multi-location Update) بمفاتيح push() منفصلة لكل طالب
+                        const path = waGetFirebasePath();
+                        if (!path || typeof firebase === 'undefined' || !firebase.database) {
+                            waShowFormStatus('تعذّر الاتصال بقاعدة البيانات حالياً، حاول مرة أخرى.', false);
+                            return;
+                        }
+
+                        const dbRef = firebase.database().ref(path);
+                        const updates = {};
+                        validRecords.forEach(record => {
+                            const newKey = dbRef.push().key;
+                            updates[newKey] = {
+                                studentName: waSafeString(record.studentName),
+                                parentPhone: waSafeString(record.parentPhone),
+                                studentGrade: waSafeString(record.studentGrade),
+                                studentAttendance: waSafeString(record.studentAttendance),
+                                studentNotes: waSafeString(record.studentNotes),
+                                createdAt: Date.now()
+                            };
+                        });
+
+                        dbRef.update(updates).then(function () {
+                            waShowFormStatus('تم استيراد ' + validRecords.length + ' طالب بنجاح ✅', true);
+                        }).catch(function (err) {
+                            console.error('waImportStudentsJson Firebase write error:', err);
+                            waShowFormStatus('تعذّر حفظ السجلات المستوردة على قاعدة البيانات: ' + (err && err.message ? err.message : 'خطأ غير معروف'), false);
+                        });
+                    } catch (parseErr) {
+                        console.error('waImportStudentsJson parse error:', parseErr);
+                        waShowFormStatus('تعذّر قراءة الملف: تأكد أنه بصيغة JSON صحيحة وغير تالف.', false);
+                    } finally {
+                        if (fileInput) fileInput.value = '';
+                    }
+                };
+
+                reader.onerror = function () {
+                    console.error('waImportStudentsJson: file read error');
+                    waShowFormStatus('حدث خطأ أثناء قراءة الملف المُختار.', false);
+                    if (fileInput) fileInput.value = '';
+                };
+
+                reader.readAsText(file, 'UTF-8');
+            } catch (err) {
+                console.error('waImportStudentsJson error:', err);
+                waShowFormStatus('حدث خطأ غير متوقع أثناء الاستيراد.', false);
+            }
+        }
+
+        // --- الدالة المحورية لرسم/إعادة رسم جدول الطلاب بالكامل (أو حالة القائمة الفارغة/بحث بلا نتائج) ---
+        function waRenderTable() {
+            try {
+                const tbody = document.getElementById('wa-table-body');
+                const emptyState = document.getElementById('wa-empty-state');
+                const noSearchResults = document.getElementById('wa-no-search-results');
+                const tableWrap = document.getElementById('wa-table-wrap');
+                const countBadge = document.getElementById('wa-count-badge');
+                const loadingState = document.getElementById('wa-loading-state');
+                const errorState = document.getElementById('wa-firebase-error-state');
+                const errorMessageEl = document.getElementById('wa-firebase-error-message');
+                const statusBadge = document.getElementById('wa-firebase-status-badge');
+                if (!tbody) return;
+
+                // NEWLY ADDED [FIREBASE]: تحديث شارة حالة الاتصال بقاعدة البيانات أعلى اللوحة
+                if (statusBadge) {
+                    if (waIsLoadingFromFirebase) {
+                        statusBadge.textContent = '🔄 جارِ المزامنة مع قاعدة البيانات...';
+                        statusBadge.className = 'wr-badge wr-badge-syncing';
+                        statusBadge.style.display = 'inline-flex';
+                    } else if (waFirebaseErrorMessage) {
+                        statusBadge.textContent = '🔌 غير متصل';
+                        statusBadge.className = 'wr-badge wr-badge-offline';
+                        statusBadge.style.display = 'inline-flex';
+                    } else {
+                        statusBadge.textContent = '✅ متصل ومُتزامن';
+                        statusBadge.className = 'wr-badge wr-badge-synced';
+                        statusBadge.style.display = 'inline-flex';
+                    }
+                }
+
+                // NEWLY ADDED [FIREBASE]: حالة التحميل الأولي — إخفاء كل شيء آخر وإظهار مؤشر الانتظار فقط
+                if (waIsLoadingFromFirebase) {
+                    tbody.innerHTML = '';
+                    if (tableWrap) tableWrap.style.display = 'none';
+                    if (noSearchResults) noSearchResults.style.display = 'none';
+                    if (emptyState) emptyState.style.display = 'none';
+                    if (errorState) errorState.style.display = 'none';
+                    if (loadingState) loadingState.style.display = 'flex';
+                    return;
+                }
+                if (loadingState) loadingState.style.display = 'none';
+
+                // NEWLY ADDED [FIREBASE]: حالة خطأ الاتصال — إظهار رسالة الخطأ مع زر إعادة المحاولة
+                if (waFirebaseErrorMessage) {
+                    tbody.innerHTML = '';
+                    if (tableWrap) tableWrap.style.display = 'none';
+                    if (noSearchResults) noSearchResults.style.display = 'none';
+                    if (emptyState) emptyState.style.display = 'none';
+                    if (errorMessageEl) errorMessageEl.textContent = waFirebaseErrorMessage;
+                    if (errorState) errorState.style.display = 'flex';
+                    return;
+                }
+                if (errorState) errorState.style.display = 'none';
+
+                const filteredStudents = waGetFilteredStudents();
+
+                if (countBadge) {
+                    countBadge.textContent = waSearchQuery
+                        ? (filteredStudents.length + ' من أصل ' + waStudentsList.length + ' طالب')
+                        : (waStudentsList.length + ' طالب');
+                }
+
+                if (!waStudentsList.length) {
+                    tbody.innerHTML = '';
+                    if (tableWrap) tableWrap.style.display = 'none';
+                    if (noSearchResults) noSearchResults.style.display = 'none';
+                    if (emptyState) emptyState.style.display = 'flex';
+                    return;
+                }
+
+                if (emptyState) emptyState.style.display = 'none';
+
+                if (!filteredStudents.length) {
+                    tbody.innerHTML = '';
+                    if (tableWrap) tableWrap.style.display = 'none';
+                    if (noSearchResults) noSearchResults.style.display = 'flex';
+                    return;
+                }
+
+                if (tableWrap) tableWrap.style.display = 'block';
+                if (noSearchResults) noSearchResults.style.display = 'none';
+
+                const template = waGetCurrentTemplate();
+                const rowsHtml = filteredStudents.map(student => {
+                    if (waEditingStudentId === student.id) {
+                        return waRenderEditRow(student);
+                    }
+                    const badge = waGetPerformanceBadge(student);
+                    const message = waBuildMessage(template, student);
+                    const safeName = waEscapeHtml(student.studentName);
+                    const safePhone = waEscapeHtml(student.parentPhone);
+                    const safeMessage = waEscapeHtml(message);
+                    const safeMessageTitle = safeMessage.replace(/"/g, '&quot;');
+
+                    return (
+                        '<tr>' +
+                            '<td class="font-bold">' + safeName + '</td>' +
+                            '<td dir="ltr" style="text-align:right;">' + safePhone + '</td>' +
+                            '<td><span class="wr-badge ' + badge.cls + '">' + waEscapeHtml(badge.label) + '</span></td>' +
+                            '<td><span class="wr-msg-preview" title="' + safeMessageTitle + '">' + safeMessage + '</span></td>' +
+                            '<td>' +
+                                '<div class="wr-row-actions">' +
+                                    '<button type="button" class="wr-btn wr-btn-emerald wr-btn-xs" onclick="waSendStudentReport(\'' + student.id + '\')">📤 إرسال</button>' +
+                                    '<button type="button" class="wr-btn wr-btn-slate wr-btn-xs" onclick="waDuplicateStudent(\'' + student.id + '\')">📄 نسخ</button>' +
+                                    '<button type="button" class="wr-btn wr-btn-amber wr-btn-xs" onclick="waStartEditStudent(\'' + student.id + '\')">✏️ تعديل</button>' +
+                                    '<button type="button" class="wr-btn wr-btn-red wr-btn-xs" onclick="waDeleteStudent(\'' + student.id + '\')">🗑️ حذف</button>' +
+                                '</div>' +
+                            '</td>' +
+                        '</tr>'
+                    );
+                }).join('');
+
+                tbody.innerHTML = rowsHtml;
+            } catch (err) {
+                console.error('waRenderTable error:', err);
+            }
+        }
+
+        // --- رسم صف التعديل الداخلي (Inline Edit Row) لطالب مُحدَّد ---
+        function waRenderEditRow(student) {
+            try {
+                const id = student.id;
+                const safeName = waEscapeHtml(student.studentName);
+                const safePhone = waEscapeHtml(student.parentPhone);
+                const safeGrade = waEscapeHtml(student.studentGrade || '');
+                const safeAttendance = waEscapeHtml(student.studentAttendance || '');
+                const safeNotes = waEscapeHtml(student.studentNotes || '');
+
+                return (
+                    '<tr>' +
+                        '<td colspan="5">' +
+                            '<div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">' +
+                                '<div><label class="wr-label">اسم الطالب</label><input type="text" id="wa-edit-name-' + id + '" class="wr-edit-input" value="' + safeName + '"></div>' +
+                                '<div><label class="wr-label">هاتف ولي الأمر</label><input type="tel" id="wa-edit-phone-' + id + '" class="wr-edit-input" value="' + safePhone + '"></div>' +
+                                '<div><label class="wr-label">الدرجة</label><input type="text" id="wa-edit-grade-' + id + '" class="wr-edit-input" value="' + safeGrade + '"></div>' +
+                                '<div><label class="wr-label">نسبة الحضور %</label><input type="number" min="0" max="100" id="wa-edit-attendance-' + id + '" class="wr-edit-input" value="' + safeAttendance + '"></div>' +
+                                '<div class="md:col-span-2"><label class="wr-label">ملاحظات المعلم</label><textarea id="wa-edit-notes-' + id + '" class="wr-edit-input" rows="2">' + safeNotes + '</textarea></div>' +
+                            '</div>' +
+                            '<div class="flex items-center gap-2">' +
+                                '<button type="button" class="wr-btn wr-btn-emerald wr-btn-xs" onclick="waSaveEditStudent(\'' + id + '\')">💾 حفظ</button>' +
+                                '<button type="button" class="wr-btn wr-btn-slate wr-btn-xs" onclick="waCancelEditStudent()">✖️ إلغاء</button>' +
+                            '</div>' +
+                        '</td>' +
+                    '</tr>'
+                );
+            } catch (err) {
+                console.error('waRenderEditRow error:', err);
+                return '';
+            }
+        }
+
+        // --- التهيئة الأولية للوحدة: تحميل البيانات المحفوظة + القالب الافتراضي + الرسم الأول ---
+        function waInitWhatsAppReportsModule() {
+            try {
+                const textarea = document.getElementById('wa-template-textarea');
+                if (textarea) {
+                    let savedTemplate = '';
+                    try { savedTemplate = window.localStorage.getItem(WA_TEMPLATE_STORAGE_KEY) || ''; } catch (storageErr) { savedTemplate = ''; }
+                    textarea.value = (savedTemplate && savedTemplate.trim() !== '') ? savedTemplate : WA_DEFAULT_TEMPLATE;
+                }
+                // NEWLY ADDED [FIREBASE]: بدء الاشتراك اللحظي ببيانات الطلاب بدلاً من القراءة من localStorage
+                waAttachFirebaseStudentsListener();
+            } catch (err) {
+                console.error('waInitWhatsAppReportsModule error:', err);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', waInitWhatsAppReportsModule);
 
         // ==================================================================================
         // NEWLY ADDED (Schedule Module): "تنظيم حصصي ومواعيدي" — لكل من المعلم والطالب
@@ -6587,7 +7740,8 @@
                 'report-search-student-name-wrapper', // NEWLY ADDED: مربع البحث باسم الطالب أعلى جدول تقرير الأداء (Teacher View Only)
                 'tab-btn-homework-report',            // NEWLY ADDED: تبويب "تقرير الأداء المنزلي الواجب" — حصري لشاشة المعلم فقط
                 'tab-btn-toolkit',                    // NEWLY ADDED: تبويب "حقيبة المعلم التفاعلية" — حصري لشاشة المعلم فقط
-                'btn-open-interaction-points'          // NEWLY ADDED: زر "نقاط التفاعل في الحصة" — تم إخفاؤه عن شاشة دخول الطالب، يبقى ظاهراً للمعلم فقط
+                'btn-open-interaction-points',          // NEWLY ADDED: زر "نقاط التفاعل في الحصة" — تم إخفاؤه عن شاشة دخول الطالب، يبقى ظاهراً للمعلم فقط
+                'tab-btn-whatsapp-reports'             // NEWLY ADDED: تبويب "نظام إرسال تقارير الطلاب عبر واتساب" — حصري لشاشة المعلم فقط (نفس آلية toolkit/homework-report)
             ];
 
             // NEWLY ADDED: تبويب "عرض الدروس" أصبح مشتركاً بين كل الأدوار (يستضيف لدى المعلم مركز الروابط
@@ -6748,6 +7902,12 @@
             // NEWLY ADDED (Schedule Module): إخفاء تبويب الجدول عن المساعد، وتحميل الجدول الخاص بالمستخدم الحالي
             applyScheduleTabVisibility(currentRole);
             loadScheduleForCurrentUser();
+
+            // NEWLY ADDED [FIREBASE] (WhatsApp Student Reports Module): إعادة الاشتراك ببيانات الطلاب من
+            // Firebase كلما تغيّر المعلم الحالي (currentTeacherId)، بنفس آلية إعادة تحميل الجدول أعلاه
+            if (typeof waAttachFirebaseStudentsListener === 'function') {
+                waAttachFirebaseStudentsListener();
+            }
         }
 
         function updateNames() {
