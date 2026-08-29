@@ -852,6 +852,16 @@
             background: #fff; border: 1px solid #e5e7eb; border-radius: 1rem;
             padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.06);
         }
+        /* NEWLY ADDED (Interactive Teacher Toolkit - UI Modification 3): انتقال سلس (Toggle) لإخفاء/إظهار
+           كامل مساحة إدارة المحتوى (#tk-setup-card) دون أي تأثير على تنسيقات .tk-card الأساسية أعلاه */
+        #tk-setup-card {
+            transition: max-height .35s ease, opacity .3s ease, margin .35s ease, padding .35s ease;
+            max-height: 2000px; opacity: 1; overflow: hidden;
+        }
+        #tk-setup-card.tk-setup-collapsed {
+            max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0;
+            border-width: 0; margin-bottom: 0; pointer-events: none;
+        }
         .tk-section-title {
             font-weight: 900; color: #012015; font-size: 1rem; margin-bottom: .75rem;
             display: flex; align-items: center; gap: .5rem;
@@ -1726,11 +1736,13 @@
                             <th class="px-3 py-2 text-gray-700 font-bold text-center">الاستهلاك</th>
                             <!-- NEWLY ADDED: عمود "تاريخ التسجيل" — يعرض تاريخ ووقت إنشاء وحفظ السجل في قاعدة البيانات (Created At / Timestamp) -->
                             <th class="px-3 py-2 text-gray-700 font-bold text-center whitespace-nowrap">تاريخ التسجيل</th>
+                            <!-- [تعديل] عمود جديد: الملاحظات — يحتوي حقل إدخال نصي وزر حفظ أمام كل سجل -->
+                            <th class="px-3 py-2 text-gray-700 font-bold text-center">الملاحظات</th>
                             <th class="px-3 py-2 text-gray-700 font-bold text-center">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody id="admin-unified-table-body" class="divide-y divide-gray-100">
-                        <tr><td colspan="14" class="px-3 py-4 text-center text-gray-400">لا توجد بيانات مسجلة حتى الآن.</td></tr>
+                        <tr><td colspan="15" class="px-3 py-4 text-center text-gray-400">لا توجد بيانات مسجلة حتى الآن.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1909,6 +1921,22 @@
             <h2>مرحباً بالمتصل: <span id="lbl-student" style="color:var(--accent-gold)">...</span></h2>
             <p>المعلم الموجه: أ/ <span id="lbl-teacher">محمود سعيد</span></p>
             <p>المادة الدراسية: <span id="lbl-teacher-subject">-</span></p>
+        </div>
+
+        <!-- ============================================================================================
+             NEWLY ADDED (Explicit Logout Management — إدارة الجلسة وتسجيل الخروج الصريح):
+             زر "تسجيل الخروج" مستقل وواضح، موضوع داخل الهيدر المشترك (Global Header) الظاهر فعلياً في
+             شاشات الأدوار الثلاثة جميعاً (المعلم/الطالب/المساعد)، لذا فهو متاح لكل مستخدم بغض النظر عن دوره
+             دون الحاجة لتكراره ثلاث مرات منفصلة. لا تُنفَّذ أي عملية إنهاء جلسة أو مسح بيانات (Tokens/State)
+             إلا حصرياً بعد نقر المستخدم على هذا الزر صراحةً — انظر تعليقات دالة handleUserLogout أدناه.
+             إضافة جديدة بالكامل، لا تُعدِّل أو تحذف أي عنصر أو سلوك سابق. -->
+        <div id="user-logout-wrapper" style="display:flex; align-items:center;">
+            <button type="button" id="btn-user-logout" onclick="handleUserLogout()"
+                    title="تسجيل الخروج من حسابك الحالي والعودة إلى صفحة تسجيل الدخول"
+                    style="background-color:#b91c1c; color:#ffffff; font-weight:bold; padding:8px 16px; border-radius:10px; font-size:12px; border:none; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.25); transition: background-color .2s; white-space:nowrap;"
+                    onmouseover="this.style.backgroundColor='#991b1b'" onmouseout="this.style.backgroundColor='#b91c1c'">
+                🚪 تسجيل الخروج
+            </button>
         </div>
 
         <!-- Panel Visibility Toggle System: أزرار إظهار ثابتة، تبقى ظاهرة دوماً لاستعادة أي لوحة مخفية -->
@@ -2101,6 +2129,27 @@
                 <!-- MODULE 1 (REMOVED): تمت إزالة أداة SMART ART بالكامل من شريط أدوات السبورة الذكية
                      بناءً على طلب التعديل (نافذة اختيار القوالب + شريط تنسيق SmartArt العائم أُزيلا نهائياً) -->
 
+                <!-- NEWLY ADDED (Student Dashboard - UI Modification 1): نافذة إدراج صورة خاصة بمربع "الواجب المنزلي" —
+                     مستقلة تماماً عن نافذة إدراج صورة السبورة الذكية (wb-modal-insert-image) لتفادي أي تعارض أو تأثير
+                     جانبي عليها، وتعيد استخدام نفس أنماط wb-modal-* الحالية للحفاظ على اتساق التصميم -->
+                <div id="hw-modal-insert-image" class="wb-modal-overlay" style="display:none;" onclick="if(event.target===this) closeWbModal('hw-modal-insert-image')">
+                    <div class="wb-modal-box">
+                        <div class="wb-modal-title">🖼️ إدراج صورة في الواجب المنزلي</div>
+                        <div class="wb-modal-field">
+                            <label>رفع صورة من الجهاز:</label>
+                            <input type="file" id="hw-image-file-input" accept="image/*" onchange="handleHwImageFileSelected(event)">
+                        </div>
+                        <div class="wb-modal-field">
+                            <label>أو أدخل رابط صورة (URL):</label>
+                            <input type="url" id="hw-image-url-input" placeholder="https://example.com/image.png">
+                        </div>
+                        <div class="wb-modal-actions">
+                            <button type="button" class="wb-modal-btn-secondary" onclick="closeWbModal('hw-modal-insert-image')">إلغاء</button>
+                            <button type="button" class="wb-modal-btn-primary" onclick="confirmInsertHwImageFromUrl()">إدراج من الرابط</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- MODULE 2.1 (NEWLY ADDED): غلاف نسبي الموضع (position:relative) يحتضن السبورة وطبقة أدوات الصور التفاعلية (اقتصاص/تحجيم) -->
                 <div id="whiteboard-image-tools-wrapper" style="position: relative;">
                     <div class="rich-editor" id="lesson-preview" contenteditable="true" placeholder="اكتب درس اليوم، أو الصق أي نص قرآني أو صورة لمخرج الحرف هنا...">
@@ -2136,7 +2185,12 @@
                             </div>
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-[#012015] block mb-1">الواجب المنزلي:</label>
+                            <div class="flex items-center justify-between mb-1 gap-2 flex-wrap">
+                                <label class="text-xs font-bold text-[#012015]">الواجب المنزلي:</label>
+                                <!-- NEWLY ADDED (Student Dashboard - UI Modification 1): زر "إدراج صورة" أعلى مربع نص الواجب المنزلي —
+                                     يسمح للطالب برفع صورة من الجهاز أو إدخال رابط صورة مباشر لإدراجها داخل مربع الواجب -->
+                                <button type="button" id="btn-hw-insert-image" onclick="openHwInsertImageModal()" class="btn-tool" style="font-size:10px; padding:4px 10px;" title="إدراج صورة داخل الواجب (رفع ملف أو رابط URL)">🖼️ إدراج صورة</button>
+                            </div>
                             <div id="txt-homework-input-box" contenteditable="true" class="rich-editor" style="min-height: 260px;" placeholder="اكتب واجبك هنا، أو أضف جدولاً/صورة..."></div>
                         </div>
                         <button type="button" id="btn-submit-homework" onclick="submitHomeworkAssignment()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">
@@ -2214,6 +2268,15 @@
             <div id="tab-panel-pdf" class="tab-panel-view" style="display: none;">
                 <div id="pdf-controls-wrapper" style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #f4f7f5; padding: 12px; border-radius: 8px; border: 1px solid #d0ded5;">
                     <input type="file" id="pdf-file-picker" accept=".pdf" style="font-size: 13px; font-weight: bold;">
+
+                    <!-- NEWLY ADDED (Teacher Dashboard - UI Modification 2): عنصر "اختيار ملف من رابط" — يسمح للمعلم بجلب
+                         ملف PDF مباشرة من رابط URL وعرضه داخل المستعرض، مع تحقق صارم من أن نوع المحتوى المُستلَم
+                         فعلياً هو application/pdf فقط قبل أي عرض، وإظهار رسالة تنبيه واضحة في حال كان الرابط غير
+                         صالح أو يخص نوع ملف آخر. لا يعدّل هذا العنصر أي منطق سابق لرفع الملفات من الجهاز -->
+                    <div style="display:flex; align-items:center; gap:6px; border-right: 2px solid #ccc; padding-right: 10px; margin-right: 5px;" title="جلب ملف PDF من رابط مباشر">
+                        <input type="url" id="pdf-url-input" placeholder="أدخل رابط ملف PDF مباشر..." style="min-width: 220px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 12px;" onkeydown="if(event.key==='Enter'){event.preventDefault(); loadPdfFromUrlInput();}">
+                        <button type="button" class="btn-tool" id="btn-pdf-load-from-url" onclick="loadPdfFromUrlInput()" title="جلب وعرض ملف PDF من الرابط المُدخل">🔗 اختيار ملف من رابط</button>
+                    </div>
                     
                     <div style="display: flex; gap: 6px; align-items: center; border-right: 2px solid #ccc; padding-right: 10px; margin-right: 5px;">
                         <button class="btn-tool" onclick="setPdfMarkupTool('pen')" id="pdf-tool-pen" style="background:var(--light-gold);">قلم السبورة (Board Pen)</button>
@@ -2439,6 +2502,42 @@
             <!-- NEWLY ADDED (Schedule Module): تبويب "تنظيم حصصي ومواعيدي" — مشترك بين شاشتي المعلم والطالب،
                  كل مستخدم يرى وينظم مواعيده الخاصة فقط (معزولة تماماً بحسب currentUserId) -->
             <div id="tab-panel-schedule" class="tab-panel-view" style="display: none;">
+
+                <!-- ============================================================================================
+                     NEWLY ADDED (Custom Audio Notification System — نظام التنبيهات الصوتية المخصصة):
+                     وحدة مستقلة تماماً (Self-Contained / Modular) لا تعتمد على أي عنصر أو دالة من باقي التبويب
+                     ولا تُعدِّل أياً منها. تتيح للمستخدم (المعلم أو الطالب) اختيار نغمة تنبيه صوتية خاصة به من
+                     جهازه المحلي (HTML5 File API)، وتحديد عدد الدقائق المسبقة للتنبيه قبل كل موعد، بينما يعمل
+                     محرك مؤقت في الخلفية (انظر scheduleNotifStartEngine أسفل الملف) على مقارنة الوقت الحالي
+                     بمواعيد المستخدم الحقيقية (scheduleList) وتشغيل الصوت المختار تلقائياً عند بلوغ التوقيت.
+                     ============================================================================================ -->
+                <div class="bg-white rounded-xl shadow p-4 space-y-3 mb-4" id="schedule-notif-settings-card">
+                    <h4 class="font-bold text-[#012015] text-sm flex items-center gap-2">🔔 إعدادات التنبيهات الصوتية للمواعيد</h4>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:items-end">
+                        <div class="flex flex-col gap-1 md:col-span-2">
+                            <label class="text-xs font-semibold text-gray-700" for="sch-notif-audio-picker">اختيار ملف صوتي مخصص للتنبيه (من جهازك):</label>
+                            <input type="file" id="sch-notif-audio-picker" accept="audio/*"
+                                   class="w-full text-[11px] text-gray-700 file:ml-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-[#c5a880] file:text-[#012015] file:font-bold file:cursor-pointer border border-gray-300 rounded-lg p-1">
+                            <span id="schedule-notif-audio-filename" class="text-[10px] text-gray-500">لم يتم اختيار ملف صوتي بعد (سيُستخدم صوت تنبيه افتراضي بسيط)</span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <button type="button" onclick="scheduleNotifTestPlaySound()" class="w-full py-2 bg-[#0b3a26] hover:bg-[#012015] text-white font-bold rounded-lg text-xs transition-colors">🔊 تجربة الصوت الآن</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1 md:w-64">
+                        <label class="text-xs font-semibold text-gray-700" for="sch-notif-minutes-before">نبّهني قبل موعد الحصة بـ (دقيقة):</label>
+                        <input type="number" id="sch-notif-minutes-before" min="0" max="1440" step="1" value="10"
+                               class="w-full p-2 border border-gray-300 rounded text-xs outline-none focus:border-[#c5a880]">
+                    </div>
+
+                    <span id="schedule-notif-status-msg" class="text-[11px] font-bold hidden"></span>
+
+                    <!-- عنصر تشغيل الصوت الفعلي في الخلفية (مخفي بصرياً عن المستخدم) -->
+                    <audio id="schedule-notif-audio-player" preload="auto" style="display:none;"></audio>
+                </div>
+
                 <div class="flex flex-col md:flex-row-reverse gap-4">
                     <!-- أ. النموذج الجانبي (Side Panel - جهة اليسار) -->
                     <div class="md:w-80 shrink-0 space-y-3">
@@ -2547,13 +2646,18 @@
                 <!-- شريط علوي: زر نافورة النجوم -->
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <h3 class="text-lg font-black text-[#012015]">✨ حقيبة المعلم التفاعلية</h3>
-                    <button type="button" class="tk-btn tk-btn-gold" onclick="tkTriggerStarFountain()">
-                        🌟 تشغيل نافورة النجوم
-                    </button>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- NEWLY ADDED [REAL-TIME SYNC]: شارة حيّة تعكس حالة المزامنة اللحظية الحالية لهذا
+                             التبويب بين شاشة المعلم وشاشات الطلاب/المساعدين (Real-Time Synchronization & Interactive Mirroring) -->
+                        <span id="tk-sync-status-badge" class="wr-badge wr-badge-neutral" style="display:none;"></span>
+                        <button type="button" class="tk-btn tk-btn-gold" onclick="tkTriggerStarFountain()">
+                            🌟 تشغيل نافورة النجوم
+                        </button>
+                    </div>
                 </div>
 
                 <!-- 2) مساحة إدارة المحتوى المركزية -->
-                <div class="tk-card mb-5">
+                <div class="tk-card mb-5" id="tk-setup-card">
                     <div class="tk-section-title">🗂️ مساحة إدارة المحتوى — نموذج إعداد الألعاب والامتحان</div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="md:col-span-2 flex flex-col gap-1">
@@ -2575,6 +2679,16 @@
                         </button>
                         <span id="tk-parse-status" class="text-xs font-bold text-gray-500"></span>
                     </div>
+                </div>
+
+                <!-- NEWLY ADDED (Interactive Teacher Toolkit - UI Modification 3): زر "إخفاء / إظهار منطقة الإعداد" —
+                     يقع أسفل "نموذج إعداد الألعاب والامتحان" مباشرة، ويُبدِّل بسلاسة (Toggle) بين إخفاء وإظهار
+                     كامل مساحة إدارة المحتوى (tk-setup-card) أعلاه، دون أي تأثير على منطق تحليل المحتوى أو
+                     أي من الألعاب/الامتحان الأخرى الذي يبقى يعمل بشكل كامل بمجرد إعادة إظهار المساحة -->
+                <div class="flex items-center justify-center mb-5" style="margin-top: -12px;">
+                    <button type="button" id="btn-tk-toggle-setup" class="tk-btn tk-btn-outline" onclick="tkToggleSetupAreaVisibility()" title="إخفاء أو إظهار مساحة إدارة المحتوى بالكامل">
+                        🙈 إخفاء منطقة الإعداد
+                    </button>
                 </div>
 
                 <!-- 3) مجموعة الألعاب المصغّرة -->
@@ -3309,6 +3423,64 @@
                     showAuthError("عذراً، كود المساعد غير صحيح أو غير مضاف من قبل المعلم الموجه!");
                 }
             });
+        }
+
+        // ==================================================================================
+        // NEWLY ADDED (Explicit Logout Management — إدارة الجلسة وتسجيل الخروج الصريح):
+        // دالة موحّدة ومشتركة تُستدعى حصرياً من زر "تسجيل الخروج" الظاهر في هيدر شاشات الأدوار
+        // الثلاثة (المعلم/الطالب/المساعد). لا يُستدعى مسح أي Tokens/Cookies/State أو إنهاء أي جلسة
+        // من أي مكان آخر في الكود تلقائياً (لا Timeout، ولا عند الخطأ، ولا عند إعادة تحميل الصفحة
+        // العادية) — فقط وحصرياً بعد نقر صريح من المستخدم هنا، بعد تأكيده صراحةً عبر نافذة تأكيد.
+        //
+        // القرار الهندسي: نظراً لضخامة عدد مستمعي Firebase اللحظيين (.on) المفتوحين عبر أجزاء
+        // متفرقة من الكود (الحضور/الصلاحيات الفردية/جدول المواعيد/إلخ)، فإن أكثر الطرق أماناً واستقراراً
+        // لإنهاء الجلسة دون ترك أي مستمع أو مؤقت "يتيم" يعمل في الخلفية، هو إعادة تحميل الصفحة بالكامل
+        // بعد تنظيف بيانات الجلسة المحلية وإزالة أي معاملات دعوة (session_id/role) من الرابط، بحيث تعود
+        // الصفحة إلى نقطة الصفر تماماً (شاشة تسجيل الدخول) بأمان تام دون أي حالة معلّقة.
+        // ==================================================================================
+        function handleUserLogout() {
+            try {
+                const confirmed = confirm('هل تريد بالتأكيد تسجيل الخروج من حسابك الحالي؟ سيتم إنهاء الجلسة الحالية وإعادتك إلى صفحة تسجيل الدخول.');
+                if (!confirmed) return; // المستخدم تراجع عن العملية: لا يتم مسح أي شيء إطلاقاً
+
+                // إيقاف محرك التنبيهات الصوتية للمواعيد (إن كان يعمل) بشكل استباقي قبل مغادرة الجلسة
+                try {
+                    if (typeof scheduleNotifStopEngine === 'function') scheduleNotifStopEngine();
+                } catch (engineErr) {
+                    console.warn('handleUserLogout: تعذر إيقاف محرك التنبيهات الصوتية بأمان (سيُنهى تلقائياً مع إعادة التحميل):', engineErr);
+                }
+
+                // إيقاف مؤقت التدريب الزمني العام إن كان نشطاً، لتفادي استمراره في الخلفية بعد الخروج
+                try {
+                    if (typeof timerInterval !== 'undefined' && timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        isTimerRunning = false;
+                    }
+                } catch (timerErr) {
+                    console.warn('handleUserLogout: تعذر إيقاف مؤقت التدريب الزمني بأمان:', timerErr);
+                }
+
+                // مسح بيانات الجلسة المؤقتة (Session Storage) فقط — يحدث هنا حصراً بعد النقر الصريح
+                try { window.sessionStorage.clear(); } catch (ssErr) {
+                    console.warn('handleUserLogout: تعذر مسح sessionStorage (قد يكون غير مدعوم في هذا المتصفح):', ssErr);
+                }
+
+                // إعادة توجيه آمنة لصفحة تسجيل الدخول: إزالة أي معاملات رابط دعوة (session_id/role)
+                // لمنع إعادة تعبئة النموذج تلقائياً بمعطيات جلسة سابقة، ثم إعادة تحميل كامل للصفحة
+                // لضمان قطع كل اتصالات Firebase اللحظية المفتوحة وإعادة كل الحالة (State) إلى نقطة الصفر
+                const cleanUrl = window.location.origin + window.location.pathname;
+                if (window.location.href !== cleanUrl) {
+                    window.location.href = cleanUrl; // ستُعاد الصفحة تحميلها تلقائياً بالانتقال لرابط جديد
+                } else {
+                    window.location.reload();
+                }
+            } catch (err) {
+                console.error('handleUserLogout error:', err);
+                // خطة أمان بديلة أخيرة عند حدوث أي خطأ غير متوقع أثناء التنظيف: إعادة تحميل الصفحة
+                // على أي حال حتى لا يبقى المستخدم عالقاً في حالة غير مستقرة
+                try { window.location.reload(); } catch (fallbackErr) { /* لا يوجد إجراء إضافي ممكن */ }
+            }
         }
 
         // === MODULE 1.2 (NEWLY ADDED): نظام تنبيهات الاقتراب/تجاوز الحد الأقصى المخصص للمستخدم من سعة التخزين ===
@@ -4292,6 +4464,92 @@
         }
 
         // ==================================================================================
+        // NEWLY ADDED (Student Dashboard - UI Modification 1): إدراج صورة داخل مربع "الواجب المنزلي"
+        // (txt-homework-input-box) عبر رفع ملف من الجهاز أو رابط URL مباشر، بنفس منطق ونمط أداة إدراج
+        // صورة السبورة الذكية أعلاه (openWbInsertImageModal / insertWhiteboardImageAtCursor) لكن بدوال
+        // مستقلة تماماً حتى لا تتأثر السبورة الذكية أو أي منطق آخر بأي شكل من الأشكال
+        // ==================================================================================
+        function openHwInsertImageModal() {
+            try {
+                const fileInput = document.getElementById('hw-image-file-input');
+                const urlInput = document.getElementById('hw-image-url-input');
+                if (fileInput) fileInput.value = '';
+                if (urlInput) urlInput.value = '';
+                const modal = document.getElementById('hw-modal-insert-image');
+                if (modal) modal.style.display = 'flex';
+            } catch (err) {
+                console.error('openHwInsertImageModal error:', err);
+            }
+        }
+
+        function handleHwImageFileSelected(event) {
+            try {
+                const file = event.target.files && event.target.files[0];
+                if (!file) return;
+                if (!file.type || !file.type.startsWith('image/')) {
+                    showAdminToast('الملف المختار ليس صورة صالحة.', 'error');
+                    event.target.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => {
+                    insertHwImageAtCursor(reader.result);
+                    closeWbModal('hw-modal-insert-image');
+                };
+                reader.onerror = () => showAdminToast('تعذّرت قراءة ملف الصورة، حاول مرة أخرى.', 'error');
+                reader.readAsDataURL(file);
+            } catch (err) {
+                console.error('handleHwImageFileSelected error:', err);
+                showAdminToast('حدث خطأ غير متوقع أثناء رفع الصورة.', 'error');
+            }
+        }
+
+        function confirmInsertHwImageFromUrl() {
+            try {
+                const urlInput = document.getElementById('hw-image-url-input');
+                const url = urlInput ? urlInput.value.trim() : '';
+                if (!url) { showAdminToast('الرجاء إدخال رابط صورة صالح، أو استخدم رفع ملف بدلاً من ذلك.', 'warning'); return; }
+                insertHwImageAtCursor(url);
+                closeWbModal('hw-modal-insert-image');
+            } catch (err) {
+                console.error('confirmInsertHwImageFromUrl error:', err);
+                showAdminToast('حدث خطأ غير متوقع أثناء إدراج الصورة.', 'error');
+            }
+        }
+
+        function insertHwImageAtCursor(src) {
+            try {
+                const editor = document.getElementById('txt-homework-input-box');
+                if (!editor) return;
+                editor.focus();
+                const img = document.createElement('img');
+                img.src = src;
+                img.style.maxWidth = '280px';
+                img.style.borderRadius = '6px';
+                img.onerror = () => showAdminToast('تعذر تحميل الصورة من الرابط المُدخل، تحقق من صحة الرابط.', 'error');
+
+                let inserted = false;
+                try {
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0) {
+                        const range = sel.getRangeAt(0);
+                        if (editor.contains(range.commonAncestorContainer)) {
+                            range.collapse(false);
+                            range.insertNode(img);
+                            inserted = true;
+                        }
+                    }
+                } catch (selErr) {
+                    console.warn('insertHwImageAtCursor: تعذّر الإدراج عند موضع المؤشر', selErr);
+                }
+                if (!inserted) editor.appendChild(img);
+            } catch (err) {
+                console.error('insertHwImageAtCursor error:', err);
+                showAdminToast('تعذّر إدراج الصورة داخل مربع الواجب.', 'error');
+            }
+        }
+
+        // ==================================================================================
         // MODULE 1 (UPDATED - Table Insertion Tool): إدراج جدول تفاعلي بعدد صفوف/أعمدة مخصص
         // (عبر محدد شبكي أو إدخال يدوي). تم حذف "صندوق أدوات تنسيق الجدول" السياقي بالكامل بناءً
         // على المتطلبات، مع الحفاظ التام على أداة الإدراج نفسها وباقي أدوات/تبويبات السبورة دون أي تأثير
@@ -4394,6 +4652,91 @@
                 }
             };
             reader.readAsDataURL(file);
+        }
+
+        // ==================================================================================
+        // NEWLY ADDED (Teacher Dashboard - UI Modification 2): جلب ملف PDF من رابط URL مباشر وعرضه
+        // داخل نفس مستعرض الـ PDF الحالي (بنفس مسار handlePdfFileSelectBroadcast تماماً: تحويله إلى
+        // Base64 ثم loadPdfDocumentEngine + مزامنته عبر Firebase)، مع تحقق صارم وحتمي من أن الملف
+        // المُستلَم فعلياً بصيغة application/pdf فقط قبل أي عرض، ومعالجة كاملة لكل حالات الفشل المحتملة
+        // (رابط فارغ/غير صالح، خطأ شبكة أو CORS، استجابة غير ناجحة، نوع محتوى مختلف عن PDF)
+        // ==================================================================================
+        function loadPdfFromUrlInput() {
+            try {
+                if (currentRole !== 'teacher') return;
+                const urlInput = document.getElementById('pdf-url-input');
+                const rawUrl = urlInput ? urlInput.value.trim() : '';
+                if (!rawUrl) {
+                    showAdminToast('الرجاء إدخال رابط ملف PDF صالح أولاً.', 'warning');
+                    return;
+                }
+                let parsedUrl;
+                try {
+                    parsedUrl = new URL(rawUrl);
+                    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') throw new Error('invalid-protocol');
+                } catch (urlErr) {
+                    showAdminToast('الرابط المُدخل غير صالح، تأكد من كتابته بشكل صحيح (يبدأ بـ http:// أو https://).', 'error');
+                    return;
+                }
+
+                const loadBtn = document.getElementById('btn-pdf-load-from-url');
+                if (loadBtn) { loadBtn.disabled = true; loadBtn.textContent = '⏳ جاري الجلب...'; }
+
+                fetch(parsedUrl.href)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('http-' + response.status);
+                        }
+                        // شرط التحقق الصارم: يجب أن يكون نوع المحتوى المُعلَن من الخادم صريحاً بصيغة application/pdf فقط
+                        const contentType = (response.headers.get('Content-Type') || '').toLowerCase();
+                        if (contentType.indexOf('application/pdf') === -1) {
+                            throw new Error('invalid-content-type');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // تحقق مزدوج إضافي على نوع الـ Blob الفعلي المُستلَم قبل أي محاولة عرض
+                        if (!blob || (blob.type && blob.type.toLowerCase().indexOf('application/pdf') === -1)) {
+                            throw new Error('invalid-content-type');
+                        }
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const base64String = event.target.result;
+                            lastSyncedPdfBase64 = base64String;
+                            currentPdfPageNumber = 1;
+
+                            loadPdfDocumentEngine(base64String);
+
+                            if (dbRef) {
+                                dbRef.child('pdf_state').set({
+                                    base64: base64String,
+                                    page: currentPdfPageNumber
+                                });
+                            }
+                            showAdminToast('تم جلب ملف الـ PDF من الرابط وعرضه بنجاح.', 'success');
+                        };
+                        reader.onerror = () => showAdminToast('تعذّرت معالجة ملف الـ PDF بعد جلبه من الرابط، حاول مرة أخرى.', 'error');
+                        reader.readAsDataURL(blob);
+                    })
+                    .catch(err => {
+                        console.error('loadPdfFromUrlInput error:', err);
+                        if (err && err.message === 'invalid-content-type') {
+                            showAdminToast('الرابط المُدخل لا يشير إلى ملف PDF صالح (نوع الملف مختلف)، الرجاء التأكد من الرابط.', 'error');
+                        } else if (err && typeof err.message === 'string' && err.message.indexOf('http-') === 0) {
+                            showAdminToast('تعذّر تحميل الملف من الرابط (خطأ من الخادم: ' + err.message.replace('http-', '') + ').', 'error');
+                        } else {
+                            showAdminToast('تعذّر الوصول إلى الرابط المُدخل، تأكد من صحته أو من صلاحيات الوصول (CORS) الخاصة بالخادم المصدر.', 'error');
+                        }
+                    })
+                    .finally(() => {
+                        if (loadBtn) { loadBtn.disabled = false; loadBtn.textContent = '🔗 اختيار ملف من رابط'; }
+                    });
+            } catch (outerErr) {
+                console.error('loadPdfFromUrlInput outer error:', outerErr);
+                showAdminToast('حدث خطأ غير متوقع أثناء محاولة جلب ملف الـ PDF من الرابط.', 'error');
+                const loadBtn = document.getElementById('btn-pdf-load-from-url');
+                if (loadBtn) { loadBtn.disabled = false; loadBtn.textContent = '🔗 اختيار ملف من رابط'; }
+            }
         }
 
         function loadPdfDocumentEngine(base64Data) {
@@ -6271,6 +6614,327 @@
                 alert('تعذر حذف الموعد: ' + err.message);
             });
         }
+
+        // ==================================================================================
+        // NEWLY ADDED (Custom Audio Notification System — نظام التنبيهات الصوتية المخصصة):
+        // وحدة مستقلة بالكامل (Modular / Self-Contained) لا تُعدِّل ولا تحذف أي دالة أو متغيّر
+        // سابق. تعتمد فقط على القراءة من المتغيّر العام الموجود فعلياً (scheduleList) دون أي
+        // تدخّل في طريقة تحميله أو تحديثه، وتُضاف جميع مستمعياتها عبر addEventListener بشكل
+        // إضافي (لا تستبدل أي معالج أحداث قائم).
+        // ==================================================================================
+
+        // --- الحالة العامة للوحدة ---
+        let scheduleNotifAudioDataUrl = null;   // Data URL (Base64) لملف الصوت المخصص المختار من جهاز المستخدم
+        let scheduleNotifAudioFileName = '';    // اسم الملف الصوتي المختار (لعرضه للمستخدم فقط)
+        let scheduleNotifMinutesBefore = 10;    // عدد الدقائق المسبقة الافتراضي قبل كل موعد
+        let scheduleNotifAlreadyNotifiedSet = new Set(); // معرّفات المواعيد التي تم التنبيه لها اليوم بالفعل (لمنع التكرار)
+        let scheduleNotifEngineIntervalId = null;        // معرّف المؤقت الخلفي (setInterval) الحالي، إن كان يعمل
+
+        const SCHEDULE_NOTIF_SETTINGS_STORAGE_KEY = 'schedule_notif_settings_v1';
+        const SCHEDULE_NOTIF_CHECK_INTERVAL_MS = 20000;      // دورة فحص كل 20 ثانية (توازن بين الدقة واستهلاك الموارد)
+        const SCHEDULE_NOTIF_MAX_AUDIO_FILE_BYTES = 5 * 1024 * 1024; // حد أقصى 5 ميجابايت لملف الصوت المخصص
+
+        // --- Error Handling: التحقق من دعم المتصفح لواجهات الملفات الصوتية المطلوبة ---
+        function scheduleNotifIsFileApiSupported() {
+            return !!(window.File && window.FileReader && window.Blob);
+        }
+
+        // --- يعرض رسالة حالة قصيرة للمستخدم (نجاح أو خطأ) داخل بطاقة إعدادات التنبيهات ---
+        function scheduleNotifShowStatus(message, isError) {
+            try {
+                const el = document.getElementById('schedule-notif-status-msg');
+                if (!el) return;
+                el.innerText = message;
+                el.style.color = isError ? '#dc2626' : '#059669';
+                el.classList.remove('hidden');
+                if (scheduleNotifShowStatus.__hideTimer) clearTimeout(scheduleNotifShowStatus.__hideTimer);
+                scheduleNotifShowStatus.__hideTimer = setTimeout(() => { el.classList.add('hidden'); }, 6000);
+            } catch (err) {
+                console.error('scheduleNotifShowStatus error:', err);
+            }
+        }
+
+        // --- تحديث عناصر واجهة الإعدادات (اسم الملف المختار + قيمة حقل الدقائق) لتعكس الحالة الحالية ---
+        function scheduleNotifRefreshSettingsUI() {
+            try {
+                const fileNameEl = document.getElementById('schedule-notif-audio-filename');
+                if (fileNameEl) {
+                    fileNameEl.innerText = scheduleNotifAudioFileName
+                        ? ('الملف المختار حالياً: ' + scheduleNotifAudioFileName)
+                        : 'لم يتم اختيار ملف صوتي بعد (سيُستخدم صوت تنبيه افتراضي بسيط)';
+                }
+                const minutesInput = document.getElementById('sch-notif-minutes-before');
+                if (minutesInput) minutesInput.value = scheduleNotifMinutesBefore;
+            } catch (err) {
+                console.error('scheduleNotifRefreshSettingsUI error:', err);
+            }
+        }
+
+        // --- حفظ إعدادات التنبيه (الدقائق المسبقة + ملف الصوت اختيارياً) في LocalStorage بشكل آمن ---
+        function scheduleNotifSaveSettings(includeAudio) {
+            try {
+                const payload = { minutesBefore: scheduleNotifMinutesBefore };
+                if (includeAudio && scheduleNotifAudioDataUrl) {
+                    payload.audioDataUrl = scheduleNotifAudioDataUrl;
+                    payload.fileName = scheduleNotifAudioFileName;
+                }
+                window.localStorage.setItem(SCHEDULE_NOTIF_SETTINGS_STORAGE_KEY, JSON.stringify(payload));
+            } catch (err) {
+                // Edge Case: مساحة التخزين الممتلئة (QuotaExceededError) أو عدم دعم LocalStorage إطلاقاً
+                console.warn('scheduleNotifSaveSettings: تعذر حفظ الإعدادات بشكل دائم:', err);
+                scheduleNotifShowStatus('تعذر حفظ إعداد الصوت بشكل دائم (مساحة التخزين ممتلئة على الأرجح)، سيبقى فعالاً خلال هذه الجلسة الحالية فقط.', true);
+            }
+        }
+
+        // --- قراءة الإعدادات المحفوظة سابقاً (إن وُجدت) عند تحميل الصفحة ---
+        function scheduleNotifLoadSettings() {
+            try {
+                const raw = window.localStorage.getItem(SCHEDULE_NOTIF_SETTINGS_STORAGE_KEY);
+                if (!raw) { scheduleNotifRefreshSettingsUI(); return; }
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object') {
+                    if (Number.isFinite(parsed.minutesBefore) && parsed.minutesBefore >= 0) {
+                        scheduleNotifMinutesBefore = parsed.minutesBefore;
+                    }
+                    if (typeof parsed.audioDataUrl === 'string' && parsed.audioDataUrl.startsWith('data:audio')) {
+                        scheduleNotifAudioDataUrl = parsed.audioDataUrl;
+                        scheduleNotifAudioFileName = parsed.fileName || 'ملف صوتي محفوظ مسبقاً';
+                    }
+                }
+            } catch (err) {
+                console.warn('scheduleNotifLoadSettings: تعذرت قراءة الإعدادات المحفوظة مسبقاً، سيتم استخدام القيم الافتراضية:', err);
+            }
+            scheduleNotifRefreshSettingsUI();
+        }
+
+        // --- معالج حدث اختيار ملف صوتي جديد من منتقي الملفات (HTML5 File API) ---
+        function handleScheduleNotifAudioFileSelected(event) {
+            try {
+                if (!scheduleNotifIsFileApiSupported()) {
+                    scheduleNotifShowStatus('عذراً، متصفحك الحالي لا يدعم رفع الملفات الصوتية المخصصة (File API غير متوفرة).', true);
+                    return;
+                }
+                const file = (event && event.target && event.target.files) ? event.target.files[0] : null;
+                if (!file) return; // المستخدم ألغى نافذة الاختيار دون تحديد ملف
+
+                if (!file.type || file.type.indexOf('audio') === -1) {
+                    scheduleNotifShowStatus('الرجاء اختيار ملف صوتي صالح فقط (مثال: mp3, wav, ogg).', true);
+                    return;
+                }
+                if (file.size > SCHEDULE_NOTIF_MAX_AUDIO_FILE_BYTES) {
+                    scheduleNotifShowStatus('حجم الملف الصوتي كبير جداً (الحد الأقصى المسموح به 5 ميجابايت).', true);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        scheduleNotifAudioDataUrl = e.target.result;
+                        scheduleNotifAudioFileName = file.name;
+                        scheduleNotifSaveSettings(true);
+                        scheduleNotifRefreshSettingsUI();
+                        scheduleNotifShowStatus('تم تحميل الملف الصوتي بنجاح: ' + file.name, false);
+                    } catch (innerErr) {
+                        console.error('handleScheduleNotifAudioFileSelected onload error:', innerErr);
+                        scheduleNotifShowStatus('حدث خطأ غير متوقع أثناء تفعيل الملف الصوتي المختار.', true);
+                    }
+                };
+                reader.onerror = function () {
+                    console.error('handleScheduleNotifAudioFileSelected: FileReader error', reader.error);
+                    scheduleNotifShowStatus('حدث خطأ أثناء قراءة الملف الصوتي، حاول اختيار ملف آخر.', true);
+                };
+                reader.readAsDataURL(file);
+            } catch (err) {
+                console.error('handleScheduleNotifAudioFileSelected error:', err);
+                scheduleNotifShowStatus('حدث خطأ غير متوقع أثناء معالجة الملف الصوتي.', true);
+            }
+        }
+
+        // --- معالج حدث تغيير قيمة حقل "الدقائق المسبقة للتنبيه"، مع تحقق وتقييد للقيم المنطقية ---
+        function handleScheduleNotifMinutesChanged() {
+            try {
+                const input = document.getElementById('sch-notif-minutes-before');
+                if (!input) return;
+                let value = parseInt(input.value, 10);
+                if (!Number.isFinite(value) || value < 0) value = 0;
+                if (value > 1440) value = 1440; // حد أقصى منطقي: 24 ساعة كاملة مسبقاً
+                input.value = value;
+                scheduleNotifMinutesBefore = value;
+                scheduleNotifSaveSettings(false);
+                scheduleNotifShowStatus('تم حفظ إعداد وقت التنبيه المسبق (' + value + ' دقيقة قبل كل موعد).', false);
+            } catch (err) {
+                console.error('handleScheduleNotifMinutesChanged error:', err);
+            }
+        }
+
+        // --- تشغيل الصوت المخصص المختار (أو تجاهل التشغيل بأمان إن لم يوجد ملف مختار بعد) ---
+        function scheduleNotifPlaySound() {
+            try {
+                if (!scheduleNotifAudioDataUrl) return; // لا يوجد صوت مخصص مختار بعد: لا شيء لتشغيله
+                const player = document.getElementById('schedule-notif-audio-player');
+                if (!player) return;
+                player.src = scheduleNotifAudioDataUrl;
+                const playPromise = player.play();
+                // Error Handling: بعض المتصفحات تمنع التشغيل التلقائي للصوت قبل أي تفاعل مباشر من المستخدم
+                if (playPromise && typeof playPromise.catch === 'function') {
+                    playPromise.catch(err => {
+                        console.warn('scheduleNotifPlaySound: تعذر التشغيل التلقائي للصوت (سياسة المتصفح على الأرجح):', err);
+                        scheduleNotifShowStatus('🔔 حان وقت التنبيه، لكن المتصفح منع التشغيل التلقائي للصوت. اضغط زر "تجربة الصوت الآن" لتفعيله لهذه الجلسة.', true);
+                    });
+                }
+            } catch (err) {
+                console.error('scheduleNotifPlaySound error:', err);
+            }
+        }
+
+        // --- زر "تجربة الصوت الآن": يشغّل الصوت المختار فوراً بضغطة مستخدم مباشرة (تتجاوز قيود التشغيل التلقائي) ---
+        function scheduleNotifTestPlaySound() {
+            try {
+                if (!scheduleNotifAudioDataUrl) {
+                    scheduleNotifShowStatus('الرجاء اختيار ملف صوتي أولاً من الحقل أعلاه قبل تجربته.', true);
+                    return;
+                }
+                scheduleNotifPlaySound();
+            } catch (err) {
+                console.error('scheduleNotifTestPlaySound error:', err);
+            }
+        }
+
+        // --- مفتاح تخزين "المواعيد التي تم التنبيه لها اليوم" (يتغيّر يومياً ولكل مستخدم على حدة) ---
+        function scheduleNotifGetFiredTodayStorageKey() {
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const userPart = (typeof currentUserId !== 'undefined' && currentUserId) ? currentUserId : 'anon';
+            return `schedule_notif_fired_${userPart}_${todayStr}`;
+        }
+
+        function scheduleNotifLoadFiredSetForToday() {
+            try {
+                const raw = window.localStorage.getItem(scheduleNotifGetFiredTodayStorageKey());
+                if (!raw) return new Set();
+                const arr = JSON.parse(raw);
+                return new Set(Array.isArray(arr) ? arr : []);
+            } catch (err) {
+                console.warn('scheduleNotifLoadFiredSetForToday: تعذرت قراءة سجل التنبيهات السابقة لليوم الحالي:', err);
+                return new Set();
+            }
+        }
+
+        function scheduleNotifMarkFired(appointmentId) {
+            try {
+                scheduleNotifAlreadyNotifiedSet.add(appointmentId);
+                window.localStorage.setItem(
+                    scheduleNotifGetFiredTodayStorageKey(),
+                    JSON.stringify(Array.from(scheduleNotifAlreadyNotifiedSet))
+                );
+            } catch (err) {
+                // حتى إن فشل الحفظ الدائم، تبقى القيمة محفوظة في الذاكرة (scheduleNotifAlreadyNotifiedSet)
+                // لمنع تكرار نفس التنبيه خلال هذه الجلسة الحالية على الأقل
+                console.warn('scheduleNotifMarkFired: تعذر حفظ سجل التنبيه بشكل دائم:', err);
+            }
+        }
+
+        // --- المحرك والمؤقت (Timer Engine): يقارن الوقت الحالي بمواعيد المستخدم الحقيقية (scheduleList)
+        //     ويُطلق التنبيه الصوتي فور بلوغ (وقت الموعد − الدقائق المسبقة المحددة) ---
+        function scheduleNotifEngineTick() {
+            try {
+                // المساعد لا يملك جدول مواعيد خاصاً به أصلاً (نفس منطق getScheduleBasePath القائم)
+                if (typeof currentRole !== 'undefined' && currentRole === 'assistant') return;
+                if (!Array.isArray(scheduleList) || scheduleList.length === 0) return;
+
+                const now = new Date();
+                const todayStr = now.toISOString().slice(0, 10);
+
+                scheduleList.forEach(appt => {
+                    try {
+                        if (!appt || !appt.id || !appt.date || !appt.from_time) return;
+                        if (appt.date !== todayStr) return; // التنبيه مخصص لمواعيد اليوم الحالي فقط
+                        if (scheduleNotifAlreadyNotifiedSet.has(appt.id)) return; // تم التنبيه لهذا الموعد بالفعل اليوم
+
+                        const timeParts = String(appt.from_time).split(':').map(Number);
+                        const hh = timeParts[0];
+                        const mm = timeParts[1];
+                        if (!Number.isFinite(hh) || !Number.isFinite(mm)) return;
+
+                        const apptDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0, 0);
+                        const notifyAtTime = new Date(apptDateTime.getTime() - (scheduleNotifMinutesBefore * 60000));
+
+                        // نافذة سماحية تساوي فترة دورة الفحص لتفادي "تفويت" لحظة التنبيه الدقيقة بين دورتين متتاليتين
+                        const toleranceMs = SCHEDULE_NOTIF_CHECK_INTERVAL_MS + 60000;
+                        const diffMs = now.getTime() - notifyAtTime.getTime();
+
+                        if (diffMs >= 0 && diffMs <= toleranceMs) {
+                            scheduleNotifPlaySound();
+                            scheduleNotifShowStatus('🔔 تذكير: موعد "' + (appt.title || 'بدون عنوان') + '" سيبدأ الساعة ' + appt.from_time, false);
+                            scheduleNotifMarkFired(appt.id);
+                        }
+                    } catch (innerErr) {
+                        // عزل خطأ أي موعد فردي (بيانات تالفة مثلاً) بحيث لا يوقف فحص باقي المواعيد
+                        console.error('scheduleNotifEngineTick: خطأ أثناء معالجة أحد المواعيد:', innerErr);
+                    }
+                });
+            } catch (err) {
+                console.error('scheduleNotifEngineTick error:', err);
+            }
+        }
+
+        // --- بدء تشغيل محرك المؤقت الخلفي (يُستدعى مرة واحدة فقط عند تحميل الصفحة) ---
+        function scheduleNotifStartEngine() {
+            try {
+                if (scheduleNotifEngineIntervalId) return; // المحرك يعمل بالفعل، لا داعي لتكرار التشغيل
+                scheduleNotifAlreadyNotifiedSet = scheduleNotifLoadFiredSetForToday();
+                scheduleNotifEngineIntervalId = setInterval(scheduleNotifEngineTick, SCHEDULE_NOTIF_CHECK_INTERVAL_MS);
+                scheduleNotifEngineTick(); // فحص فوري أول عند بدء التشغيل دون انتظار أول دورة زمنية
+            } catch (err) {
+                console.error('scheduleNotifStartEngine error:', err);
+            }
+        }
+
+        // --- إيقاف محرك المؤقت الخلفي بأمان (يُستدعى عند تسجيل الخروج مثلاً) ---
+        function scheduleNotifStopEngine() {
+            try {
+                if (scheduleNotifEngineIntervalId) {
+                    clearInterval(scheduleNotifEngineIntervalId);
+                    scheduleNotifEngineIntervalId = null;
+                }
+            } catch (err) {
+                console.error('scheduleNotifStopEngine error:', err);
+            }
+        }
+
+        // --- Error Handling: مراقبة اتصال قاعدة بيانات Firebase اللحظية (تعمل عبر WebSocket داخلياً)،
+        //     لتنبيه المستخدم عند انقطاع الاتصال بحيث يعرف أن مواعيده الجديدة قد لا تصل فوراً حتى تُستعاد ---
+        function scheduleNotifWatchConnection() {
+            try {
+                if (typeof firebase === 'undefined' || !firebase.database) return;
+                firebase.database().ref('.info/connected').on('value', (snap) => {
+                    if (snap.val() !== true) {
+                        scheduleNotifShowStatus('⚠️ انقطع الاتصال اللحظي بالخادم، قد لا تصل تحديثات المواعيد الجديدة فوراً حتى تتم استعادة الاتصال.', true);
+                    }
+                }, (err) => {
+                    console.warn('scheduleNotifWatchConnection: listener error', err);
+                });
+            } catch (err) {
+                console.error('scheduleNotifWatchConnection setup error:', err);
+            }
+        }
+
+        // --- تهيئة الوحدة بالكامل عند تحميل الصفحة: ربط الأحداث + تحميل الإعدادات + بدء المحرك ---
+        // ملاحظة: تم استخدام addEventListener بشكل إضافي هنا (لا يستبدل أي معالج DOMContentLoaded سابق)
+        window.addEventListener('DOMContentLoaded', function scheduleNotifInitOnLoad() {
+            try {
+                const picker = document.getElementById('sch-notif-audio-picker');
+                if (picker) picker.addEventListener('change', handleScheduleNotifAudioFileSelected);
+
+                const minutesInput = document.getElementById('sch-notif-minutes-before');
+                if (minutesInput) minutesInput.addEventListener('change', handleScheduleNotifMinutesChanged);
+
+                scheduleNotifLoadSettings();
+                scheduleNotifStartEngine();
+                scheduleNotifWatchConnection();
+            } catch (err) {
+                console.error('scheduleNotifInitOnLoad error:', err);
+            }
+        });
 
         // ==================================================================================
         // NEWLY ADDED (Schedule Module — Print Feature): "تجهيز وطباعة الجدول الحالي"
@@ -8499,7 +9163,7 @@
             }
 
             if (rows.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="14" class="px-3 py-4 text-center text-gray-400">لا توجد بيانات مطابقة حالياً.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="15" class="px-3 py-4 text-center text-gray-400">لا توجد بيانات مطابقة حالياً.</td></tr>`;
                 return;
             }
 
@@ -8529,10 +9193,82 @@
                         <td class="px-3 py-2 font-mono text-gray-500">${a ? escapeHtmlAttr(a.code) : '-'}</td>
                         <td class="px-3 py-2 text-center">${buildAdminStorageCell(t, s, a)}</td>
                         <td class="px-3 py-2 text-center whitespace-nowrap">${buildAdminRegistrationDateCell(t, s, a)}</td>
+                        <!-- [تعديل] خلية جديدة: حقل إدخال نصي + زر "حفظ" للملاحظات الخاصة بكل سجل ظاهر في هذا الصف -->
+                        <td class="px-3 py-2 text-center">${buildAdminNotesCell(rowIndex, t, s, a)}</td>
                         <td class="px-3 py-2 text-center"><div class="flex flex-wrap gap-2 justify-center">${actionsHtml}</div></td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        // === [تعديل] خلية عمود "الملاحظات" الجديد في الجدول الشامل بلوحة تحكم المدير ===
+        // تبني حقل إدخال نصي (input) مع زر "حفظ" لكل سجل ظاهر فعلياً ضمن هذا الصف (معلم/طالب/مساعد)،
+        // بنفس أسلوب buildAdminActionButtons و buildAdminStorageCell المتّبع أصلاً في الملف (تقسيم لكل نوع).
+        // معرّف كل حقل إدخال فريد اعتماداً على رقم الصف (rowIndex) + نوع السجل، لتفادي أي تعارض في
+        // حال ظهور نفس المعلم في أكثر من صف (مرة لكل طالب/مساعد تابع له).
+        function buildAdminNotesCell(rowIndex, teacher, student, assistant) {
+            try {
+                const entries = [
+                    ['teacher', teacher],
+                    ['student', student],
+                    ['assistant', assistant]
+                ].filter(([, rec]) => !!rec);
+
+                if (entries.length === 0) return '-';
+
+                const typeLabels = { teacher: 'معلم', student: 'طالب', assistant: 'مساعد' };
+
+                const blocksHtml = entries.map(([type, rec]) => {
+                    const inputId = `admin-notes-input-${rowIndex}-${type}`;
+                    const existingNotes = (rec && rec.notes !== undefined && rec.notes !== null) ? String(rec.notes) : '';
+                    return `
+                        <div class="flex flex-col gap-1 mb-1 last:mb-0">
+                            <span class="text-[9px] text-gray-400 font-bold text-center">${typeLabels[type]}</span>
+                            <div class="flex gap-1 items-center justify-center">
+                                <input type="text" id="${inputId}" value="${escapeHtmlAttr(existingNotes)}" placeholder="أضف ملاحظة..." maxlength="500"
+                                    class="w-24 md:w-32 p-1 border border-gray-300 rounded text-[10px] outline-none focus:border-[#c5a880]">
+                                <button type="button" onclick="saveAdminRecordNotes('${type}', '${escapeHtmlAttr(rec.code)}', '${inputId}')"
+                                    class="bg-[#0b3a26] hover:bg-[#012015] text-white text-[10px] px-2 py-1 rounded font-bold transition-all">حفظ</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return blocksHtml;
+            } catch (err) {
+                console.error('buildAdminNotesCell error:', err);
+                return '-';
+            }
+        }
+
+        // === [تعديل] حفظ قيمة الملاحظة المُدخلة لسجل محدد (معلم/طالب/مساعد) مباشرة في Firebase،
+        // مع إظهار إشعار (Toast) بنجاح أو فشل عملية الحفظ، ومعالجة شاملة لكافة حالات الاستثناء
+        // (عنصر إدخال غير موجود، تعذّر تحديد المسار، فشل الاتصال بقاعدة البيانات...) دون توقف السكربت.
+        function saveAdminRecordNotes(type, code, inputId) {
+            try {
+                const inputEl = document.getElementById(inputId);
+                if (!inputEl) {
+                    showAdminToast('تعذّر العثور على حقل الملاحظة المطلوب حفظه.', 'error');
+                    return;
+                }
+
+                const notesValue = inputEl.value.trim();
+                const path = getAdminRecordPath(type, code);
+                if (!path) {
+                    showAdminToast('تعذّر تحديد مسار السجل لحفظ الملاحظة.', 'error');
+                    return;
+                }
+
+                firebase.database().ref(path).update({ notes: notesValue }).then(() => {
+                    showAdminToast('تم حفظ الملاحظة بنجاح!');
+                }).catch(err => {
+                    console.error('saveAdminRecordNotes error:', err);
+                    showAdminToast('فشل حفظ الملاحظة: ' + (err && err.message ? err.message : 'خطأ غير معروف'), 'error');
+                });
+            } catch (err) {
+                console.error('saveAdminRecordNotes error:', err);
+                showAdminToast('حدث خطأ غير متوقع أثناء حفظ الملاحظة.', 'error');
+            }
         }
 
         // === MODULE 1: نظام استهلاك قاعدة البيانات (Storage Quota System) ===
@@ -8825,8 +9561,12 @@
                 }
 
                 const headerCells = Array.from(table.querySelectorAll('thead th'));
-                // استبعاد آخر عمود (الإجراءات) لأنه يحتوي أزراراً وليس بيانات قابلة للتصدير
-                const exportableHeaderCount = headerCells.length > 0 ? headerCells.length - 1 : 0;
+                // استبعاد آخر عمودين (الملاحظات [تعديل: عمود تفاعلي جديد] + الإجراءات) لأنهما يحتويان
+                // حقول إدخال/أزراراً وليسا بيانات نصية صرفة قابلة للتصدير
+                const NON_EXPORTABLE_TRAILING_COLUMNS = 2;
+                const exportableHeaderCount = headerCells.length > NON_EXPORTABLE_TRAILING_COLUMNS
+                    ? headerCells.length - NON_EXPORTABLE_TRAILING_COLUMNS
+                    : 0;
                 if (exportableHeaderCount <= 0) {
                     showAdminToast('لا توجد أعمدة قابلة للتصدير.', 'error');
                     return;
@@ -9101,6 +9841,27 @@
                 setTimeout(() => { try { el.remove(); } catch (e) {} }, 3200);
             } catch (e) {
                 console.error('tkShowToast error:', e);
+            }
+        }
+
+        // ==================================================================================
+        // NEWLY ADDED (Interactive Teacher Toolkit - UI Modification 3): تبديل سلس بين إخفاء وإظهار
+        // مساحة إدارة المحتوى بالكامل (#tk-setup-card) عبر إضافة/إزالة الصنف tk-setup-collapsed، دون
+        // أي تأثير على teacherToolkitState أو أي من منطق تحليل المحتوى/الألعاب/الامتحان الحالي —
+        // إخفاء المساحة بصرياً فقط (Toggle) مع الإبقاء التام على كل عناصرها وقيمها كما هي في الـ DOM
+        // ==================================================================================
+        function tkToggleSetupAreaVisibility() {
+            try {
+                const card = document.getElementById('tk-setup-card');
+                const btn = document.getElementById('btn-tk-toggle-setup');
+                if (!card) return;
+                const isCollapsed = card.classList.toggle('tk-setup-collapsed');
+                if (btn) {
+                    btn.textContent = isCollapsed ? '🙉 إظهار منطقة الإعداد' : '🙈 إخفاء منطقة الإعداد';
+                }
+            } catch (err) {
+                console.error('tkToggleSetupAreaVisibility error:', err);
+                tkShowToast('حدث خطأ غير متوقع أثناء إخفاء/إظهار منطقة الإعداد.', 'error');
             }
         }
 
@@ -9379,6 +10140,12 @@
                             <button type="button" class="tk-btn tk-btn-outline" onclick="tkHideWheelItem('${picked.id}')">🙈 إخفاء العنصر من العجلة الدوارة</button>
                         `;
                     }
+                    // NEWLY ADDED [REAL-TIME SYNC]: نتيجة الدوران تظهر بعد تأخير زمني (Timeout) لاحق لعودة
+                    // tkSpinWheel نفسها، لذا لا تلتقطها اللقطة (Snapshot) الأولى التي يبثّها محرك المزامنة
+                    // فور تنفيذ الدالة مباشرة. هذا السطر الإضافي فقط (دون أي تعديل على منطق الدوران أو
+                    // النتيجة نفسيهما) يطلب بثّ لقطة ثانية محدَّثة بمجرد ظهور النتيجة الفعلية، لضمان وصول
+                    // نفس نتيجة العجلة بالضبط للطالب لحظة ظهورها لدى المعلم.
+                    if (typeof tkScheduleToolkitBroadcast === 'function') tkScheduleToolkitBroadcast();
                 }, 4600);
             } catch (err) {
                 console.error('tkSpinWheel error:', err);
@@ -9449,13 +10216,19 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <button type="button" class="tk-btn tk-btn-outline" onclick="tkFlashIndex--; tkDrawFlashcard();">◀ السابق</button>
+                        <button type="button" class="tk-btn tk-btn-outline" onclick="tkFlashPrev()">◀ السابق</button>
                         <span class="text-xs font-bold text-gray-500">${tkFlashIndex + 1} / ${items.length}</span>
-                        <button type="button" class="tk-btn tk-btn-outline" onclick="tkFlashIndex++; tkDrawFlashcard();">التالي ▶</button>
+                        <button type="button" class="tk-btn tk-btn-outline" onclick="tkFlashNext()">التالي ▶</button>
                     </div>
                 </div>
             `;
         }
+        // NEWLY ADDED [REAL-TIME SYNC]: دالتان مُسمّاتان (بدلاً من التعبير المضمّن السابق مباشرة داخل
+        // onclick) تحملان بالضبط نفس المنطق والسلوك السابقين حرفياً (تقديم/تأخير الفهرس ثم إعادة الرسم)،
+        // بحيث يمكن لمحرك المزامنة اللحظية أدناه توجيه (Route) نقرات الطالب على هذين الزرّين عبر اسم دالة
+        // صريح وقابل للالتفاف (Wrapping)، دون أي تغيير في النتيجة أو الشكل الظاهر لدى المعلم إطلاقاً.
+        function tkFlashPrev() { tkFlashIndex--; tkDrawFlashcard(); }
+        function tkFlashNext() { tkFlashIndex++; tkDrawFlashcard(); }
 
         // --- 3.4 لعبة توصيل (Matching) ---
         let tkMatchState = { leftSelected: null, terms: [], answers: [], matchedIds: new Set() };
@@ -10857,12 +11630,11 @@
             }
         }
 
-        function tkRenderCertificate(correctCount, total, accuracy, earnedPoints) {
-            const container = document.getElementById('tk-certificate-container');
-            if (!container) return;
-            const studentName = teacherToolkitState.studentName || 'الطالب';
-            const lessonTitle = teacherToolkitState.lessonTitle || '-';
-            container.innerHTML = `
+        // === [تعديل] تم فصل بناء HTML الخاص بشهادة الإنجاز في دالة مستقلة قابلة لإعادة الاستخدام،
+        //     بحيث يمكن استدعاؤها أيضاً من دالة الطباعة المدمجة (tkPrintDetailedReport) دون تكرار الكود،
+        //     مع الحفاظ التام على نفس التصميم والمخرجات السابقة لدالة tkRenderCertificate. ===
+        function tkBuildCertificateHtml(studentName, lessonTitle, correctCount, total, accuracy, earnedPoints) {
+            return `
                 <div class="tk-certificate">
                     <div style="position:relative;z-index:1;">
                         <div style="font-size:1.1rem; font-weight:800; color:#c5a880;">🏅 شهادة تقدير وإنجاز</div>
@@ -10876,6 +11648,14 @@
                     </div>
                 </div>
             `;
+        }
+
+        function tkRenderCertificate(correctCount, total, accuracy, earnedPoints) {
+            const container = document.getElementById('tk-certificate-container');
+            if (!container) return;
+            const studentName = teacherToolkitState.studentName || 'الطالب';
+            const lessonTitle = teacherToolkitState.lessonTitle || '-';
+            container.innerHTML = tkBuildCertificateHtml(studentName, lessonTitle, correctCount, total, accuracy, earnedPoints);
         }
 
         function tkGetTodayDateString() {
@@ -10943,7 +11723,11 @@
             container.innerHTML = tkBuildDetailedReportHtml(correctCount, total, accuracy);
         }
 
-        // --- طباعة التقرير التفصيلي: نفس أسلوب الطباعة المتّبع بالفعل في الملف (نافذة منفصلة + @media print) ---
+        // === [تعديل] إعادة برمجة حدث زر "🖨️ طباعة التقرير التفصيلي":
+        //     أصبحت الدالة الآن تُولّد مستند طباعة/PDF موحّد واحد يدمج بين "شهادة الإنجاز" و"التقرير
+        //     التفصيلي" معاً بشكل متتابع داخل نفس النافذة/المستند (بدلاً من التقرير فقط سابقاً)، دون
+        //     فصلهما في ملفين مستقلين. تم الإبقاء على نفس أسلوب الطباعة المتّبع بالفعل في الملف
+        //     (نافذة منفصلة + @media print) وعلى نفس اسم الدالة ومعرّف الزر دون أي تغيير. ===
         function tkPrintDetailedReport() {
             try {
                 if (!teacherToolkitState.examSubmitted) {
@@ -10954,7 +11738,21 @@
                 const correctCount = qs.filter((q, qi) => q.options[teacherToolkitState.examAnswers[qi]] === q.correctAnswer).length;
                 const total = qs.length;
                 const accuracy = Math.round((correctCount / total) * 100);
+
+                // === [تعديل] إعادة حساب بيانات الشهادة (النقاط/اسم الطالب/عنوان الدرس) بنفس منطق
+                //     tkSubmitExam أعلاه، حتى تتطابق شهادة الطباعة تماماً مع الشهادة المعروضة في الواجهة ===
+                const earnedPoints = correctCount * 10;
+                const studentName = teacherToolkitState.studentName || 'الطالب';
+                const lessonTitle = teacherToolkitState.lessonTitle || '-';
+
+                const certificateHtml = tkBuildCertificateHtml(studentName, lessonTitle, correctCount, total, accuracy, earnedPoints);
                 const reportHtml = tkBuildDetailedReportHtml(correctCount, total, accuracy);
+
+                // === [تعديل] دمج الشهادة والتقرير معاً بشكل متتابع ضمن نفس المستند ===
+                const combinedHtml = `
+                    <div class="tk-print-certificate-section">${certificateHtml}</div>
+                    <div class="tk-print-report-section">${reportHtml}</div>
+                `;
 
                 const printWindow = window.open('', '_blank');
                 if (!printWindow) {
@@ -10966,17 +11764,32 @@
                     <html lang="ar" dir="rtl">
                     <head>
                         <meta charset="UTF-8">
-                        <title>التقرير التفصيلي</title>
+                        <title>شهادة الإنجاز والتقرير التفصيلي</title>
                         <style>
                             body { font-family: 'Cairo', sans-serif; padding: 30px; color:#012015; }
                             table { width:100%; border-collapse: collapse; }
                             td, th { border:1px solid #ccc; padding:8px; }
+                            /* === [تعديل] تنسيقات شهادة الإنجاز منقولة كما هي من التصميم الأصلي (.tk-certificate)
+                                 داخل الصفحة الرئيسية، لضمان ظهور الشهادة بنفس الشكل بالضبط داخل نافذة الطباعة === */
+                            .tk-certificate {
+                                background: linear-gradient(160deg,#012015,#0b3a26); color: #fff; border-radius: 1.2rem;
+                                padding: 1.8rem; text-align: center; border: 3px solid #c5a880; position: relative; overflow: hidden;
+                            }
+                            .tk-certificate::before {
+                                content: '★'; position: absolute; font-size: 12rem; opacity: .05; top: -2rem; left: -1rem;
+                            }
+                            .tk-cert-score { font-size: 2.6rem; font-weight: 900; color: #c5a880; }
+                            .tk-print-certificate-section { margin-bottom: 25px; }
+                            /* === [تعديل] تبدأ صفحة التقرير التفصيلي بعد الشهادة مباشرة عند الطباعة الورقية
+                                 فقط (page-break)، مع بقاء العنصرين ضمن مستند/ملف طباعة واحد موحّد كما هو مطلوب === */
+                            .tk-print-report-section { page-break-before: always; }
                             @media print {
                                 body { padding: 10mm; }
+                                .tk-certificate { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                             }
                         </style>
                     </head>
-                    <body>${reportHtml}</body>
+                    <body>${combinedHtml}</body>
                     </html>
                 `);
                 printWindow.document.close();
@@ -11016,6 +11829,385 @@
                 console.error('tkTriggerStarFountain error:', err);
             }
         }
+
+        // ==================================================================================
+        // NEWLY ADDED: المزامنة اللحظية والانعكاس التفاعلي لتبويب "حقيبة المعلم التفاعلية"
+        // (Real-Time Synchronization & Interactive Mirroring — Interactive Teacher Toolkit)
+        // ------------------------------------------------------------------------------------
+        // الهدف: ربط تبويب "حقيبة المعلم التفاعلية" في شاشة الطالب/المساعد بشاشة المعلم لحظياً عبر
+        // Firebase Realtime Database (نفس مثيل الاتصال الحالي dbRef = sessions/{currentSessionId}
+        // المُهيَّأ فعلياً في connectToFirebaseSession/initializeFirebaseAppCore)، بحيث:
+        //   1) العرض اللحظي (Live Mirroring): كل ما يعرضه المعلم داخل حقيبته (اللعبة المفتوحة حالياً،
+        //      الامتحان، النتائج، الشهادة، التقرير التفصيلي) ينعكس حرفياً ولحظياً على شاشة الطالب.
+        //   2) التفاعلية المزدوجة (Bi-Directional Interactivity): يمكن للطالب النقر/الإجابة/اللعب
+        //      مباشرة من شاشته هو، فتُرسَل تفاعلاته كأوامر (Remote Actions) إلى المعلم الذي ينفّذها
+        //      فوراً محلياً عبر نفس الدوال الأصلية تماماً دون أي تكرار في المنطق البرمجي، ثم تُبَث
+        //      النتيجة المُحدَّثة تلقائياً لجميع الأطراف (المعلم ونفس الطالب وباقي الحاضرين) معاً.
+        //
+        // القرار الهندسي (لماذا هذا التصميم): قاعدة بيانات Firebase Realtime Database المُستخدمة في
+        // هذا المشروع عميلة بالكامل (Client-Side) دون أي طبقة خادم/Cloud Functions، لذا فإن أكثر
+        // الأساليب أماناً واستقراراً لتفادي انقسام الحالة (State Divergence) بين عشرات المتصفحات هو
+        // اعتماد شاشة المعلم كـ"المصدر الوحيد للحقيقة" (Single Source of Truth) الذي يُنفِّذ كل تفاعل
+        // فعلياً، بينما تكتفي شاشات الطلاب/المساعدين بإرسال نيّة التفاعل (Command) وعرض النتيجة النهائية
+        // فور بثّها — تماماً كما يحدث بالفعل في نظام الصلاحيات والسبورة والمؤقت في هذا المشروع.
+        //
+        // الأسلوب: بدلاً من إعادة بناء حالة كل لعبة من الـ14 لعبة يدوياً على شاشة الطالب (ما يعني تكرار
+        // منطق برمجي هائل ومخاطرة عالية بعدم التطابق)، يتم "عكس" المحتوى المرئي (HTML) الفعلي الناتج عن
+        // نفس دوال الرسم الأصلية (render functions) حرفياً كما هو من شاشة المعلم إلى شاشة الطالب — وبما
+        // أن كل أزرار التفاعل (onclick) داخل هذا المحتوى تستدعي أسماء الدوال العامة (tkOpenBox, tkAnswerTrueFalse,
+        // ...إلخ) بالاسم فقط، فإن "التفافها" (Wrapping) مرة واحدة أدناه يكفي لتوجيه أي نقرة عليها من شاشة
+        // الطالب تلقائياً نحو طابور الأوامر، دون أي حاجة لتعديل تلك الأزرار أو الدوال الأصلية نفسها.
+        //
+        // هذا القسم بأكمله "إضافي" (Additive) بالكامل: لا يحذف ولا يُعدِّل أي دالة أو متغيّر أو منطق
+        // برمجي قائم فعلياً في تبويب حقيبة المعلم (بخلاف تسمية نداءين مضمّنين لدالتين جديدتين للبطاقات،
+        // وسطر بث ثانٍ داخل مؤقّت نتيجة العجلة الدوارة — كلاهما محايد تماماً للسلوك الظاهري الأصلي).
+        // ==================================================================================
+
+        // --- أسماء المسارات الفرعية الجديدة كلياً داخل sessions/{currentSessionId}، لا تتقاطع مع أي
+        //     مسار آخر مستخدم فعلياً في المشروع (whiteboard / pdf_state / metadata / timer ...) ---
+        const TK_SYNC_STATE_NODE = 'toolkit_state';
+        const TK_SYNC_ACTIONS_NODE = 'toolkit_actions';
+
+        // معرّفات الحاويات (Containers) التي يعكسها المحرك حرفياً (HTML Mirroring) من شاشة المعلم
+        // إلى شاشة الطالب — وهي بالضبط نفس الحاويات التي تُعيد كل دوال الرسم الأصلية كتابة محتواها
+        // بالكامل (stage.innerHTML = ...) عند كل تفاعل، لذا فإن عكسها حرفياً يضمن تطابقاً بصرياً تاماً
+        // دون الحاجة لإعادة تنفيذ أي من منطق الألعاب الأربع عشرة نفسه على جهاز الطالب.
+        const TK_MIRRORED_CONTAINER_IDS = ['tk-game-stage', 'tk-exam-container', 'tk-certificate-container', 'tk-detailed-report-container'];
+
+        let tkSyncTeacherActionsListenerAttached = false;
+        let tkSyncStudentStateListenerAttached = false;
+        let tkToolkitBroadcastDebounceTimer = null;
+
+        // --- الدوال "التفاعلية" المشتركة: يمكن تنفيذها من شاشة المعلم مباشرة، أو إرسالها كأمر بعيد
+        //     (Remote Action) من شاشة الطالب/المساعد لتُنفَّذ لدى المعلم ثم تُبَث نتيجتها للجميع ---
+        const TK_SYNCED_SHARED_ACTIONS = [
+            // 3.1 العجلة الدوارة
+            'tkSpinWheel', 'tkHideWheelItem',
+            // 3.2 الصناديق الغامضة
+            'tkOpenBox',
+            // 3.3 البطاقات (Flashcards)
+            'tkFlashPrev', 'tkFlashNext',
+            // 3.4 لعبة توصيل
+            'tkSelectMatchTerm', 'tkSelectMatchAnswer',
+            // 3.5 صح وخطأ
+            'tkAnswerTrueFalse',
+            // 3.6 القطار
+            'tkRevealTrainCar',
+            // 3.7 ترتيب النصوص
+            'tkReorderGoTo', 'tkPlaceWord', 'tkUnplaceWord', 'tkCheckReorder', 'tkReorderSetupCurrentCandidate',
+            // 3.8 خريطة الكنز
+            'tkOpenTreasureStage', 'tkCompleteTreasureStage',
+            // 3.9 من سيربح المليون
+            'tkMilUseFifty', 'tkMilUseAudience', 'tkMilAnswer',
+            // 3.10 سباق السيارات/الخيول
+            'tkRaceAnswer',
+            // 3.11 صائد الجواهر
+            'tkJewelClickToken', 'tkJewelNext',
+            // 3.12 صيد الأسماك وفرقعة البلالين
+            'tkCatchFish', 'tkUpdateFishSpeed', 'tkPopBalloon',
+            // 3.13 المحاكاة التفاعلية الديناميكية
+            'tkSimGoToEquation', 'tkSimAdjustCoefficient', 'tkSimResetCoefficients',
+            'tkSimCircuitUpdate', 'tkSimCheckAnswer', 'tkSimNextIcebreaker',
+            // 4) امتحان اختيار من متعدد
+            'tkSelectExamOption', 'tkSubmitExam'
+        ];
+
+        // --- الدوال التي يبقى تنفيذها الفعلي حصرياً بيد المعلم (تتحكم في بنية/مسار الجلسة العامة
+        //     كاختيار اللعبة أو إعادة تحليل المحتوى)، لكن نتيجتها تُبَث فوراً لجميع الأطراف بمجرد وقوعها ---
+        const TK_TEACHER_ONLY_ACTIONS = ['tkOpenGame', 'tkAnalyzeAndTransformContent'];
+
+        // --- شارة حالة المزامنة الحيّة أعلى التبويب (عنصر إضافي بحت في الواجهة، دون أي تأثير منطقي) ---
+        function tkUpdateSyncStatusBadge(text, kind) {
+            try {
+                const badge = document.getElementById('tk-sync-status-badge');
+                if (!badge) return;
+                badge.style.display = 'inline-flex';
+                badge.className = 'wr-badge ' + (kind === 'success' ? 'wr-badge-emerald' : (kind === 'error' ? 'wr-badge-red' : 'wr-badge-neutral'));
+                badge.textContent = text;
+            } catch (err) {
+                console.error('tkUpdateSyncStatusBadge error:', err);
+            }
+        }
+
+        // --- التقاط لقطة كاملة (Snapshot) من الحالة المرئية الحالية لدى المعلم فقط، عبر قراءة innerHTML
+        //     الفعلي للحاويات المُدارة بالكامل من دوال الرسم الأصلية، إضافة إلى بعض الأعلام المساعدة ---
+        function tkCaptureToolkitSnapshot() {
+            try {
+                const stage = document.getElementById('tk-game-stage');
+                const examContainer = document.getElementById('tk-exam-container');
+                const certContainer = document.getElementById('tk-certificate-container');
+                const reportContainer = document.getElementById('tk-detailed-report-container');
+                const statusEl = document.getElementById('tk-parse-status');
+                const resultsArea = document.getElementById('tk-results-area');
+
+                const snapshot = { ts: Date.now(), activeGame: teacherToolkitState.activeGame || null };
+                snapshot.gameStageHtml = stage ? stage.innerHTML : '';
+                snapshot.examContainerHtml = examContainer ? examContainer.innerHTML : '';
+                snapshot.certificateHtml = certContainer ? certContainer.innerHTML : '';
+                snapshot.detailedReportHtml = reportContainer ? reportContainer.innerHTML : '';
+                snapshot.parseStatusText = statusEl ? statusEl.textContent : '';
+                snapshot.resultsAreaHidden = resultsArea ? resultsArea.classList.contains('hidden') : true;
+                return snapshot;
+            } catch (err) {
+                console.error('tkCaptureToolkitSnapshot error:', err);
+                return null;
+            }
+        }
+
+        // --- بث اللقطة الحالية فوراً إلى Firebase (المعلم فقط) ---
+        function tkBroadcastToolkitStateNow() {
+            try {
+                if (currentRole !== 'teacher' || !dbRef) return;
+                const snap = tkCaptureToolkitSnapshot();
+                if (!snap) return;
+                dbRef.child(TK_SYNC_STATE_NODE).set(snap).then(() => {
+                    tkUpdateSyncStatusBadge('🟢 تتم مزامنة الحقيبة لحظياً مع الطلاب', 'success');
+                }).catch(err => {
+                    console.error('tkBroadcastToolkitStateNow: فشل بث حالة حقيبة المعلم:', err && err.message ? err.message : err);
+                    tkUpdateSyncStatusBadge('⚠️ تعذّرت مزامنة الحقيبة، تحقّق من الاتصال', 'error');
+                });
+            } catch (err) {
+                console.error('tkBroadcastToolkitStateNow error:', err);
+            }
+        }
+
+        // --- تأجيل بسيط (Debounce) لتجميع عدة تحديثات متقاربة زمنياً (مثل سحب شريط سرعة الأسماك)
+        //     في كتابة واحدة فقط لقاعدة البيانات، دون أي تأثير محسوس على فورية الإحساس بالمزامنة ---
+        function tkScheduleToolkitBroadcast() {
+            try {
+                if (currentRole !== 'teacher') return;
+                if (tkToolkitBroadcastDebounceTimer) clearTimeout(tkToolkitBroadcastDebounceTimer);
+                tkToolkitBroadcastDebounceTimer = setTimeout(tkBroadcastToolkitStateNow, 120);
+            } catch (err) {
+                console.error('tkScheduleToolkitBroadcast error:', err);
+            }
+        }
+
+        // --- تطبيق لقطة واردة (من المعلم) على شاشة الطالب/المساعد: عكس حرفي لمحتوى الحاويات المُدارة،
+        //     إضافة إلى تمييز بلاطة اللعبة النشطة حالياً وإظهار/إخفاء منطقة النتائج بنفس حالة المعلم ---
+        function tkApplyIncomingToolkitSnapshot(data) {
+            if (!data) return;
+            try {
+                const stage = document.getElementById('tk-game-stage');
+                if (stage && typeof data.gameStageHtml === 'string' && stage.innerHTML !== data.gameStageHtml) {
+                    stage.innerHTML = data.gameStageHtml;
+                }
+                const examContainer = document.getElementById('tk-exam-container');
+                if (examContainer && typeof data.examContainerHtml === 'string' && examContainer.innerHTML !== data.examContainerHtml) {
+                    examContainer.innerHTML = data.examContainerHtml;
+                }
+                const certContainer = document.getElementById('tk-certificate-container');
+                if (certContainer && typeof data.certificateHtml === 'string') certContainer.innerHTML = data.certificateHtml;
+
+                const reportContainer = document.getElementById('tk-detailed-report-container');
+                if (reportContainer && typeof data.detailedReportHtml === 'string') reportContainer.innerHTML = data.detailedReportHtml;
+
+                const statusEl = document.getElementById('tk-parse-status');
+                if (statusEl && typeof data.parseStatusText === 'string') statusEl.textContent = data.parseStatusText;
+
+                const resultsArea = document.getElementById('tk-results-area');
+                if (resultsArea) resultsArea.classList.toggle('hidden', !!data.resultsAreaHidden);
+
+                document.querySelectorAll('#tk-games-grid .tk-game-tile').forEach(t => {
+                    t.classList.toggle('tk-active', t.getAttribute('data-game') === data.activeGame);
+                });
+
+                tkUpdateSyncStatusBadge('🟢 مباشر — تعكس هذه الشاشة الآن حقيبة معلمك', 'success');
+            } catch (err) {
+                console.error('tkApplyIncomingToolkitSnapshot error:', err);
+                tkUpdateSyncStatusBadge('⚠️ تعذّر تحديث المزامنة اللحظية', 'error');
+            }
+        }
+
+        // --- جمع القيم الحالية لكل عناصر الإدخال (Input/Select/Textarea) داخل مسرح اللعبة الحالي لدى
+        //     الطالب لحظة تفاعله (مثل شريط سرعة الأسماك أو مفتاح/جهد/مقاومة محاكاة الدائرة الكهربائية)،
+        //     لإرسالها مرفقة مع الأمر البعيد وتطبيقها أولاً على نفس العناصر لدى المعلم قبل تنفيذ الدالة
+        //     الأصلية — إذ إن بعض الدوال (كـ tkSimCircuitUpdate) تقرأ قيمها مباشرة من الـ DOM دون معاملات ---
+        function tkCollectStageDomInputValues() {
+            const values = {};
+            try {
+                document.querySelectorAll('#tk-game-stage [id]').forEach(el => {
+                    const tag = el.tagName;
+                    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') {
+                        values[el.id] = (el.type === 'checkbox' || el.type === 'radio') ? !!el.checked : el.value;
+                    }
+                });
+            } catch (err) {
+                console.error('tkCollectStageDomInputValues error:', err);
+            }
+            return values;
+        }
+
+        function tkApplyStageDomInputValues(values) {
+            if (!values) return;
+            try {
+                Object.keys(values).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    if (el.type === 'checkbox' || el.type === 'radio') el.checked = !!values[id];
+                    else el.value = values[id];
+                });
+            } catch (err) {
+                console.error('tkApplyStageDomInputValues error:', err);
+            }
+        }
+
+        // --- إرسال تفاعل الطالب/المساعد كأمر بعيد (Remote Action) إلى طابور الأوامر، لينفّذه المعلم
+        //     محلياً عبر نفس الدالة الأصلية تماماً فور استلامه ---
+        function tkSendRemoteToolkitAction(fnName, args) {
+            try {
+                if (!dbRef) { tkShowToast('لا يوجد اتصال نشط بالجلسة حالياً، حاول مرة أخرى.', 'error'); return; }
+                dbRef.child(TK_SYNC_ACTIONS_NODE).push({
+                    fn: fnName,
+                    args: JSON.stringify(args || []),
+                    domInputs: JSON.stringify(tkCollectStageDomInputValues()),
+                    byUserId: currentUserId,
+                    byUserName: currentStudentName || currentUserId,
+                    ts: (typeof firebase !== 'undefined' && firebase.database) ? firebase.database.ServerValue.TIMESTAMP : Date.now()
+                }).catch(err => {
+                    console.error('tkSendRemoteToolkitAction error:', err && err.message ? err.message : err);
+                    tkShowToast('تعذّر إرسال تفاعلك إلى المعلم، حاول مرة أخرى.', 'error');
+                });
+            } catch (err) {
+                console.error('tkSendRemoteToolkitAction error:', err);
+            }
+        }
+
+        // --- (شاشة المعلم فقط) الاستماع اللحظي لطابور أوامر الطلاب/المساعدين، وتنفيذ كل أمر صالح محلياً
+        //     عبر نفس الدالة الأصلية بالضبط (window[fn](...args))، ثم حذف الأمر من الطابور فور معالجته ---
+        function tkAttachTeacherToolkitActionsQueueListener() {
+            try {
+                if (currentRole !== 'teacher' || !dbRef || tkSyncTeacherActionsListenerAttached) return;
+                tkSyncTeacherActionsListenerAttached = true;
+                dbRef.child(TK_SYNC_ACTIONS_NODE).on('child_added', (snapshot) => {
+                    const actionKey = snapshot.key;
+                    try {
+                        const action = snapshot.val();
+                        const isKnownSharedAction = action && TK_SYNCED_SHARED_ACTIONS.indexOf(action.fn) !== -1;
+                        if (action && isKnownSharedAction && typeof window[action.fn] === 'function') {
+                            let parsedArgs = [];
+                            let domInputs = {};
+                            try { parsedArgs = JSON.parse(action.args || '[]'); } catch (parseErr) { parsedArgs = []; }
+                            try { domInputs = JSON.parse(action.domInputs || '{}'); } catch (parseErr) { domInputs = {}; }
+                            tkApplyStageDomInputValues(domInputs);
+                            window[action.fn].apply(null, parsedArgs);
+                        }
+                    } catch (err) {
+                        console.error('tkAttachTeacherToolkitActionsQueueListener: تعذّرت معالجة أمر بعيد:', err);
+                    } finally {
+                        // تنظيف الطابور فور المعالجة لتفادي أي تراكم غير محدود لأوامر سابقة
+                        try { dbRef.child(TK_SYNC_ACTIONS_NODE).child(actionKey).remove(); } catch (removeErr) {}
+                    }
+                });
+            } catch (err) {
+                console.error('tkAttachTeacherToolkitActionsQueueListener error:', err);
+            }
+        }
+
+        // --- (شاشة الطالب/المساعد فقط) الاستماع اللحظي للقطة حالة حقيبة المعلم، وتطبيقها فور وصولها ---
+        function tkAttachStudentToolkitStateListener() {
+            try {
+                if (currentRole === 'teacher' || !dbRef || tkSyncStudentStateListenerAttached) return;
+                tkSyncStudentStateListenerAttached = true;
+                dbRef.child(TK_SYNC_STATE_NODE).on('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        tkApplyIncomingToolkitSnapshot(snapshot.val());
+                    }
+                }, (err) => {
+                    console.error('tkAttachStudentToolkitStateListener error:', err && err.message ? err.message : err);
+                    tkUpdateSyncStatusBadge('⚠️ تعذّر الاتصال بمزامنة حقيبة المعلم', 'error');
+                });
+            } catch (err) {
+                console.error('tkAttachStudentToolkitStateListener error:', err);
+            }
+        }
+
+        // --- (شاشة الطالب/المساعد فقط) إخفاء منطقة إدارة المحتوى الخاصة بالمعلم (نموذج الإعداد وزر
+        //     إخفائها ونافورة النجوم) بصرياً فقط دون أي حذف من الـ DOM، مع إضافة ملاحظة توضيحية مختصرة
+        //     مرة واحدة فقط أعلى التبويب — بحيث تبقى مساحة الألعاب والامتحان والنتائج وحدها ظاهرة وتفاعلية ---
+        function tkApplyStudentToolkitRoleUi() {
+            try {
+                if (currentRole === 'teacher') return;
+                const setupCard = document.getElementById('tk-setup-card');
+                if (setupCard) setupCard.style.display = 'none';
+                const toggleBtn = document.getElementById('btn-tk-toggle-setup');
+                if (toggleBtn && toggleBtn.parentElement) toggleBtn.parentElement.style.display = 'none';
+
+                const panel = document.getElementById('tab-panel-toolkit');
+                if (panel && !document.getElementById('tk-student-mirror-note')) {
+                    const note = document.createElement('div');
+                    note.id = 'tk-student-mirror-note';
+                    note.className = 'tk-card mb-4';
+                    note.innerHTML = '<div class="text-sm font-bold text-gray-600">👀 تعرض هذه المساحة الآن ما يعرضه معلمك مباشرة أولاً بأول — يمكنك التفاعل مع الألعاب والامتحان من هنا بنفسك.</div>';
+                    const firstChild = panel.firstElementChild;
+                    if (firstChild) panel.insertBefore(note, firstChild.nextSibling);
+                    else panel.appendChild(note);
+                }
+                tkUpdateSyncStatusBadge('🟡 بانتظار بدء المعلم لحقيبته التفاعلية...', 'neutral');
+            } catch (err) {
+                console.error('tkApplyStudentToolkitRoleUi error:', err);
+            }
+        }
+
+        // --- تثبيت آلية الالتفاف (Wrapping) حول كل الدوال التفاعلية المذكورة أعلاه: تنفيذ محلي طبيعي
+        //     + بث فوري إن كان المنفِّذ هو المعلم، أو تحويل الطلب إلى أمر بعيد إن كان المنفِّذ طالباً/مساعداً.
+        //     هذا الالتفاف لا يمس تعريف أي دالة أصلية بالحذف أو التعديل؛ فقط يُعيد توجيه الاستدعاء إليها. ---
+        (function tkInstallToolkitSyncWrappers() {
+            try {
+                const allSyncedNames = TK_SYNCED_SHARED_ACTIONS.concat(TK_TEACHER_ONLY_ACTIONS);
+                allSyncedNames.forEach((fnName) => {
+                    const originalFn = window[fnName];
+                    if (typeof originalFn !== 'function') return; // حماية إضافية إن تغيّر اسم دالة مستقبلاً
+                    window[fnName] = function tkSyncedActionWrapper() {
+                        const callArgs = Array.prototype.slice.call(arguments);
+                        if (currentRole === 'teacher') {
+                            let result;
+                            try {
+                                result = originalFn.apply(this, callArgs);
+                            } finally {
+                                tkScheduleToolkitBroadcast();
+                            }
+                            return result;
+                        } else {
+                            if (TK_TEACHER_ONLY_ACTIONS.indexOf(fnName) !== -1) {
+                                tkShowToast('هذا الإجراء متاح للمعلم فقط، بإمكانك التفاعل مباشرة مع اللعبة/الامتحان المعروض حالياً.', 'warning');
+                                return undefined;
+                            }
+                            tkSendRemoteToolkitAction(fnName, callArgs);
+                            return undefined;
+                        }
+                    };
+                });
+            } catch (err) {
+                console.error('tkInstallToolkitSyncWrappers error:', err);
+            }
+        })();
+
+        // --- الالتفاف حول connectToFirebaseSession نفسها لربط مستمعي المزامنة أعلاه تلقائياً فور كل
+        //     اتصال ناجح بالجلسة (بما يشمل حالات تبديل الدور/الجلسة دون إعادة تحميل كامل للصفحة)، دون
+        //     أي تعديل في تعريفها أو منطقها الأصلي — فقط تنفيذها الطبيعي أولاً ثم إضافة هذا الربط بعدها ---
+        (function tkInstallConnectToFirebaseSessionHook() {
+            try {
+                const originalConnectFn = window.connectToFirebaseSession;
+                if (typeof originalConnectFn !== 'function') return;
+                window.connectToFirebaseSession = function tkConnectToFirebaseSessionWithToolkitSync() {
+                    const result = originalConnectFn.apply(this, arguments);
+                    try {
+                        if (currentRole === 'teacher') {
+                            tkAttachTeacherToolkitActionsQueueListener();
+                        } else {
+                            tkAttachStudentToolkitStateListener();
+                            tkApplyStudentToolkitRoleUi();
+                        }
+                    } catch (hookErr) {
+                        console.error('tkInstallConnectToFirebaseSessionHook post-connect error:', hookErr);
+                    }
+                    return result;
+                };
+            } catch (err) {
+                console.error('tkInstallConnectToFirebaseSessionHook error:', err);
+            }
+        })();
 
         // ==================================================================================
         // NEWLY ADDED: منطق ودجت "نقاط التفاعل في الحصة" — عداد دائري + كونفيتي ملء الشاشة + تصفير.
