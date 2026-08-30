@@ -683,6 +683,220 @@
                 display: none !important;
                 visibility: hidden !important;
             }
+
+            /* NEWLY ADDED (Print Feature - Performance Report): تنسيقات طباعة معاينة تقرير أداء الطلاب
+               تُضاف كقاعدة إضافية إلى نفس كتلة @media print الحالية دون أي تعديل على القواعد أعلاه. */
+            #report-print-area, #report-print-area * {
+                visibility: visible;
+            }
+            #report-print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 10mm;
+                /* NEWLY ADDED (Multi-page Print Support): إلغاء أي تقييد على الارتفاع/التمرير الخاص
+                   بمعاينة الشاشة (overflow-y-auto / max-h) بحيث يتدفق المحتوى بالكامل طبيعياً عبر
+                   عدة صفحات طباعة متتالية دون قص أي جزء منه، مع طباعة كل السجلات المعروضة حالياً
+                   في الجدول (بعد تطبيق فلاتر البحث/التصفية النشطة) دون أي تقييد إضافي. */
+                overflow: visible !important;
+                height: auto !important;
+                max-height: none !important;
+            }
+            /* NEWLY ADDED (Multi-page Print Support - Performance Report): إعادة طباعة صف رؤوس الأعمدة
+               تلقائياً أعلى كل صفحة طباعة جديدة (thead كـ table-header-group)، ومنع تقطيع أي صف بيانات
+               بين صفحتين قدر الإمكان، مع تفعيل تغليف النصوص الطويلة (word-wrap/overflow-wrap) داخل
+               الخلايا لتفادي أي قص أو تشوّه بصري للبيانات (كخانة "ملاحظات وتوصيات" الطويلة مثلاً). */
+            #report-print-table {
+                width: 100%;
+                table-layout: auto;
+                border-collapse: collapse;
+            }
+            #report-print-table thead {
+                display: table-header-group;
+            }
+            #report-print-table tr {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            #report-print-table td,
+            #report-print-table th {
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                word-break: break-word;
+            }
+            body.report-print-mode #printable-workspace,
+            body.report-print-mode #printable-workspace * {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            /* NEWLY ADDED (Print Feature - Performance Report / A4 Landscape): توجيه صفحة الطباعة
+               أفقياً (Landscape) حصراً لمنطقة تقرير أداء الطلاب (#report-print-area) عبر تقنية
+               "Named Page" في CSS (خاصية page)، بحيث لا يتأثر إطلاقاً حجم/اتجاه صفحات الطباعة
+               الأخرى في النظام (كبطاقة الجدول @page الافتراضية أدناه أو تقرير الواجبات المنزلية)،
+               نظراً لكثرة الأعمدة في هذا الجدول تحديداً وحاجتها لمساحة أفقية أوسع. */
+            @page report-landscape-page {
+                size: A4 landscape;
+                margin: 10mm;
+            }
+            #report-print-area {
+                page: report-landscape-page;
+            }
+
+            /* NEWLY ADDED (Multi-page Print Support - Performance Report): فاصل صفحة صريح يُدرَج
+               ديناميكياً (عبر renderReportPrintPreview) بين مجموعات الصفوف، بحيث يلتزم عدد السجلات
+               المطبوعة في كل صفحة تماماً بالقيمة التي يحددها المعلم داخل نافذة المعاينة
+               (#report-print-page-size)، دون أي تأثير على منطق عرض/تصفية الجدول الأصلي على الشاشة. */
+            #report-print-table tr.report-print-page-break {
+                break-after: page;
+                page-break-after: always;
+            }
+
+            /* NEWLY ADDED (Print Feature - Homework Report): تنسيقات طباعة معاينة تقرير الأداء المنزلي */
+            #homework-print-area, #homework-print-area * {
+                visibility: visible;
+            }
+            #homework-print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 10mm;
+                /* NEWLY ADDED (Multi-page Print Support): نفس مبدأ إلغاء تقييد الارتفاع/التمرير الخاص
+                   بمعاينة الشاشة، لضمان طباعة كل السجلات المعروضة حالياً (بعد الفلاتر النشطة) بالكامل
+                   عبر عدة صفحات متتالية دون أي قص. */
+                overflow: visible !important;
+                height: auto !important;
+                max-height: none !important;
+            }
+            body.homework-print-mode #printable-workspace,
+            body.homework-print-mode #printable-workspace * {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            /* NEWLY ADDED: منع تقطيع سجل الواجب (جدول + قسم محتوى التسليم) بين صفحتين قدر الإمكان */
+            .homework-print-record {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            #homework-print-records .homework-print-record table thead {
+                display: table-header-group;
+            }
+            #homework-print-records .homework-print-record table td,
+            #homework-print-records .homework-print-record table th {
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                word-break: break-word;
+            }
+
+            /* NEWLY ADDED (تحجيم مربع محتوى تسليم الواجب — Submission Content Box Resizing):
+               ضبط أبعاد ومحاذاة مربع "محتوى تسليم الواجب" داخل معاينة/مخرجات الطباعة ليتحجّم
+               تلقائياً ويتناسب مع عرض باقي عناصر التقرير (100% من عرض السجل دون تجاوز)، مع تفعيل
+               تغليف صحيح للنصوص الطويلة (word-wrap/overflow-wrap) وتصغير أي صور مضمّنة داخل المحتوى
+               الغني (Rich Content) تلقائياً لتناسب عرض الصفحة، دون أي قص للبيانات أو تشوّه بصري. */
+            .homework-print-content-box {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                word-break: break-word;
+                white-space: normal;
+            }
+            .homework-print-content-box * {
+                max-width: 100%;
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                word-break: break-word;
+            }
+            .homework-print-content-box img {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+            .homework-print-content-box table {
+                width: 100% !important;
+                table-layout: fixed;
+                border-collapse: collapse;
+            }
+
+            /* NEWLY ADDED (Multi-page Print Support - Homework Report): فاصل صفحة صريح يُدرَج
+               ديناميكياً (عبر renderHomeworkPrintPreview) بين مجموعات السجلات، بحيث يلتزم عدد
+               السجلات المطبوعة في كل صفحة تماماً بالقيمة التي يحددها المعلم داخل نافذة المعاينة
+               (#homework-print-page-size)، دون أي تأثير على منطق عرض/تصفية الجدول الأصلي على الشاشة. */
+            .homework-print-page-break {
+                break-after: page;
+                page-break-after: always;
+            }
+
+            /* ==========================================================================
+               NEWLY ADDED (إصلاح: ضمان طباعة كافة السجلات الظاهرة - Homework & Performance
+               Reports): تعريف فعلي (Literal CSS) لأصناف الطباعة بنمط Tailwind المستخدمة على
+               عناصر النافذتين أعلاه (print:hidden / print:overflow-visible / print:max-w-none /
+               print:break-inside-avoid)، والتي لم تكن مُضمَّنة أصلاً داخل نسخة Tailwind
+               المُجمَّعة مسبقاً (Pre-compiled/Purged Build) في رأس هذا الملف لأنها لم تُستخدم
+               وقت التجميع، ومن ثم كانت بلا أي تأثير فعلي أثناء الطباعة. هذا التعريف يجعلها تعمل
+               فعلياً بنفس الشكل الذي يُنتجه Tailwind CLI تماماً، دون أي تعديل على أي صنف آخر. */
+            .print\:hidden {
+                display: none !important;
+            }
+            .print\:overflow-visible {
+                overflow: visible !important;
+            }
+            .print\:max-w-none {
+                max-width: none !important;
+            }
+            .print\:break-inside-avoid {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* ==========================================================================
+               NEWLY ADDED (إصلاح جذري إضافي - ضمان مضاعَف عبر معرّفات/أصناف body الثابتة):
+               بصرف النظر عن أصناف Tailwind أعلاه، تُفرَض هنا مباشرة (عبر كلاس body.report-print-mode
+               / body.homework-print-mode الموجود أصلاً والمُفعَّل فعلياً بواسطة openReportPrintModal/
+               openHomeworkPrintModal) إزالة تامة لأي تقييد على الارتفاع (max-h-[90vh])، التمرير
+               (overflow-y-auto)، أو التموضع الثابت (position: fixed) في حاويتي نافذتي المعاينة،
+               بحيث تتحول الحاوية بالكامل إلى تدفق مستند طبيعي (Normal Document Flow) يسمح للمتصفح
+               بتوزيع كل السجلات المعروضة حالياً (بعد الفلاتر النشطة) تلقائياً على عدد الصفحات
+               اللازم دون أي اقتصار أو قصّ، دون أي تأثير على شكل أو سلوك النافذتين أثناء التصفح
+               العادي على الشاشة (تُطبَّق فقط أثناء وضع الطباعة الفعلي). */
+            body.report-print-mode #report-print-modal,
+            body.report-print-mode #report-print-modal > div:not(#report-print-modal-backdrop) {
+                position: static !important;
+                display: block !important;
+                inset: auto !important;
+                width: 100% !important;
+                max-width: none !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                background: none !important;
+            }
+            body.report-print-mode #report-print-modal-backdrop {
+                display: none !important;
+            }
+            body.homework-print-mode #homework-print-modal,
+            body.homework-print-mode #homework-print-modal > div {
+                position: static !important;
+                display: block !important;
+                inset: auto !important;
+                width: 100% !important;
+                max-width: none !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                background: none !important;
+            }
         }
 
         /* NEWLY ADDED (Schedule Module — Print Feature): ضبط حجم صفحة الطباعة على A4 لبطاقة الجدول */
@@ -808,6 +1022,81 @@
         .wb-grid-picker { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
         .wb-grid-cell { width: 100%; aspect-ratio: 1; border: 1px solid #cbd5e1; border-radius: 2px; cursor: pointer; }
         .wb-grid-cell.active { background: var(--accent-gold); border-color: var(--primary-emerald); }
+
+        /* ============================================================================
+           NEWLY ADDED (Media Player & Class Screen Recorder Modules): أنماط CSS لزري
+           "مشغل الوسائط" و"مسجل الحصة" الجديدين في الشريط العلوي، ونافذتيهما العائمة/المنبثقة.
+           إضافة جديدة بالكامل، لا تُعدِّل أو تحذف أي نمط سابق في الصفحة.
+           ============================================================================ */
+        #media-player-widget { top: 120px; left: 40px; width: 380px; height: auto; }
+        .mp-video-frame { width: 100%; max-height: 220px; background: #000; border-radius: 8px; display: block; }
+        .mp-controls-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .mp-btn-control {
+            background: var(--primary-emerald); color: #fff; border: none; border-radius: 8px;
+            width: 34px; height: 34px; font-size: 14px; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; transition: background .15s ease;
+        }
+        .mp-btn-control:hover { background: var(--secondary-emerald); }
+        .mp-btn-control:disabled { opacity: .45; cursor: not-allowed; }
+        .mp-seekbar { flex: 1; min-width: 100px; accent-color: var(--accent-gold); cursor: pointer; }
+        .mp-time-label { font-size: 10px; color: #374151; font-weight: 700; white-space: nowrap; }
+        .mp-file-input-label {
+            display: inline-block; background: rgba(197,168,128,0.15); border: 1px solid var(--accent-gold);
+            color: var(--accent-gold); font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+        }
+        .mp-file-input-label:hover { background: var(--accent-gold); color: var(--primary-emerald); }
+        .mp-empty-state { font-size: 11px; color: #6b7280; text-align: center; padding: 14px 6px; }
+        .mp-error-msg { font-size: 10px; color: #b91c1c; font-weight: 700; margin-top: 6px; display: none; }
+        .mp-url-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+        .mp-url-input {
+            flex: 1; min-width: 0; padding: 7px 10px; border: 1px solid #d1d5db; border-radius: 8px;
+            font-size: 11px; outline: none; font-family: inherit; direction: ltr; text-align: left;
+        }
+        .mp-url-input:focus { border-color: var(--accent-gold); }
+        .mp-url-load-btn {
+            background: var(--primary-emerald); color: #fff; border: none; border-radius: 8px;
+            font-size: 11px; font-weight: 700; padding: 7px 14px; cursor: pointer; white-space: nowrap;
+            transition: background .15s ease;
+        }
+        .mp-url-load-btn:hover { background: var(--secondary-emerald); }
+        .mp-widget-header-hint { opacity: .75; font-size: 10px; font-weight: 500; margin-inline-start: 6px; }
+        .mp-btn-fullscreen-toggle {
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff;
+            font-size: 12px; padding: 3px 9px; border-radius: 6px; cursor: pointer; margin-inline-end: 6px;
+            transition: background .15s ease;
+        }
+        .mp-btn-fullscreen-toggle:hover { background: rgba(255,255,255,0.3); }
+
+        /* وضع ملء الشاشة (Fullscreen) لنافذة مشغل الوسائط — يُفعَّل بالنقر المزدوج على شريط عنوان النافذة
+           أو على زر التكبير، ويُعاد الحجم/الموضع الأصليان تلقائياً عند الخروج من هذا الوضع */
+        #media-player-widget.mp-fullscreen {
+            position: fixed !important;
+            top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+            width: 100vw !important; height: 100vh !important;
+            max-width: 100vw !important; max-height: 100vh !important;
+            border-radius: 0 !important; resize: none !important; z-index: 999999 !important;
+        }
+        #media-player-widget.mp-fullscreen .mp-video-frame { max-height: calc(100vh - 230px); }
+
+        /* مسجل الحصة (Class Screen Recorder Module) */
+        .sr-status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
+        .sr-status-idle { background: #e5e7eb; color: #374151; }
+        .sr-status-recording { background: #fee2e2; color: #b91c1c; }
+        .sr-status-paused { background: #fef3c7; color: #92400e; }
+        .sr-status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+        .sr-status-recording .sr-status-dot { animation: sr-pulse 1s infinite; }
+        @keyframes sr-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+        .sr-action-btn {
+            width: 100%; padding: 10px; border-radius: 10px; border: none; font-weight: 800; font-size: 12px;
+            cursor: pointer; margin-bottom: 8px; transition: filter .15s ease;
+        }
+        .sr-action-btn:hover { filter: brightness(0.92); }
+        .sr-action-btn:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+        .sr-btn-start { background: #b91c1c; color: #fff; }
+        .sr-btn-stop { background: var(--primary-emerald); color: #fff; }
+        .sr-btn-download { background: var(--accent-gold); color: var(--primary-emerald); }
+        .sr-error-msg { font-size: 10.5px; color: #b91c1c; font-weight: 700; margin-top: 8px; display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 8px; }
+        .sr-hint-text { font-size: 10px; color: #6b7280; margin-top: 8px; line-height: 1.6; }
 
         /* شريط أدوات تنسيق الصورة الموسّع (يستبدل .wb-img-toolbar البسيط بنسخة تدعم صفوفاً متعددة من عناصر التحكم) */
         .wb-img-toolbar { flex-wrap: wrap; max-width: 340px; }
@@ -1404,6 +1693,117 @@
     </style>
 
     <!-- ==================================================================================
+         NEWLY ADDED (Compact Screen Preview - Homework Report & Performance Report):
+         طبقة تنسيق مستقلة (Scoped / Additive Stylesheet) هدفها الوحيد ضبط الكثافة التنسيقية
+         (Padding/Margins/Font-sizes/ارتفاع الخانات) لمعاينتي "تقرير الأداء المنزلي"
+         (#homework-print-modal) و "تقرير أداء الطلاب" (#report-print-modal) على الشاشة فقط،
+         بحيث تظهر جميع عناصر النافذتين (من العنوان العلوي وحتى زر "تنفيذ الطباعة الآن") بالكامل
+         داخل حدود الشاشة المتاحة دون الحاجة للتمرير. كل القواعد أدناه محصورة صراحة داخل
+         "@media screen" فقط، ولا تتضمن أي معرّف (selector) مستخدم داخل كتلة "@media print"
+         الأصلية أعلاه، وذلك لضمان عزل كامل (Style Isolation) بين معاينة الشاشة ومخرجات
+         الطباعة الحقيقية دون أي تأثير جانبي عليها. هذه الطبقة إضافية بالكامل (Additive Only)
+         ولا تحذف أو تُبدّل أي صنف Tailwind أو أي عنصر HTML موجود مسبقاً، ولا تؤثر على أي منطق
+         برمجي (Data Binding / State) خاص بالنافذتين. -->
+    <style id="compact-preview-homework-performance-reports">
+        @media screen {
+            /* الحاوية الرئيسية لكل نافذة معاينة: تقليل الحشو الخارجي وزيادة أقصى ارتفاع مسموح
+               به بحيث تستفيد النافذة من أكبر مساحة ممكنة من الشاشة المتاحة */
+            #report-print-modal > .relative.bg-white,
+            #homework-print-modal > div.bg-white {
+                padding: 10px !important;
+                max-height: 97vh !important;
+            }
+
+            /* رأس النافذة الثابت (العنوان + مربعات اختيار الأعمدة + خيار عدد السجلات بالصفحة) */
+            #report-print-modal .flex-shrink-0.sticky > .flex.items-center.justify-between,
+            #homework-print-modal .flex-shrink-0.sticky > .flex.items-center.justify-between {
+                margin-bottom: 4px !important;
+            }
+            #report-print-modal .flex-shrink-0.sticky h3,
+            #homework-print-modal .flex-shrink-0.sticky h3 {
+                font-size: 11px !important;
+            }
+            #report-print-columns-picker,
+            #homework-print-columns-picker {
+                padding: 5px !important;
+                gap: 3px !important;
+                margin-bottom: 4px !important;
+                font-size: 9px !important;
+                line-height: 1.3 !important;
+            }
+            #report-print-modal .flex-shrink-0.sticky > div.flex.items-center.gap-2,
+            #homework-print-modal .flex-shrink-0.sticky > div.flex.items-center.gap-2 {
+                margin-bottom: 2px !important;
+                font-size: 10px !important;
+            }
+            #report-print-modal select,
+            #homework-print-modal select {
+                padding: 1px 5px !important;
+                font-size: 10px !important;
+            }
+
+            /* منطقة معاينة محتوى التقرير نفسها (تُستثنى تماماً وقت الطباعة الفعلية) */
+            #report-print-area,
+            #homework-print-area {
+                padding: 6px !important;
+            }
+            #report-print-area > div[style*="text-align:center"],
+            #homework-print-area > div[style*="text-align:center"] {
+                margin-bottom: 6px !important;
+                padding-bottom: 4px !important;
+            }
+            #report-print-area h2,
+            #homework-print-area h2 {
+                font-size: 13px !important;
+            }
+            #report-print-meta,
+            #homework-print-meta {
+                font-size: 9px !important;
+                margin-top: 3px !important;
+            }
+
+            /* جدول تقرير أداء الطلاب: تصغير الخط وتقليل ارتفاع الخلايا */
+            #report-print-table {
+                font-size: 9px !important;
+            }
+            #report-print-table th,
+            #report-print-table td {
+                padding: 2px 3px !important;
+                line-height: 1.2 !important;
+            }
+
+            /* سجلات تقرير الأداء المنزلي: تصغير الخط وتقليل ارتفاع الخلايا/المسافات بين السجلات */
+            #homework-print-records .homework-print-record {
+                margin-bottom: 6px !important;
+            }
+            #homework-print-records .homework-print-record table {
+                font-size: 9px !important;
+            }
+            #homework-print-records .homework-print-record table th,
+            #homework-print-records .homework-print-record table td {
+                padding: 2px 3px !important;
+                line-height: 1.2 !important;
+            }
+            #homework-print-records .homework-print-content-box {
+                padding: 4px !important;
+                font-size: 9px !important;
+                line-height: 1.3 !important;
+            }
+
+            /* شريط الأزرار السفلي (يتضمن زر "تنفيذ الطباعة الآن") */
+            #report-print-modal .flex.gap-2.mt-5,
+            #homework-print-modal .flex.gap-2.mt-5 {
+                margin-top: 6px !important;
+            }
+            #report-print-modal .flex.gap-2.mt-5 button,
+            #homework-print-modal .flex.gap-2.mt-5 button {
+                padding-top: 5px !important;
+                padding-bottom: 5px !important;
+            }
+        }
+    </style>
+
+    <!-- ==================================================================================
          NEWLY ADDED: طبقة تنسيق مستقلة (Scoped / Additive Stylesheet) خاصة حصراً بوحدة
          "نظام إرسال تقارير الطلاب عبر واتساب" (Prefix: wr-). هذه الطبقة إضافية بالكامل
          (Additive Only) ولا تُعدّل أو تتقاطع مع أي صنف (class) موجود مسبقاً ضمن حزمة
@@ -1853,6 +2253,125 @@
         </div>
     </div>
 
+    <!-- ==================================================================================
+         NEWLY ADDED (Print Feature - Performance Report / Teacher Dashboard): نافذة معاينة/طباعة
+         تقرير أداء الطلاب (Performance Report). تعمل بنفس آلية schedule-print-modal تماماً
+         (نافذة منفصلة + @media print + عزل عبر كلاس على body)، مع إضافة مربعات اختيار (Checkboxes)
+         لتحديد الأعمدة المراد تضمينها في المعاينة/الطباعة فقط، دون أي تعديل على جدول الشاشة الأصلي
+         أو منطق العرض/التصفية الحالي له. -->
+    <div id="report-print-modal" class="fixed inset-0 z-[9999999] flex items-center justify-center p-4 hidden">
+        <!-- NEWLY ADDED (إخفاء خلفية النافذة المنبثقة أثناء الطباعة): طبقة الخلفية المعتمة (Backdrop)
+             أصبحت عنصراً مستقلاً بذاته (بدلاً من دمج لونها مع الحاوية الرئيسية)، مع كلاس print:hidden
+             لمنع ظهور أي طمس رمادي فوق الصفحات المطبوعة، دون أي تأثير على مظهرها أو سلوكها أثناء التصفح العادي. -->
+        <div id="report-print-modal-backdrop" class="absolute inset-0 bg-black/50 print:hidden" onclick="closeReportPrintModal()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl mx-auto p-6 max-h-[90vh] flex flex-col overflow-x-auto print:overflow-visible print:max-w-none">
+            <!-- NEWLY ADDED (Sticky Header/Options Layout): تثبيت الجزء العلوي (العنوان + مربعات اختيار
+                 الأعمدة + خيار عدد السجلات لكل صفحة طباعة) في أعلى نافذة المعاينة أثناء التصفح العادي،
+                 بحيث يبقى ظاهراً دوماً بينما تُمرَّر منطقة محتوى التقرير أدناه (#report-print-area) بمفردها.
+                 لا تأثير إطلاقاً على وضع الطباعة الفعلي (مخفي بالكامل عبر print:hidden على كل عنصر بداخله). -->
+            <div class="flex-shrink-0 sticky top-0 z-10 bg-white">
+                <div class="flex items-center justify-between mb-3 no-print print:hidden">
+                    <h3 class="font-bold text-[#012015] text-sm">🖨️ معاينة وطباعة تقرير أداء الطلاب</h3>
+                    <button type="button" onclick="closeReportPrintModal()" class="text-gray-400 hover:text-[#012015] text-xs font-bold">✖️ إغلاق</button>
+                </div>
+
+                <!-- مربعات اختيار الأعمدة المراد تضمينها في الطباعة -->
+                <div id="report-print-columns-picker" class="no-print print:hidden mb-3 p-3 bg-slate-50 border border-gray-200 rounded-xl grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-semibold text-gray-700">
+                    <!-- تُملأ ديناميكياً عبر buildReportPrintColumnsPicker() -->
+                </div>
+
+                <!-- NEWLY ADDED (Multi-page Print Support - Performance Report): تحكم تفاعلي يتيح للمعلم
+                     تحديد عدد السجلات في كل صفحة طباعة، بما يضمن الالتزام التام بالعدد المحدد عند تقسيم
+                     السجلات المعروضة حالياً على عدة صفحات متتالية. القيمة "0" تعني عدم فرض أي تقسيم
+                     (تدفق طبيعي حسب مساحة الصفحة). -->
+                <div class="no-print print:hidden mb-3 flex items-center gap-2 text-xs font-semibold text-gray-700">
+                    <label for="report-print-page-size">عدد السجلات في كل صفحة طباعة:</label>
+                    <select id="report-print-page-size" onchange="renderReportPrintPreview()" class="border border-gray-300 rounded-lg px-2 py-1 text-xs">
+                        <option value="0">الكل (بدون تقسيم)</option>
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- منطقة الطباعة الفعلية فقط (تُستثنى بقية عناصر الصفحة أثناء الطباعة عبر @media print) -->
+            <div id="report-print-area" class="flex-1 overflow-y-auto border-2 border-dashed border-gray-200 rounded-xl p-4 bg-[#f9fbf9] print:overflow-visible">
+                <div style="text-align:center; margin-bottom:14px; border-bottom:3px solid #c5a880; padding-bottom:10px;">
+                    <h2 style="color:#012015; margin:0; font-size:17px;">تقرير أداء الطلاب</h2>
+                    <p id="report-print-meta" style="color:#555; margin-top:6px; font-size:12px;"></p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="report-print-table" style="width:100%; border-collapse:collapse; font-size:11px;">
+                        <thead>
+                            <tr id="report-print-table-head"></tr>
+                        </thead>
+                        <tbody id="report-print-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-5 no-print print:hidden">
+                <button type="button" onclick="window.print()" class="flex-1 py-2 bg-[#012015] hover:bg-[#0b3a26] text-white font-bold rounded-lg text-xs transition-colors">🖨️ تنفيذ الطباعة الآن</button>
+                <button type="button" onclick="closeReportPrintModal()" class="flex-1 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-lg text-xs transition-colors">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================================================================================
+         NEWLY ADDED (Print Feature - Homework Report / Teacher Dashboard): نافذة معاينة/طباعة
+         تقرير الأداء المنزلي (Homework Report)، بنفس آلية النوافذ أعلاه، مع إمكانية تضمين محتوى
+         "مربع تسليم الواجب" لكل طالب كقسم فرعي أنيق أسفل كل سجل داخل معاينة/مخرجات الطباعة. -->
+    <div id="homework-print-modal" class="fixed inset-0 z-[9999999] bg-black/50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl p-6 max-h-[90vh] flex flex-col">
+            <!-- NEWLY ADDED (Sticky Header/Options Layout): تثبيت الجزء العلوي (العنوان + مربعات اختيار
+                 الأعمدة/تضمين المحتوى + خيار عدد السجلات لكل صفحة طباعة) في أعلى نافذة المعاينة أثناء
+                 التصفح العادي، بحيث يبقى ظاهراً دوماً بينما تُمرَّر منطقة محتوى التقرير أدناه
+                 (#homework-print-area) بمفردها. لا تأثير إطلاقاً على وضع الطباعة الفعلي (مخفي بالكامل
+                 عبر print:hidden على كل عنصر بداخله). -->
+            <div class="flex-shrink-0 sticky top-0 z-10 bg-white">
+                <div class="flex items-center justify-between mb-3 no-print print:hidden">
+                    <h3 class="font-bold text-[#012015] text-sm">🖨️ معاينة وطباعة تقرير الأداء المنزلي</h3>
+                    <button type="button" onclick="closeHomeworkPrintModal()" class="text-gray-400 hover:text-[#012015] text-xs font-bold">✖️ إغلاق</button>
+                </div>
+
+                <!-- مربعات اختيار الأعمدة + خيار تضمين محتوى تسليم الواجب -->
+                <div id="homework-print-columns-picker" class="no-print print:hidden mb-3 p-3 bg-slate-50 border border-gray-200 rounded-xl grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-semibold text-gray-700">
+                    <!-- تُملأ ديناميكياً عبر buildHomeworkPrintColumnsPicker() -->
+                </div>
+
+                <!-- NEWLY ADDED (Multi-page Print Support - Homework Report): تحكم تفاعلي يتيح للمعلم
+                     تحديد عدد السجلات في كل صفحة طباعة، بما يضمن الالتزام التام بالعدد المحدد عند تقسيم
+                     السجلات المعروضة حالياً على عدة صفحات متتالية. القيمة "0" تعني عدم فرض أي تقسيم. -->
+                <div class="no-print print:hidden mb-3 flex items-center gap-2 text-xs font-semibold text-gray-700">
+                    <label for="homework-print-page-size">عدد السجلات في كل صفحة طباعة:</label>
+                    <select id="homework-print-page-size" onchange="renderHomeworkPrintPreview()" class="border border-gray-300 rounded-lg px-2 py-1 text-xs">
+                        <option value="0">الكل (بدون تقسيم)</option>
+                        <option value="1">1</option>
+                        <option value="3">3</option>
+                        <option value="5" selected>5</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- منطقة الطباعة الفعلية فقط (تُستثنى بقية عناصر الصفحة أثناء الطباعة عبر @media print) -->
+            <div id="homework-print-area" class="flex-1 overflow-y-auto border-2 border-solid border-gray-300 rounded-xl p-4 bg-[#f9fbf9] print:overflow-visible">
+                <div style="text-align:center; margin-bottom:14px; border-bottom:3px solid #c5a880; padding-bottom:10px;">
+                    <h2 style="color:#012015; margin:0; font-size:17px;">تقرير الأداء المنزلي الواجب</h2>
+                    <p id="homework-print-meta" style="color:#555; margin-top:6px; font-size:12px;"></p>
+                </div>
+                <div id="homework-print-records"></div>
+            </div>
+
+            <div class="flex gap-2 mt-5 no-print print:hidden">
+                <button type="button" onclick="window.print()" class="flex-1 py-2 bg-[#012015] hover:bg-[#0b3a26] text-white font-bold rounded-lg text-xs transition-colors">🖨️ تنفيذ الطباعة الآن</button>
+                <button type="button" onclick="closeHomeworkPrintModal()" class="flex-1 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-lg text-xs transition-colors">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Element Resizer Overlay Layer Components -->
     <div id="editor-resizer-overlay">
         <div class="resize-handle nw"></div>
@@ -1945,8 +2464,86 @@
             <button type="button" class="btn-show-panel" id="btn-show-hosting-control-panel" onclick="showPanel('hosting-control-panel')">  ️ إظهار لوحة الاستضافة</button>
             <!-- NEWLY ADDED: زر "نقاط التفاعل في الحصة" — بجانب زر إظهار لوحة الاستضافة مباشرة -->
             <button type="button" class="btn-show-panel" id="btn-open-interaction-points" onclick="openInteractionPointsWidget()"> ⭐ نقاط التفاعل في الحصة</button>
+            <!-- NEWLY ADDED (Media Player Module): زر "مشغل الوسائط" — بجانب زر "نقاط التفاعل في الحصة" مباشرة، حصري لشاشة المعلم -->
+            <button type="button" class="btn-show-panel" id="btn-open-media-player" onclick="openMediaPlayerWidget()">🎬 مشغل الوسائط</button>
+            <!-- NEWLY ADDED (Class Screen Recorder Module): زر "مسجل الحصة" — بجانب زر "نقاط التفاعل في الحصة" مباشرة، حصري لشاشة المعلم -->
+            <button type="button" class="btn-show-panel" id="btn-open-screen-recorder" onclick="openScreenRecorderWidget()">🖥️ مسجل الحصة</button>
         </div>
     </header>
+
+    <!-- ============================================================================================
+         NEWLY ADDED (Media Player Module): نافذة عائمة قابلة للسحب لتشغيل ملفات الفيديو/الصوت المحلية
+         (MP4, WebM, AVI, MKV, MP3, WAV, AAC, OGG) عبر HTML5 Media API. إضافة جديدة بالكامل ومستقلة تماماً،
+         لا تعتمد على أي حالة (State) سابقة ولا تُعدِّل أي عنصر آخر في الصفحة. تُصبح قابلة للسحب تلقائياً عبر
+         آلية initializeDraggableContainers() الحالية لأنها تحمل صنفي floating-widget / widget-header نفسهما
+         المستخدمين مسبقاً في ودجت المؤقت ولوحة الاستضافة، دون الحاجة لأي تعديل على تلك الآلية.
+         ============================================================================================ -->
+    <div id="media-player-widget" class="floating-widget hidden" style="display:none;">
+        <div class="widget-header" ondblclick="toggleMediaPlayerFullscreen()" title="انقر نقرتين متتاليتين هنا لتكبير النافذة لملء الشاشة أو استعادة حجمها">
+            <span>🎬 مشغل الوسائط <span class="mp-widget-header-hint">(نقرتان لملء الشاشة)</span></span>
+            <span style="display:flex; align-items:center;">
+                <button type="button" class="mp-btn-fullscreen-toggle" onclick="toggleMediaPlayerFullscreen()" title="تكبير لملء الشاشة / استعادة الحجم">⛶</button>
+                <button type="button" class="btn-hide-panel" onclick="closeMediaPlayerWidget()">إغلاق ✕</button>
+            </span>
+        </div>
+        <div class="widget-body">
+            <label class="mp-file-input-label" for="mp-file-input">📂 اختيار ملف وسائط (فيديو / صوت)</label>
+            <input type="file" id="mp-file-input" accept="video/*,audio/*,.mkv,.avi" style="display:none;" onchange="handleMediaPlayerFileSelected(event)">
+
+            <div class="mp-url-row">
+                <input type="url" id="mp-url-input" class="mp-url-input" placeholder="أو ألصق رابط فيديو/صوت مباشر (URL) هنا..." onkeydown="if(event.key==='Enter'){event.preventDefault(); handleMediaPlayerUrlLoad();}">
+                <button type="button" class="mp-url-load-btn" onclick="handleMediaPlayerUrlLoad()">فتح الرابط</button>
+            </div>
+
+            <div id="mp-empty-state" class="mp-empty-state">لم يتم اختيار أي ملف وسائط بعد.</div>
+
+            <video id="mp-video-element" class="mp-video-frame" style="display:none;" playsinline></video>
+            <audio id="mp-audio-element" style="display:none; width:100%;"></audio>
+
+            <div id="mp-controls-row" class="mp-controls-row" style="display:none;">
+                <button type="button" class="mp-btn-control" id="mp-btn-play" title="تشغيل" onclick="mediaPlayerPlay()">▶️</button>
+                <button type="button" class="mp-btn-control" id="mp-btn-pause" title="إيقاف مؤقت" onclick="mediaPlayerPause()">⏸️</button>
+                <button type="button" class="mp-btn-control" id="mp-btn-stop" title="إيقاف" onclick="mediaPlayerStop()">⏹️</button>
+                <span class="mp-time-label" id="mp-time-current">00:00</span>
+                <input type="range" class="mp-seekbar" id="mp-seekbar" min="0" max="100" value="0" step="0.1" oninput="mediaPlayerSeek(this.value)">
+                <span class="mp-time-label" id="mp-time-duration">00:00</span>
+            </div>
+            <div class="mp-error-msg" id="mp-error-msg"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================================================
+         NEWLY ADDED (Class Screen Recorder Module): نافذة منبثقة لتسجيل شاشة الحصة + الصوت وتصديرها،
+         مع إيقاف/استئناف تلقائي عند مغادرة/العودة لتبويب الصفحة الحالي (Page Visibility API + blur/focus).
+         تستخدم نفس نمط الأنماط البصرية الحالي للنوافذ المنبثقة (wb-modal-overlay / wb-modal-box) المُستخدم
+         مسبقاً في نوافذ إدراج الصورة/الجدول، للحفاظ على اتساق التصميم العام للمنصة. إضافة جديدة بالكامل
+         ومستقلة تماماً، لا تُعدِّل أي عنصر أو منطق سابق في الصفحة.
+         ============================================================================================ -->
+    <div id="screen-recorder-overlay" class="wb-modal-overlay hidden" style="display:none;" onclick="if(event.target===this) closeScreenRecorderWidget()">
+        <div class="wb-modal-box" style="max-width:420px;">
+            <div class="wb-modal-title">🖥️ مسجل الحصة (تسجيل الشاشة + الصوت)</div>
+
+            <div id="sr-status-badge" class="sr-status-badge sr-status-idle">
+                <span class="sr-status-dot"></span>
+                <span id="sr-status-text">جاهز للتسجيل</span>
+            </div>
+
+            <button type="button" class="sr-action-btn sr-btn-start" id="sr-btn-start" onclick="startScreenRecording()">⏺️ بدء تسجيل الشاشة والصوت</button>
+            <button type="button" class="sr-action-btn sr-btn-stop" id="sr-btn-stop" onclick="stopScreenRecording()" disabled>⏹️ إنهاء التسجيل</button>
+            <button type="button" class="sr-action-btn sr-btn-download" id="sr-btn-download" onclick="downloadRecordedVideo()" disabled>⬇️ تصدير وتحميل الفيديو (MP4)</button>
+
+            <div class="sr-error-msg" id="sr-error-msg"></div>
+            <div class="sr-hint-text">
+                ملاحظة: سيتم إيقاف التسجيل تلقائياً مؤقتاً عند مغادرتك لهذا التبويب أو تصغير المتصفح أو الانتقال
+                إلى تطبيق آخر، ويُستأنف تلقائياً من حيث توقف عند عودتك إلى هذه الشاشة. في حال عدم دعم متصفحك
+                الحالي لترميز MP4 أثناء التسجيل، سيتم تصدير الملف بصيغة WebM كبديل متوافق مع نفس المشغلات.
+            </div>
+
+            <div class="wb-modal-actions">
+                <button type="button" class="wb-modal-btn-secondary" onclick="closeScreenRecorderWidget()">إغلاق</button>
+            </div>
+        </div>
+    </div>
 
     <!-- 2. Setup Input Controls - Wrapped to dynamically render only for Teachers -->
     <div id="setup-panel-wrapper"></div>
@@ -2351,6 +2948,10 @@
                         <button type="button" id="btn-add-report-row" onclick="addReportRow()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow-md transition-all">
                             + إضافة سجل تقييم جديد
                         </button>
+                        <!-- NEWLY ADDED (Print Feature - Performance Report): زر فتح نافذة معاينة/طباعة تقرير أداء الطلاب -->
+                        <button type="button" id="btn-print-report-table" onclick="openReportPrintModal()" class="bg-[#0b3a26] hover:bg-[#012015] text-white font-bold px-4 py-2 rounded-lg text-xs shadow-md transition-all flex items-center gap-1">
+                            🖨️ طباعة
+                        </button>
                     </div>
                 </div>
                 <!-- NEWLY ADDED: شريط تصفية ذكي لحظي أعلى الجدول — بحث باسم الطالب (شاشة المعلم حصرياً)،
@@ -2390,6 +2991,11 @@
                     <table class="min-w-full divide-y divide-gray-200 text-right text-[12px]">
                         <thead class="bg-slate-100">
                             <tr>
+                                <!-- NEWLY ADDED (Print Feature - Performance Report / Row Selection): عمود تحديد السجلات
+                                     المراد تضمينها حصرياً ضمن معاينة/مخرجات الطباعة (حصري لشاشة المعلم، على غرار عمود الإجراءات) -->
+                                <th id="th-report-select" class="px-2 py-2 text-gray-700 font-bold text-center w-10">
+                                    <input type="checkbox" id="chk-report-select-all" class="w-3.5 h-3.5" title="تحديد كل السجلات الظاهرة للطباعة" onchange="toggleAllReportPrintRowSelection(this.checked)">
+                                </th>
                                 <th class="px-2 py-2 text-gray-700 font-bold text-center w-10">م</th>
                                 <!-- MODIFIED (خانة اسم الطالب): أصبحت قائمة منسدلة ديناميكية تجلب طلاب المعلم الحالي لحظياً -->
                                 <th class="px-2 py-2 text-gray-700 font-bold min-w-[150px]">اسم الطالب</th>
@@ -2409,7 +3015,7 @@
                             </tr>
                         </thead>
                         <tbody id="tbl-lesson-report-body" class="divide-y divide-gray-100">
-                            <tr><td colspan="13" class="px-3 py-4 text-center text-gray-400">لا توجد سجلات أداء مضافة لهذه الحصة حتى الآن.</td></tr>
+                            <tr><td colspan="14" class="px-3 py-4 text-center text-gray-400">لا توجد سجلات أداء مضافة لهذه الحصة حتى الآن.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -2430,6 +3036,10 @@
                         <input type="file" accept="application/json,.json" id="input-import-homework-json" onchange="importHomeworkReportJson(event)" class="hidden">
                         <button type="button" id="btn-export-homework-json" onclick="exportHomeworkReportJson()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-2 rounded-lg text-xs shadow-md transition-all flex items-center gap-1">
                                تصدير JSON
+                        </button>
+                        <!-- NEWLY ADDED (Print Feature - Homework Report): زر فتح نافذة معاينة/طباعة تقرير الأداء المنزلي -->
+                        <button type="button" id="btn-print-homework-table" onclick="openHomeworkPrintModal()" class="bg-[#0b3a26] hover:bg-[#012015] text-white font-bold px-3 py-2 rounded-lg text-xs shadow-md transition-all flex items-center gap-1">
+                            🖨️ طباعة
                         </button>
                     </div>
                 </h3>
@@ -2474,6 +3084,11 @@
                             <table class="min-w-full divide-y divide-gray-200 text-right text-[12px]">
                                 <thead class="bg-slate-100">
                                     <tr>
+                                        <!-- NEWLY ADDED (Print Feature - Homework Report / Row Selection): عمود تحديد السجلات
+                                             المراد تضمينها حصرياً ضمن معاينة/مخرجات الطباعة، مع مربع "تحديد الكل" للسجلات الظاهرة حالياً -->
+                                        <th class="px-2 py-2 text-gray-700 font-bold text-center w-10">
+                                            <input type="checkbox" id="chk-homework-select-all" class="w-3.5 h-3.5" title="تحديد كل السجلات الظاهرة للطباعة" onchange="toggleAllHomeworkPrintRowSelection(this.checked)">
+                                        </th>
                                         <th class="px-2 py-2 text-gray-700 font-bold text-center w-10">مسلسل</th>
                                         <th class="px-2 py-2 text-gray-700 font-bold min-w-[140px]">اسم الطالب</th>
                                         <th class="px-2 py-2 text-gray-700 font-bold min-w-[120px]">كود الطالب</th>
@@ -2490,7 +3105,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tbl-homework-report-body" class="divide-y divide-gray-100">
-                                    <tr><td colspan="8" class="px-3 py-4 text-center text-gray-400">لا توجد واجبات مسلَّمة حتى الآن.</td></tr>
+                                    <tr><td colspan="9" class="px-3 py-4 text-center text-gray-400">لا توجد واجبات مسلَّمة حتى الآن.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -3056,6 +3671,51 @@
         // NEWLY ADDED: النسخة المخزّنة لحظياً من سجلات "تقرير أداء الحصة" (lesson_performance_report)
         // الخاصة بالحصة الحالية للمعلم الموجه، مرتّبة زمنياً حسب وقت الإضافة
         let cachedLessonReportsList = [];
+
+        // ==================================================================================
+        // NEWLY ADDED (Print Feature - Performance Report / Row Selection): تتبّع سجلات جدول
+        // "التقارير الشاملة للطالب" التي وضع المعلم علامة ✓ بجانبها فعلياً، ليتم الاعتماد عليها
+        // حصرياً كمصدر بيانات الطباعة (بدلاً من الاعتماد على فلاتر البحث/التصفية النشطة حالياً).
+        // يُحفظ التحديد In-Memory طوال الجلسة الحالية فقط، ولا يؤثر على أي بيانات مخزّنة بقاعدة البيانات.
+        // ==================================================================================
+        let selectedReportPrintKeys = new Set();
+        // تُحفظ هنا مفاتيح آخر مجموعة صفوف ظاهرة فعلياً بعد الفلاتر النشطة (شاشة المعلم فقط)، لتغذية مربع "تحديد الكل" بدقة
+        let lastVisibleReportFilteredKeys = [];
+
+        // يُبدّل حالة تحديد سجل تقرير واحد (تحديد/إلغاء) لغرض تضمينه ضمن الطباعة لاحقاً
+        function toggleReportPrintRowSelection(key, isChecked) {
+            try {
+                if (!key) return;
+                if (isChecked) selectedReportPrintKeys.add(key);
+                else selectedReportPrintKeys.delete(key);
+                syncReportSelectAllCheckboxState();
+            } catch (err) {
+                console.error('toggleReportPrintRowSelection error:', err);
+            }
+        }
+
+        // يُبدّل تحديد كافة السجلات الظاهرة حالياً بعد الفلاتر النشطة (تحديد الكل / إلغاء تحديد الكل)
+        function toggleAllReportPrintRowSelection(isChecked) {
+            try {
+                lastVisibleReportFilteredKeys.forEach(key => {
+                    if (isChecked) selectedReportPrintKeys.add(key);
+                    else selectedReportPrintKeys.delete(key);
+                });
+                renderDynamicReportTable();
+            } catch (err) {
+                console.error('toggleAllReportPrintRowSelection error:', err);
+            }
+        }
+
+        // يُزامن حالة مربع "تحديد الكل" (محدد بالكامل / غير محدد / تحديد جزئي) بحسب السجلات الظاهرة حالياً
+        function syncReportSelectAllCheckboxState() {
+            const selectAllEl = document.getElementById('chk-report-select-all');
+            if (!selectAllEl) return;
+            const visibleKeys = lastVisibleReportFilteredKeys;
+            const selectedVisibleCount = visibleKeys.filter(key => selectedReportPrintKeys.has(key)).length;
+            selectAllEl.checked = visibleKeys.length > 0 && selectedVisibleCount === visibleKeys.length;
+            selectAllEl.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleKeys.length;
+        }
 
         // NEWLY ADDED (Teacher View - جدول "تقرير أداء الطلاب في هذه الحصة"): قائمة مخبّأة لحظياً
         // بكل الطلاب المرتبطين بالمعلم الموجّه الحاضر حالياً في الجلسة النشطة (current_session_teacher_id
@@ -6438,8 +7098,8 @@
         // (Timezone) عند تفسير المتصفح للتاريخ كـ UTC. يُعيد نصاً فارغاً بأمان عند أي قيمة غير صالحة
         // (Edge Case) دون التسبب بأي توقف في تنفيذ السكربت.
         // ==================================================================================
-        const SCHEDULE_DAY_CODES_BY_JS_INDEX = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa']; // Date.getDay(): 0=الأحد ... 6=السبت
-        const SCHEDULE_DAY_CODE_TO_ARABIC = { sa: 'السبت', su: 'الأحد', mo: 'الإثنين', tu: 'الثلاثاء', we: 'الأربعاء', th: 'الخميس', fr: 'الجمعة' };
+        const SCHEDULE_DAY_CODES_BY_JS_INDEX = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']; // Date.getDay(): 0=الأحد ... 6=السبت
+        const SCHEDULE_DAY_CODE_TO_ARABIC = { السبت: 'السبت', الأحد: 'الأحد', الإثنين: 'الإثنين', الثلاثاء: 'الثلاثاء', الأربعاء: 'الأربعاء', الخميس: 'الخميس', الجمعة: 'الجمعة' };
 
         function computeScheduleDayCodeFromDate(dateStr) {
             try {
@@ -7927,6 +8587,21 @@
 
             const isTeacherView = (currentRole === 'teacher');
             const isStudentView = (currentRole === 'student');
+            // NEWLY ADDED (Print Feature - Performance Report / Row Selection - Student View): عمود
+            // "تحديد السجلات" (✓) أصبح متاحاً الآن لشاشة الطالب أيضاً بنفس آلية شاشة المعلم تماماً
+            // (نفس المتغير المشترك selectedReportPrintKeys ونفس دالتي toggleReportPrintRowSelection /
+            // toggleAllReportPrintRowSelection)، مع بقاء شاشة المساعد دون أي تغيير (بلا عمود تحديد،
+            // تماماً كما كانت من قبل).
+            const isSelectableView = (isTeacherView || isStudentView);
+
+            // NEWLY ADDED (Print Feature - Performance Report / Row Selection): تنظيف مفاتيح التحديد
+            // الخاصة بالطباعة من أي سجل لم يعد موجوداً فعلياً ضمن القائمة المخزَّنة مؤقتاً (مثال: تم حذفه)
+            if (selectedReportPrintKeys.size) {
+                const stillExistingReportKeys = new Set((cachedLessonReportsList || []).map(r => r.key));
+                Array.from(selectedReportPrintKeys).forEach(key => {
+                    if (!stillExistingReportKeys.has(key)) selectedReportPrintKeys.delete(key);
+                });
+            }
 
             // --- NEWLY ADDED: تحديث عنوان الجدول ليختلف بين شاشة المعلم وشاشة الطالب ---
             const titleEl = document.getElementById('lbl-report-table-title');
@@ -8007,16 +8682,25 @@
                 visibleRows = visibleRows.filter(row => (row.sessionDate || '') && row.sessionDate <= toDateFilterTerm);
             }
 
+            // NEWLY ADDED (Print Feature - Performance Report / Row Selection): تحديث قائمة المفاتيح
+            // الظاهرة حالياً بعد الفلاتر النشطة (متاح الآن لشاشتيّ المعلم والطالب معاً، بعد إضافة عمود
+            // التحديد لشاشة الطالب)، ليعتمد عليها مربع "تحديد الكل" لاحقاً بدقة
+            lastVisibleReportFilteredKeys = isSelectableView ? visibleRows.map(row => row.key) : [];
+
             if (!visibleRows.length) {
                 const emptyMsg = isStudentView
                     ? 'لا توجد سجلات أداء مسجّلة باسمك حتى الآن.'
                     : 'لا توجد سجلات أداء مضافة لهذه الحصة حتى الآن.';
-                tbody.innerHTML = `<tr><td colspan="${isTeacherView ? 13 : 12}" class="px-3 py-4 text-center text-gray-400">${emptyMsg}</td></tr>`;
+                // NEWLY ADDED: مراعاة العمود الإضافي (التحديد) عند حساب امتداد الخلية الفارغة لشاشة الطالب أيضاً
+                const emptyColspan = isTeacherView ? 14 : (isStudentView ? 13 : 12);
+                tbody.innerHTML = `<tr><td colspan="${emptyColspan}" class="px-3 py-4 text-center text-gray-400">${emptyMsg}</td></tr>`;
+                if (isSelectableView) syncReportSelectAllCheckboxState();
                 return;
             }
 
             tbody.innerHTML = visibleRows.map((row, idx) => {
                 const serial = idx + 1;
+                const isPrintChecked = selectedReportPrintKeys.has(row.key);
                 // NEWLY ADDED: عنوان الدرس أصبح حقلاً نصياً يدوياً مستقلاً لكل سجل، مع القيمة الحيّة الحالية كافتراضي للسجلات القديمة/الجديدة التي لم تُعدَّل بعد
                 const rowLessonTitle = (row.lessonTitle !== undefined && row.lessonTitle !== '') ? row.lessonTitle : liveLessonTitle;
 
@@ -8033,6 +8717,10 @@
 
                     return `
                         <tr class="hover:bg-slate-50 transition-colors">
+                            <!-- NEWLY ADDED (Print Feature - Performance Report / Row Selection): مربع تحديد السجل لتضمينه في الطباعة -->
+                            <td class="px-2 py-2 text-center">
+                                <input type="checkbox" class="w-3.5 h-3.5 report-row-select-checkbox" ${isPrintChecked ? 'checked' : ''} onchange="toggleReportPrintRowSelection('${row.key}', this.checked)">
+                            </td>
                             <td class="px-2 py-2 text-center font-bold text-gray-500">${serial}</td>
                             <td class="px-2 py-2">
                                 <!-- MODIFIED (خانة اسم الطالب - Dynamic Dropdown): تُبنى خياراتها لحظياً من cachedTeacherLinkedStudentsList
@@ -8085,13 +8773,38 @@
                         </tr>`;
                 }
 
-                // --- عرض الطالب/المساعد: للقراءة فقط (Read-Only Constraint) ---
+                // --- عرض شاشة الطالب: للقراءة فقط (Read-Only Constraint) مع إضافة عمود تحديد السجلات
+                //     للطباعة (NEWLY ADDED - Print Feature - Performance Report / Row Selection - Student
+                //     View)، بنفس آلية شاشة المعلم تماماً (نفس المتغير المشترك selectedReportPrintKeys
+                //     ونفس دالة toggleReportPrintRowSelection)، دون أي تعديل على باقي خانات القراءة فقط ---
+                if (isStudentView) {
+                    return `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-2 py-2 text-center">
+                                <input type="checkbox" class="w-3.5 h-3.5 report-row-select-checkbox" ${isPrintChecked ? 'checked' : ''} onchange="toggleReportPrintRowSelection('${row.key}', this.checked)">
+                            </td>
+                            <td class="px-2 py-2 text-center font-bold text-gray-500">${serial}</td>
+                            <td class="px-2 py-2 font-semibold text-gray-800">${escapeHtmlAttr(row.studentName) || '-'}</td>
+                            <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.stage) || '-'}</td>
+                            <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.studentCode) || '-'}</td>
+                            <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(liveSubject)}</td>
+                            <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(liveTeacherName)}</td>
+                            <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(rowLessonTitle)}</td>
+                            <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.sessionDate) || '-'}</td>
+                            <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.activity) || '-'}</td>
+                            <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.interactionLevel) || '-'}</td>
+                            <td class="px-2 py-2 text-center text-gray-600">${escapeHtmlAttr(row.formativeEval) || '-'}</td>
+                            <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.notes) || '-'}</td>
+                        </tr>`;
+                }
+
+                // --- عرض المساعد: للقراءة فقط (Read-Only Constraint) — بلا أي تغيير، بلا عمود تحديد ---
                 return `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-2 py-2 text-center font-bold text-gray-500">${serial}</td>
                         <td class="px-2 py-2 font-semibold text-gray-800">${escapeHtmlAttr(row.studentName) || '-'}</td>
                         <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.stage) || '-'}</td>
-                        <!-- NEWLY ADDED: خانة كود الطالب — للقراءة فقط لدى الطالب/المساعد أيضاً -->
+                        <!-- NEWLY ADDED: خانة كود الطالب — للقراءة فقط لدى المساعد أيضاً -->
                         <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.studentCode) || '-'}</td>
                         <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(liveSubject)}</td>
                         <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(liveTeacherName)}</td>
@@ -8103,6 +8816,179 @@
                         <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.notes) || '-'}</td>
                     </tr>`;
             }).join('');
+
+            // NEWLY ADDED (Print Feature - Performance Report / Row Selection): مزامنة حالة مربع
+            // "تحديد الكل" بعد كل إعادة رسم للجدول (متاح الآن لشاشتيّ المعلم والطالب معاً)، لتعكس
+            // التحديد الفعلي الحالي بدقة
+            if (isSelectableView) syncReportSelectAllCheckboxState();
+        }
+
+        // ==================================================================================
+        // NEWLY ADDED (Print Feature - Performance Report / Teacher Dashboard):
+        // نافذة معاينة/طباعة تقرير أداء الطلاب مع إمكانية اختيار الأعمدة المطلوب تضمينها في الطباعة فقط.
+        // تعتمد بالكامل على البيانات والفلاتر الحالية المعروضة فعلياً في الجدول الأصلي (cachedLessonReportsList
+        // + عناصر شريط البحث/التصفية)، دون أي تعديل على منطق العرض أو المزامنة اللحظية القائم أصلاً في
+        // renderDynamicReportTable. اختيارات الأعمدة تُحفظ محلياً (In-Memory) طوال الجلسة الحالية فقط.
+        // ==================================================================================
+        const REPORT_PRINT_COLUMNS = [
+            { key: 'serial', label: 'م', default: true },
+            { key: 'studentName', label: 'اسم الطالب', default: true },
+            { key: 'stage', label: 'المرحلة الدراسية', default: true },
+            { key: 'studentCode', label: 'كود الطالب', default: true },
+            { key: 'subject', label: 'المادة', default: true },
+            { key: 'teacherName', label: 'المعلم', default: true },
+            { key: 'lessonTitle', label: 'عنوان الدرس/الموضوع', default: true },
+            { key: 'sessionDate', label: 'تاريخ الحصة/المحاضرة', default: true },
+            { key: 'activity', label: 'النشاط/الحالة', default: true },
+            { key: 'interactionLevel', label: 'مستوى التفاعل', default: true },
+            { key: 'formativeEval', label: 'الدرجة من 10', default: true },
+            { key: 'notes', label: 'ملاحظات وتوصيات', default: true }
+        ];
+
+        // MODIFIED (Print Feature - Performance Report / Row Selection): بعد أن كانت هذه الدالة تعتمد على
+        // فلاتر البحث/التصفية النشطة حالياً أعلى الجدول، أصبحت الآن تُرجع حصرياً السجلات التي وضع المعلم
+        // علامة ✓ بجانبها فعلياً من عمود التحديد داخل جدول "التقارير الشاملة للطالب" (selectedReportPrintKeys)،
+        // بصرف النظر عن حالة الفلاتر النشطة حالياً، مع الحفاظ الكامل على منطق تغذية القيم الحيّة (المادة/المعلم/
+        // عنوان الدرس) كما كان معمولاً به سابقاً في هذه الدالة تحديداً.
+        // MODIFIED (Print Feature - Performance Report / Row Selection - Student View): بعد إضافة عمود
+        // تحديد السجلات (✓) لشاشة الطالب أيضاً (بنفس آلية شاشة المعلم تماماً)، أصبحت هذه الدالة تعتمد
+        // على selectedReportPrintKeys بشكل موحّد لكل من المعلم والطالب معاً، دون أي حاجة لمنطق خاص بالدور.
+        // خصوصية بيانات الطالب تبقى محفوظة تماماً كما كانت: فالسجلات المعروضة له أصلاً في الجدول (وبالتالي
+        // القابلة للتحديد ✓) مُصفّاة سلفاً باسمه فقط عبر renderDynamicReportTable.
+        function getVisibleLessonReportRowsForPrint() {
+            try {
+                if (!selectedReportPrintKeys || !selectedReportPrintKeys.size) return [];
+
+                const liveSubject = currentTeacherSubject || 'غير محدد';
+                const liveTeacherName = currentTeacherName || '-';
+                const titleFieldEl = document.getElementById('txt-lesson-save-title');
+                const liveLessonTitle = (titleFieldEl && titleFieldEl.value.trim()) || activeLessonTitle || 'بدون عنوان';
+
+                const selectedRows = (cachedLessonReportsList || []).filter(row => selectedReportPrintKeys.has(row.key));
+
+                return selectedRows.map(row => {
+                    const rowLessonTitle = (row.lessonTitle !== undefined && row.lessonTitle !== '') ? row.lessonTitle : liveLessonTitle;
+                    return Object.assign({}, row, {
+                        subject: liveSubject,
+                        teacherName: liveTeacherName,
+                        lessonTitle: rowLessonTitle
+                    });
+                });
+            } catch (err) {
+                console.error('getVisibleLessonReportRowsForPrint error:', err);
+                return [];
+            }
+        }
+
+        // يبني/يعيد بناء مربعات اختيار الأعمدة داخل نافذة معاينة/طباعة تقرير أداء الطلاب
+        function buildReportPrintColumnsPicker() {
+            const wrapper = document.getElementById('report-print-columns-picker');
+            if (!wrapper) return;
+            wrapper.innerHTML = REPORT_PRINT_COLUMNS.map(col => `
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" class="w-3.5 h-3.5 report-print-col-checkbox" data-col-key="${col.key}" ${col.default ? 'checked' : ''} onchange="renderReportPrintPreview()">
+                    ${col.label}
+                </label>
+            `).join('');
+        }
+
+        // يعيد قائمة مفاتيح الأعمدة المُحدَّدة فعلياً حالياً بواسطة المعلم داخل النافذة
+        function getSelectedReportPrintColumnKeys() {
+            const checkboxes = document.querySelectorAll('#report-print-columns-picker .report-print-col-checkbox');
+            const selected = [];
+            checkboxes.forEach(chk => { if (chk.checked) selected.push(chk.getAttribute('data-col-key')); });
+            return selected;
+        }
+
+        // يبني معاينة الطباعة الديناميكية (جدول أنيق) بحسب الأعمدة المختارة والصفوف المعروضة حالياً فقط
+        function renderReportPrintPreview() {
+            try {
+                const headEl = document.getElementById('report-print-table-head');
+                const bodyEl = document.getElementById('report-print-table-body');
+                const metaEl = document.getElementById('report-print-meta');
+                if (!headEl || !bodyEl) return;
+
+                const selectedKeys = getSelectedReportPrintColumnKeys();
+                const selectedColumns = REPORT_PRINT_COLUMNS.filter(col => selectedKeys.includes(col.key));
+                const rows = getVisibleLessonReportRowsForPrint();
+
+                if (metaEl) {
+                    const now = new Date();
+                    metaEl.innerText = `تاريخ الطباعة: ${now.toLocaleDateString('ar-EG')} — عدد السجلات: ${rows.length}`;
+                }
+
+                if (!selectedColumns.length) {
+                    headEl.innerHTML = '';
+                    bodyEl.innerHTML = `<tr><td style="padding:10px; text-align:center; color:#888;">الرجاء اختيار عمود واحد على الأقل لعرضه في الطباعة.</td></tr>`;
+                    return;
+                }
+
+                headEl.innerHTML = selectedColumns.map(col =>
+                    `<th style="border:1px solid #ccc; padding:6px; background:#f1f5f2; color:#012015;">${col.label}</th>`
+                ).join('');
+
+                if (!rows.length) {
+                    bodyEl.innerHTML = `<tr><td colspan="${selectedColumns.length}" style="padding:10px; text-align:center; color:#888;">لا توجد سجلات مطابقة للعرض/الطباعة حالياً.</td></tr>`;
+                    return;
+                }
+
+                // NEWLY ADDED (Multi-page Print Support - Performance Report): قراءة عدد السجلات
+                // المحدد من قِبل المعلم لكل صفحة طباعة (0 = بدون تقسيم/تدفق طبيعي)، دون أي تأثير
+                // على منطق جلب أو تصفية الصفوف الأصلي أعلاه.
+                const reportPageSizeEl = document.getElementById('report-print-page-size');
+                const reportPerPage = reportPageSizeEl ? (parseInt(reportPageSizeEl.value, 10) || 0) : 0;
+
+                const rowsHtmlParts = [];
+                rows.forEach((row, idx) => {
+                    const cells = selectedColumns.map(col => {
+                        const value = (col.key === 'serial') ? (idx + 1) : row[col.key];
+                        return `<td style="border:1px solid #ccc; padding:6px;">${escapeHtmlAttr(value !== undefined && value !== null && value !== '' ? value : '-')}</td>`;
+                    }).join('');
+                    rowsHtmlParts.push(`<tr>${cells}</tr>`);
+
+                    const isLastRow = (idx + 1) === rows.length;
+                    if (reportPerPage > 0 && !isLastRow && (idx + 1) % reportPerPage === 0) {
+                        rowsHtmlParts.push(`<tr class="report-print-page-break"><td colspan="${selectedColumns.length}" style="border:none; padding:0; height:0; line-height:0;"></td></tr>`);
+                    }
+                });
+                bodyEl.innerHTML = rowsHtmlParts.join('');
+            } catch (err) {
+                console.error('renderReportPrintPreview error:', err);
+            }
+        }
+
+        // فتح/إغلاق نافذة معاينة وطباعة تقرير أداء الطلاب — بنفس آلية عزل الطباعة المعتمدة أصلاً
+        // (schedule-print-mode) عبر كلاس مخصص على body مرتبط بقواعد @media print الخاصة بهذه المنطقة فقط
+        // MODIFIED (Print Feature - Performance Report / Row Selection): أصبحت الدالة تتحقق أولاً من وجود
+        // سجل واحد على الأقل محدَّد (✓) من عمود التحديد بالجدول قبل فتح نافذة المعاينة/الطباعة أصلاً
+        // MODIFIED (Print Feature - Performance Report / Row Selection - Student View): بعد إضافة عمود
+        // تحديد السجلات (✓) لشاشة الطالب أيضاً بنفس آلية شاشة المعلم تماماً، أصبح شرط "وجود سجل محدد ✓"
+        // موحّداً وسارياً لكل من المعلم والطالب معاً (بدلاً من كونه حصرياً للمعلم فقط)، دون أي تغيير في
+        // آلية التحديد نفسها أو في سلوك شاشة المعلم.
+        function openReportPrintModal() {
+            try {
+                if (!selectedReportPrintKeys || !selectedReportPrintKeys.size) {
+                    alert('الرجاء تحديد سجل واحد على الأقل (بوضع علامة ✓) من جدول التقارير الشاملة للطالب قبل فتح معاينة الطباعة.');
+                    return;
+                }
+                buildReportPrintColumnsPicker();
+                renderReportPrintPreview();
+                const modal = document.getElementById('report-print-modal');
+                if (modal) modal.classList.remove('hidden');
+                document.body.classList.add('report-print-mode');
+            } catch (err) {
+                console.error('openReportPrintModal error:', err);
+            }
+        }
+
+        function closeReportPrintModal() {
+            try {
+                const modal = document.getElementById('report-print-modal');
+                if (modal) modal.classList.add('hidden');
+                document.body.classList.remove('report-print-mode');
+            } catch (err) {
+                console.error('closeReportPrintModal error:', err);
+            }
         }
 
         // =====================================================================
@@ -8114,6 +9000,51 @@
         // الواجبات المنزلية" ومربع "تسليم الواجب" تلقائياً دون أي حاجة لتحديث الصفحة.
         let cachedHomeworkList = [];
         let selectedHomeworkKey = null;
+
+        // ==================================================================================
+        // NEWLY ADDED (Print Feature - Homework Report / Row Selection): تتبّع سجلات جدول
+        // "متابعة الواجبات المنزلية" التي وضع المعلم علامة ✓ بجانبها فعلياً، ليتم الاعتماد عليها
+        // حصرياً كمصدر بيانات الطباعة (بدلاً من الاعتماد على فلاتر البحث/التصفية النشطة حالياً).
+        // يُحفظ التحديد In-Memory طوال الجلسة الحالية فقط، ولا يؤثر على أي بيانات مخزّنة بقاعدة البيانات.
+        // ==================================================================================
+        let selectedHomeworkPrintKeys = new Set();
+        // تُحفظ هنا مفاتيح آخر مجموعة صفوف ظاهرة فعلياً بعد الفلاتر النشطة، لتغذية مربع "تحديد الكل" بدقة
+        let lastVisibleHomeworkFilteredKeys = [];
+
+        // يُبدّل حالة تحديد سجل واجب واحد (تحديد/إلغاء) لغرض تضمينه ضمن الطباعة لاحقاً
+        function toggleHomeworkPrintRowSelection(key, isChecked) {
+            try {
+                if (!key) return;
+                if (isChecked) selectedHomeworkPrintKeys.add(key);
+                else selectedHomeworkPrintKeys.delete(key);
+                syncHomeworkSelectAllCheckboxState();
+            } catch (err) {
+                console.error('toggleHomeworkPrintRowSelection error:', err);
+            }
+        }
+
+        // يُبدّل تحديد كافة السجلات الظاهرة حالياً بعد الفلاتر النشطة (تحديد الكل / إلغاء تحديد الكل)
+        function toggleAllHomeworkPrintRowSelection(isChecked) {
+            try {
+                lastVisibleHomeworkFilteredKeys.forEach(key => {
+                    if (isChecked) selectedHomeworkPrintKeys.add(key);
+                    else selectedHomeworkPrintKeys.delete(key);
+                });
+                renderHomeworkReportTable();
+            } catch (err) {
+                console.error('toggleAllHomeworkPrintRowSelection error:', err);
+            }
+        }
+
+        // يُزامن حالة مربع "تحديد الكل" (محدد بالكامل / غير محدد / تحديد جزئي) بحسب السجلات الظاهرة حالياً
+        function syncHomeworkSelectAllCheckboxState() {
+            const selectAllEl = document.getElementById('chk-homework-select-all');
+            if (!selectAllEl) return;
+            const visibleKeys = lastVisibleHomeworkFilteredKeys;
+            const selectedVisibleCount = visibleKeys.filter(key => selectedHomeworkPrintKeys.has(key)).length;
+            selectAllEl.checked = visibleKeys.length > 0 && selectedVisibleCount === visibleKeys.length;
+            selectAllEl.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleKeys.length;
+        }
 
         function listenToHomeworkSubmissions() {
             if (!dbRef) return;
@@ -8161,8 +9092,18 @@
             // تحديث خيارات قائمة "عنوان الدرس" المنسدلة كلما تغيّرت قائمة الواجبات المخزَّنة مؤقتاً
             populateHomeworkLessonFilterOptions();
 
+            // NEWLY ADDED (Print Feature - Homework Report / Row Selection): تنظيف مفاتيح التحديد
+            // الخاصة بالطباعة من أي سجل لم يعد موجوداً فعلياً ضمن القائمة المخزَّنة مؤقتاً (مثال: تم حذفه)
+            if (selectedHomeworkPrintKeys.size) {
+                const stillExistingKeys = new Set(cachedHomeworkList.map(r => r.key));
+                Array.from(selectedHomeworkPrintKeys).forEach(key => {
+                    if (!stillExistingKeys.has(key)) selectedHomeworkPrintKeys.delete(key);
+                });
+            }
+
             if (!cachedHomeworkList.length) {
-                tbody.innerHTML = `<tr><td colspan="8" class="px-3 py-4 text-center text-gray-400">لا توجد واجبات مسلَّمة حتى الآن.</td></tr>`;
+                lastVisibleHomeworkFilteredKeys = [];
+                tbody.innerHTML = `<tr><td colspan="9" class="px-3 py-4 text-center text-gray-400">لا توجد واجبات مسلَّمة حتى الآن.</td></tr>`;
                 return;
             }
 
@@ -8180,13 +9121,19 @@
                 return matchesName && matchesCode && matchesLesson && matchesStatus;
             });
 
+            // NEWLY ADDED (Print Feature - Homework Report / Row Selection): تحديث قائمة المفاتيح
+            // الظاهرة حالياً بعد الفلاتر النشطة، ليعتمد عليها مربع "تحديد الكل" لاحقاً بدقة
+            lastVisibleHomeworkFilteredKeys = filteredList.map(row => row.key);
+
             if (!filteredList.length) {
-                tbody.innerHTML = `<tr><td colspan="8" class="px-3 py-4 text-center text-gray-400">لا توجد نتائج مطابقة لعبارة البحث/التصفية الحالية.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="px-3 py-4 text-center text-gray-400">لا توجد نتائج مطابقة لعبارة البحث/التصفية الحالية.</td></tr>`;
+                syncHomeworkSelectAllCheckboxState();
                 return;
             }
 
             tbody.innerHTML = filteredList.map((row, idx) => {
                 const isSelected = row.key === selectedHomeworkKey;
+                const isPrintChecked = selectedHomeworkPrintKeys.has(row.key);
                 const currentStatus = row.status || 'جاري التصحيح';
                 const isCorrected = currentStatus === 'تم التصحيح';
 
@@ -8202,6 +9149,10 @@
 
                 return `
                     <tr class="hover:bg-slate-50 transition-colors cursor-pointer${isSelected ? ' bg-emerald-50' : ''}" onclick="viewHomeworkSubmission('${row.key}')">
+                        <!-- NEWLY ADDED (Print Feature - Homework Report / Row Selection): مربع تحديد السجل لتضمينه في الطباعة -->
+                        <td class="px-2 py-2 text-center" onclick="event.stopPropagation();">
+                            <input type="checkbox" class="w-3.5 h-3.5 homework-row-select-checkbox" ${isPrintChecked ? 'checked' : ''} onchange="toggleHomeworkPrintRowSelection('${row.key}', this.checked)">
+                        </td>
                         <td class="px-2 py-2 text-center font-bold text-gray-500">${idx + 1}</td>
                         <td class="px-2 py-2 font-semibold text-gray-800">${escapeHtmlAttr(row.studentName) || '-'}</td>
                         <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.studentCode) || '-'}</td>
@@ -8227,6 +9178,10 @@
                         </td>
                     </tr>`;
             }).join('');
+
+            // NEWLY ADDED (Print Feature - Homework Report / Row Selection): مزامنة حالة مربع
+            // "تحديد الكل" بعد كل إعادة رسم للجدول، لتعكس التحديد الفعلي الحالي بدقة
+            syncHomeworkSelectAllCheckboxState();
         }
 
         // النقاط الرئيسية 2 و3 (عمود "تحديث الحالة"): يقرأ القيمة المختارة حالياً من القائمة المنسدلة
@@ -8291,6 +9246,204 @@
             renderHomeworkReportTable();
             renderHomeworkSubmissionBox();
         }
+
+        // ==================================================================================
+        // NEWLY ADDED (Print Feature - Homework Report / Teacher Dashboard):
+        // نافذة معاينة/طباعة تقرير الأداء المنزلي مع إمكانية اختيار الأعمدة، وخيار إضافي لتضمين محتوى
+        // "مربع تسليم الواجب" لكل طالب كقسم فرعي أنيق أسفل كل سجل. تعتمد على نفس البيانات والفلاتر
+        // المعروضة فعلياً حالياً (cachedHomeworkList + عناصر شريط البحث/التصفية)، دون أي تعديل على
+        // renderHomeworkReportTable أو منطق المزامنة اللحظية القائم أصلاً.
+        // ==================================================================================
+        const HOMEWORK_PRINT_COLUMNS = [
+            { key: 'serial', label: 'مسلسل', default: true },
+            { key: 'studentName', label: 'اسم الطالب', default: true },
+            { key: 'studentCode', label: 'كود الطالب', default: true },
+            { key: 'lessonTitle', label: 'عنوان الدرس/الموضوع', default: true },
+            { key: 'submittedAt', label: 'تاريخ التسليم', default: true },
+            { key: 'status', label: 'حالة الواجب', default: true }
+        ];
+
+        // MODIFIED (Print Feature - Homework Report / Row Selection): بعد أن كانت هذه الدالة تعتمد على
+        // فلاتر البحث/الحالة/الدرس النشطة حالياً، أصبحت الآن تُرجع حصرياً السجلات التي وضع المعلم علامة ✓
+        // بجانبها فعلياً من عمود التحديد داخل جدول "متابعة الواجبات المنزلية" (selectedHomeworkPrintKeys)،
+        // بصرف النظر عن حالة الفلاتر النشطة حالياً، مع الحفاظ على ترتيب السجلات الأصلي (حسب وقت التسليم).
+        function getVisibleHomeworkRowsForPrint() {
+            try {
+                if (!selectedHomeworkPrintKeys || !selectedHomeworkPrintKeys.size) return [];
+                return (cachedHomeworkList || []).filter(row => selectedHomeworkPrintKeys.has(row.key));
+            } catch (err) {
+                console.error('getVisibleHomeworkRowsForPrint error:', err);
+                return [];
+            }
+        }
+
+        // يبني/يعيد بناء مربعات اختيار الأعمدة + خيار تضمين محتوى تسليم الواجب داخل نافذة المعاينة/الطباعة
+        function buildHomeworkPrintColumnsPicker() {
+            const wrapper = document.getElementById('homework-print-columns-picker');
+            if (!wrapper) return;
+            let html = HOMEWORK_PRINT_COLUMNS.map(col => `
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" class="w-3.5 h-3.5 homework-print-col-checkbox" data-col-key="${col.key}" ${col.default ? 'checked' : ''} onchange="renderHomeworkPrintPreview()">
+                    ${col.label}
+                </label>
+            `).join('');
+            html += `
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" id="chk-print-hw-include-content" class="w-3.5 h-3.5" checked onchange="renderHomeworkPrintPreview()">
+                    تضمين محتوى تسليم الواجب
+                </label>`;
+            wrapper.innerHTML = html;
+        }
+
+        function getSelectedHomeworkPrintColumnKeys() {
+            const checkboxes = document.querySelectorAll('#homework-print-columns-picker .homework-print-col-checkbox');
+            const selected = [];
+            checkboxes.forEach(chk => { if (chk.checked) selected.push(chk.getAttribute('data-col-key')); });
+            return selected;
+        }
+
+        // يبني معاينة الطباعة الديناميكية: جدول مصغّر لكل سجل واجب، متبوعاً (اختيارياً) بقسم فرعي أنيق
+        // يعرض محتوى "مربع تسليم الواجب" الخاص بنفس الطالب، مُعقَّماً عبر sanitizeRichHtml قبل الإدراج
+        function renderHomeworkPrintPreview() {
+            try {
+                const container = document.getElementById('homework-print-records');
+                const metaEl = document.getElementById('homework-print-meta');
+                if (!container) return;
+
+                const selectedKeys = getSelectedHomeworkPrintColumnKeys();
+                const selectedColumns = HOMEWORK_PRINT_COLUMNS.filter(col => selectedKeys.includes(col.key));
+                const includeContentEl = document.getElementById('chk-print-hw-include-content');
+                const includeContent = !includeContentEl || includeContentEl.checked;
+                const rows = getVisibleHomeworkRowsForPrint();
+
+                if (metaEl) {
+                    const now = new Date();
+                    metaEl.innerText = `تاريخ الطباعة: ${now.toLocaleDateString('ar-EG')} — عدد السجلات: ${rows.length}`;
+                }
+
+                if (!selectedColumns.length) {
+                    container.innerHTML = `<p style="text-align:center; color:#888; padding:10px;">الرجاء اختيار عمود واحد على الأقل لعرضه في الطباعة.</p>`;
+                    return;
+                }
+
+                if (!rows.length) {
+                    container.innerHTML = `<p style="text-align:center; color:#888; padding:10px;">لا توجد سجلات مطابقة للعرض/الطباعة حالياً.</p>`;
+                    return;
+                }
+
+                // NEWLY ADDED (Multi-page Print Support - Homework Report): قراءة عدد السجلات
+                // المحدد من قِبل المعلم لكل صفحة طباعة (0 = بدون تقسيم/تدفق طبيعي)، دون أي تأثير
+                // على منطق جلب أو تصفية السجلات الأصلي أعلاه.
+                const homeworkPageSizeEl = document.getElementById('homework-print-page-size');
+                const homeworkPerPage = homeworkPageSizeEl ? (parseInt(homeworkPageSizeEl.value, 10) || 0) : 0;
+
+                const recordsHtmlParts = [];
+                rows.forEach((row, idx) => {
+                    const currentStatus = row.status || 'جاري التصحيح';
+                    const submittedAt = row.timestamp
+                        ? new Date(row.timestamp).toLocaleString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                        : '-';
+                    const valuesMap = {
+                        serial: idx + 1,
+                        studentName: row.studentName || '-',
+                        studentCode: row.studentCode || '-',
+                        lessonTitle: row.lessonTitle || '-',
+                        submittedAt: submittedAt,
+                        status: currentStatus
+                    };
+
+                    const cellsHtml = selectedColumns.map(col =>
+                        `<td style="border:1px solid #ccc; padding:6px;">${escapeHtmlAttr(valuesMap[col.key])}</td>`
+                    ).join('');
+                    const headHtml = selectedColumns.map(col =>
+                        `<th style="border:1px solid #ccc; padding:6px; background:#f1f5f2; color:#012015;">${col.label}</th>`
+                    ).join('');
+
+                    const contentSectionHtml = includeContent ? `
+                        <div class="homework-print-content-box" style="margin-top:6px; border:1px solid #c5a880; border-radius:8px; padding:8px 10px; background:#fbfaf6;">
+                            <div style="font-weight:700; color:#0b3a26; font-size:11px; margin-bottom:4px;">📄 محتوى تسليم الواجب:</div>
+                            <div class="homework-print-content-box" style="font-size:11px; line-height:1.7; color:#333;">${row.content ? sanitizeRichHtml(row.content) : '<span style="color:#999;">لا يحتوي هذا الواجب على أي محتوى.</span>'}</div>
+                        </div>` : '';
+
+                    // NEWLY ADDED: كلاس print:break-inside-avoid (بالإضافة إلى قاعدة break-inside/
+                    // page-break-inside الموجودة أصلاً على .homework-print-record ضمن @media print)
+                    // لضمان عدم انفصال بيانات الطالب عن محتوى تسليم واجبه بين صفحتين أثناء الطباعة.
+                    recordsHtmlParts.push(`
+                        <div class="homework-print-record print:break-inside-avoid" style="margin-bottom:14px;">
+                            <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                                <thead><tr>${headHtml}</tr></thead>
+                                <tbody><tr>${cellsHtml}</tr></tbody>
+                            </table>
+                            ${contentSectionHtml}
+                        </div>`);
+
+                    const isLastRecord = (idx + 1) === rows.length;
+                    if (homeworkPerPage > 0 && !isLastRecord && (idx + 1) % homeworkPerPage === 0) {
+                        recordsHtmlParts.push('<div class="homework-print-page-break"></div>');
+                    }
+                });
+                container.innerHTML = recordsHtmlParts.join('');
+            } catch (err) {
+                console.error('renderHomeworkPrintPreview error:', err);
+            }
+        }
+
+        // فتح/إغلاق نافذة معاينة وطباعة تقرير الأداء المنزلي — بنفس آلية عزل الطباعة المعتمدة أصلاً
+        // MODIFIED (Print Feature - Homework Report / Row Selection): أصبحت الدالة تتحقق أولاً من وجود
+        // سجل واحد على الأقل محدَّد (✓) من عمود التحديد بالجدول قبل فتح نافذة المعاينة/الطباعة أصلاً
+        function openHomeworkPrintModal() {
+            try {
+                if (!selectedHomeworkPrintKeys || !selectedHomeworkPrintKeys.size) {
+                    alert('الرجاء تحديد سجل واحد على الأقل (بوضع علامة ✓) من جدول متابعة الواجبات المنزلية قبل فتح معاينة الطباعة.');
+                    return;
+                }
+                buildHomeworkPrintColumnsPicker();
+                renderHomeworkPrintPreview();
+                const modal = document.getElementById('homework-print-modal');
+                if (modal) modal.classList.remove('hidden');
+                document.body.classList.add('homework-print-mode');
+            } catch (err) {
+                console.error('openHomeworkPrintModal error:', err);
+            }
+        }
+
+        function closeHomeworkPrintModal() {
+            try {
+                const modal = document.getElementById('homework-print-modal');
+                if (modal) modal.classList.add('hidden');
+                document.body.classList.remove('homework-print-mode');
+            } catch (err) {
+                console.error('closeHomeworkPrintModal error:', err);
+            }
+        }
+
+        // ==================================================================================
+        // NEWLY ADDED (Print Modals — Close on Escape Key): يستمع لحدث ضغط زر Esc من لوحة
+        // المفاتيح على مستوى الصفحة بالكامل، ويُغلق تلقائياً أياً من نافذتي معاينة/طباعة
+        // "تقرير أداء الطلاب" (report-print-modal) أو "تقرير الأداء المنزلي" (homework-print-modal)
+        // في حال كانت ظاهرة فعلياً حالياً (غير محملة بكلاس hidden)، عبر استدعاء نفس دالتي الإغلاق
+        // المعتمدتين أصلاً (closeReportPrintModal / closeHomeworkPrintModal) دون أي تكرار للمنطق.
+        // لا يؤثر هذا المستمع إطلاقاً على أي نافذة أو مستمع أحداث آخر موجود مسبقاً في الصفحة.
+        // ==================================================================================
+        function handlePrintModalsEscapeKey(event) {
+            try {
+                if (event.key !== 'Escape' && event.key !== 'Esc') return;
+
+                const reportPrintModal = document.getElementById('report-print-modal');
+                if (reportPrintModal && !reportPrintModal.classList.contains('hidden')) {
+                    closeReportPrintModal();
+                    return;
+                }
+
+                const homeworkPrintModal = document.getElementById('homework-print-modal');
+                if (homeworkPrintModal && !homeworkPrintModal.classList.contains('hidden')) {
+                    closeHomeworkPrintModal();
+                }
+            } catch (err) {
+                console.error('handlePrintModalsEscapeKey error:', err);
+            }
+        }
+        document.addEventListener('keydown', handlePrintModalsEscapeKey);
 
         // الطالب فقط: تسليم محتوى مربع الواجب مقترناً باسمه وكوده إلى قاعدة البيانات/حالة التطبيق،
         // بحيث ينعكس أثره فوراً على جدول ومربع المتابعة في شاشة المعلم دون أي إعادة تحميل للصفحة
@@ -8405,7 +9558,9 @@
                 'tab-btn-homework-report',            // NEWLY ADDED: تبويب "تقرير الأداء المنزلي الواجب" — حصري لشاشة المعلم فقط
                 'tab-btn-toolkit',                    // NEWLY ADDED: تبويب "حقيبة المعلم التفاعلية" — حصري لشاشة المعلم فقط
                 'btn-open-interaction-points',          // NEWLY ADDED: زر "نقاط التفاعل في الحصة" — تم إخفاؤه عن شاشة دخول الطالب، يبقى ظاهراً للمعلم فقط
-                'tab-btn-whatsapp-reports'             // NEWLY ADDED: تبويب "نظام إرسال تقارير الطلاب عبر واتساب" — حصري لشاشة المعلم فقط (نفس آلية toolkit/homework-report)
+                'tab-btn-whatsapp-reports',             // NEWLY ADDED: تبويب "نظام إرسال تقارير الطلاب عبر واتساب" — حصري لشاشة المعلم فقط (نفس آلية toolkit/homework-report)
+                'btn-open-media-player',                // NEWLY ADDED (Media Player Module): زر "مشغل الوسائط" — حصري لشاشة المعلم فقط (نفس آلية نقاط التفاعل)
+                'btn-open-screen-recorder'               // NEWLY ADDED (Class Screen Recorder Module): زر "مسجل الحصة" — حصري لشاشة المعلم فقط (نفس آلية نقاط التفاعل)
             ];
 
             // NEWLY ADDED: تبويب "عرض الدروس" أصبح مشتركاً بين كل الأدوار (يستضيف لدى المعلم مركز الروابط
@@ -8448,6 +9603,24 @@
                     el.style.display = '';
                 }
             });
+        }
+
+        // NEWLY ADDED (Print Feature - Performance Report / Row Selection - Student View): عمود تحديد
+        // السجلات للطباعة (th-report-select) أصبح متاحاً الآن لكل من المعلم والطالب معاً (بدلاً من كونه
+        // حصرياً للمعلم فقط)، بينما يبقى مخفياً تماماً عن المساعد (يحتفظ بنفس السلوك القديم دون أي تغيير).
+        // فُصلت هذه الدالة عن applyRoleBasedVisibility (والقائمة العامة teacherOnlyElementIds) تحديداً
+        // لأن هذا العمود لم يعد "حصرياً للمعلم فقط" كباقي عناصر تلك القائمة.
+        function applyReportSelectColumnVisibility(role) {
+            const el = document.getElementById('th-report-select');
+            if (!el) return;
+            const isAllowedRole = (role === 'teacher' || role === 'student');
+            if (isAllowedRole) {
+                el.classList.remove('hidden');
+                el.style.display = '';
+            } else {
+                el.classList.add('hidden');
+                el.style.display = 'none';
+            }
         }
 
         // --- STUDENT & ASSISTANT HEADER BUTTONS PERMANENT HIDING ---
@@ -8555,6 +9728,10 @@
 
             // تطبيق نظام الصلاحيات: إظهار/إخفاء العناصر الخاصة بالمعلم حسب الدور الحالي
             applyRoleBasedVisibility(currentRole);
+
+            // NEWLY ADDED (Print Feature - Performance Report / Row Selection - Student View): إظهار
+            // عمود تحديد السجلات للمعلم والطالب معاً، وإخفاؤه عن المساعد فقط
+            applyReportSelectColumnVisibility(currentRole);
 
             // إخفاء دائم لأزرار لوحات الطلاب/المساعدين/المؤقت/الاستضافة في شاشة الطالب فقط
             applyStudentHeaderButtonsVisibility(currentRole);
@@ -9202,10 +10379,21 @@
         }
 
         // === [تعديل] خلية عمود "الملاحظات" الجديد في الجدول الشامل بلوحة تحكم المدير ===
-        // تبني حقل إدخال نصي (input) مع زر "حفظ" لكل سجل ظاهر فعلياً ضمن هذا الصف (معلم/طالب/مساعد)،
+        // تبني حقل إدخال نصي (input) مع زر تفاعلي بجانبه لكل سجل ظاهر فعلياً ضمن هذا الصف (معلم/طالب/مساعد)،
         // بنفس أسلوب buildAdminActionButtons و buildAdminStorageCell المتّبع أصلاً في الملف (تقسيم لكل نوع).
         // معرّف كل حقل إدخال فريد اعتماداً على رقم الصف (rowIndex) + نوع السجل، لتفادي أي تعارض في
         // حال ظهور نفس المعلم في أكثر من صف (مرة لكل طالب/مساعد تابع له).
+        //
+        // NEWLY ADDED (التبديل الديناميكي لحالة خانة الملاحظات — Notes Field Toggle):
+        // كل سجل ملاحظة له حالتان: "تحرير" (الحقل قابل للكتابة + زر "حفظ") أو "مثبّت" (الحقل للقراءة
+        // فقط readOnly/disabled + زر "تعديل"). عند الضغط على "حفظ" يُحفظ النص في Firebase فوراً ثم يتحوّل
+        // الحقل تلقائياً لوضع القراءة فقط ويتحوّل الزر إلى "تعديل"؛ وعند الضغط على "تعديل" يُعاد تفعيل
+        // الحقل للكتابة ويتحوّل الزر مجدداً إلى "حفظ" — دون إعادة رسم الجدول بالكامل، لضمان استمرار
+        // حالة كل حقل بشكل مستقل حتى مع تحديثات المزامنة اللحظية الأخرى القادمة من مستمع Firebase.
+        // adminNotesUnlockedKeys: يحفظ مفاتيح السجلات الموجودة حالياً في وضع "تحرير" (غير المحفوظ بعد)
+        // بحيث تبقى الحالة صحيحة حتى لو أُعيد بناء الجدول بالكامل بسبب أي تحديث لحظي آخر في البيانات.
+        const adminNotesUnlockedKeys = new Set();
+
         function buildAdminNotesCell(rowIndex, teacher, student, assistant) {
             try {
                 const entries = [
@@ -9220,15 +10408,26 @@
 
                 const blocksHtml = entries.map(([type, rec]) => {
                     const inputId = `admin-notes-input-${rowIndex}-${type}`;
+                    const btnId = `admin-notes-btn-${rowIndex}-${type}`;
                     const existingNotes = (rec && rec.notes !== undefined && rec.notes !== null) ? String(rec.notes) : '';
+                    const noteKey = `${type}:${rec.code}`;
+                    // مثبّت (Locked/Read-Only) فقط إن كانت هناك ملاحظة محفوظة فعلياً في قاعدة البيانات
+                    // ولم يضغط المعلم/المدير على "تعديل" لفكّ تثبيتها مجدداً بعد
+                    const isLocked = existingNotes !== '' && !adminNotesUnlockedKeys.has(noteKey);
+                    const inputStateAttrs = isLocked ? 'readOnly disabled' : '';
+                    const inputStateClass = isLocked ? 'bg-gray-100 text-gray-500' : 'bg-white text-gray-800';
+                    const btnLabel = isLocked ? 'تعديل' : 'حفظ';
+                    const btnOnclick = isLocked
+                        ? `enableAdminNoteEditMode('${type}', '${escapeHtmlAttr(rec.code)}', '${inputId}', '${btnId}')`
+                        : `saveAdminRecordNotes('${type}', '${escapeHtmlAttr(rec.code)}', '${inputId}', '${btnId}')`;
                     return `
                         <div class="flex flex-col gap-1 mb-1 last:mb-0">
                             <span class="text-[9px] text-gray-400 font-bold text-center">${typeLabels[type]}</span>
                             <div class="flex gap-1 items-center justify-center">
-                                <input type="text" id="${inputId}" value="${escapeHtmlAttr(existingNotes)}" placeholder="أضف ملاحظة..." maxlength="500"
-                                    class="w-24 md:w-32 p-1 border border-gray-300 rounded text-[10px] outline-none focus:border-[#c5a880]">
-                                <button type="button" onclick="saveAdminRecordNotes('${type}', '${escapeHtmlAttr(rec.code)}', '${inputId}')"
-                                    class="bg-[#0b3a26] hover:bg-[#012015] text-white text-[10px] px-2 py-1 rounded font-bold transition-all">حفظ</button>
+                                <input type="text" id="${inputId}" value="${escapeHtmlAttr(existingNotes)}" placeholder="أضف ملاحظة..." maxlength="500" ${inputStateAttrs}
+                                    class="w-24 md:w-32 p-1 border border-gray-300 rounded text-[10px] outline-none focus:border-[#c5a880] ${inputStateClass}">
+                                <button type="button" id="${btnId}" onclick="${btnOnclick}"
+                                    class="bg-[#0b3a26] hover:bg-[#012015] text-white text-[10px] px-2 py-1 rounded font-bold transition-all">${btnLabel}</button>
                             </div>
                         </div>
                     `;
@@ -9244,7 +10443,9 @@
         // === [تعديل] حفظ قيمة الملاحظة المُدخلة لسجل محدد (معلم/طالب/مساعد) مباشرة في Firebase،
         // مع إظهار إشعار (Toast) بنجاح أو فشل عملية الحفظ، ومعالجة شاملة لكافة حالات الاستثناء
         // (عنصر إدخال غير موجود، تعذّر تحديد المسار، فشل الاتصال بقاعدة البيانات...) دون توقف السكربت.
-        function saveAdminRecordNotes(type, code, inputId) {
+        // NEWLY ADDED: بعد نجاح الحفظ، يتحوّل حقل النص تلقائياً إلى وضع القراءة فقط (readOnly/disabled)
+        // ويتحوّل الزر تلقائياً إلى زر "تعديل" — مباشرة عبر التعامل مع عناصر DOM دون الحاجة لإعادة رسم الجدول.
+        function saveAdminRecordNotes(type, code, inputId, btnId) {
             try {
                 const inputEl = document.getElementById(inputId);
                 if (!inputEl) {
@@ -9261,6 +10462,21 @@
 
                 firebase.database().ref(path).update({ notes: notesValue }).then(() => {
                     showAdminToast('تم حفظ الملاحظة بنجاح!');
+                    // --- تحويل حالة مربع النص فوراً إلى وضع القراءة فقط + تحويل الزر إلى "تعديل" ---
+                    try {
+                        adminNotesUnlockedKeys.delete(`${type}:${code}`);
+                        inputEl.readOnly = true;
+                        inputEl.disabled = true;
+                        inputEl.classList.remove('bg-white', 'text-gray-800');
+                        inputEl.classList.add('bg-gray-100', 'text-gray-500');
+                        const btnEl = btnId ? document.getElementById(btnId) : null;
+                        if (btnEl) {
+                            btnEl.innerText = 'تعديل';
+                            btnEl.setAttribute('onclick', `enableAdminNoteEditMode('${type}', '${code}', '${inputId}', '${btnId}')`);
+                        }
+                    } catch (uiErr) {
+                        console.error('saveAdminRecordNotes UI toggle error:', uiErr);
+                    }
                 }).catch(err => {
                     console.error('saveAdminRecordNotes error:', err);
                     showAdminToast('فشل حفظ الملاحظة: ' + (err && err.message ? err.message : 'خطأ غير معروف'), 'error');
@@ -9268,6 +10484,36 @@
             } catch (err) {
                 console.error('saveAdminRecordNotes error:', err);
                 showAdminToast('حدث خطأ غير متوقع أثناء حفظ الملاحظة.', 'error');
+            }
+        }
+
+        // NEWLY ADDED (التبديل الديناميكي لحالة خانة الملاحظات — وضع "تعديل"): يفكّ تثبيت مربع النص
+        // ويعيد تفعيله للكتابة (readOnly = false)، ويحوّل الزر مجدداً إلى "حفظ"، مع تسجيل هذا السجل ضمن
+        // adminNotesUnlockedKeys بحيث تبقى حالة "التحرير" ثابتة حتى لو أُعيد رسم الجدول بالكامل لاحقاً
+        // بسبب أي تحديث لحظي آخر قادم من مستمع Firebase، إلى أن يتم الحفظ مجدداً أو تُغلق الصفحة.
+        function enableAdminNoteEditMode(type, code, inputId, btnId) {
+            try {
+                const inputEl = document.getElementById(inputId);
+                if (!inputEl) {
+                    showAdminToast('تعذّر العثور على حقل الملاحظة المطلوب تعديله.', 'error');
+                    return;
+                }
+
+                adminNotesUnlockedKeys.add(`${type}:${code}`);
+                inputEl.readOnly = false;
+                inputEl.disabled = false;
+                inputEl.classList.remove('bg-gray-100', 'text-gray-500');
+                inputEl.classList.add('bg-white', 'text-gray-800');
+                try { inputEl.focus(); } catch (focusErr) { /* تجاهل */ }
+
+                const btnEl = btnId ? document.getElementById(btnId) : null;
+                if (btnEl) {
+                    btnEl.innerText = 'حفظ';
+                    btnEl.setAttribute('onclick', `saveAdminRecordNotes('${type}', '${code}', '${inputId}', '${btnId}')`);
+                }
+            } catch (err) {
+                console.error('enableAdminNoteEditMode error:', err);
+                showAdminToast('حدث خطأ غير متوقع أثناء تفعيل وضع التعديل.', 'error');
             }
         }
 
@@ -12505,6 +13751,714 @@
         }
 
         window.addEventListener('DOMContentLoaded', initPlatformViewModeSwitcher);
+
+        // ==================================================================================
+        // NEWLY ADDED: منطق "مشغل الوسائط" (Media Player Module) — تشغيل ملفات فيديو/صوت محلية
+        // عبر HTML5 Media API (Play / Pause / Stop / Seekbar) مع معالجة شاملة للأخطاء. حالة محلية
+        // مستقلة تماماً، لا تعتمد على Firebase ولا تُعدِّل أي دالة أو حالة سابقة في المشروع.
+        // ==================================================================================
+        let mediaPlayerCurrentObjectUrl = null;
+        let mediaPlayerActiveElement = null; // يشير إلى عنصر <video> أو <audio> النشط حالياً
+
+        function openMediaPlayerWidget() {
+            try {
+                const widget = document.getElementById('media-player-widget');
+                if (!widget) return;
+                widget.classList.remove('hidden');
+                widget.style.display = 'flex';
+                if (typeof highestZIndex === 'number') {
+                    highestZIndex += 1;
+                    widget.style.zIndex = String(highestZIndex);
+                }
+            } catch (err) {
+                console.error('openMediaPlayerWidget error:', err);
+            }
+        }
+
+        function closeMediaPlayerWidget() {
+            try {
+                mediaPlayerStop();
+                const widget = document.getElementById('media-player-widget');
+                if (!widget) return;
+                // NEWLY ADDED: إعادة ضبط وضع ملء الشاشة تلقائياً عند الإغلاق لتفادي بقاء النافذة
+                // بحجم/موضع غير متوقع (ملء الشاشة) في المرة التالية لفتحها
+                if (typeof mediaPlayerIsFullscreen !== 'undefined' && mediaPlayerIsFullscreen) {
+                    widget.classList.remove('mp-fullscreen');
+                    mediaPlayerIsFullscreen = false;
+                    mediaPlayerPreFullscreenState = null;
+                }
+                widget.classList.add('hidden');
+                widget.style.display = 'none';
+            } catch (err) {
+                console.error('closeMediaPlayerWidget error:', err);
+            }
+        }
+
+        function showMediaPlayerError(message) {
+            try {
+                const errEl = document.getElementById('mp-error-msg');
+                if (!errEl) return;
+                if (!message) {
+                    errEl.style.display = 'none';
+                    errEl.textContent = '';
+                    return;
+                }
+                errEl.textContent = message;
+                errEl.style.display = 'block';
+            } catch (err) {
+                console.error('showMediaPlayerError error:', err);
+            }
+        }
+
+        function handleMediaPlayerFileSelected(event) {
+            try {
+                showMediaPlayerError('');
+                const file = (event && event.target && event.target.files) ? event.target.files[0] : null;
+                if (!file) return;
+
+                // دعم صيغ الفيديو (MP4, WebM, AVI, MKV) والصوت (MP3, WAV, AAC, OGG) عبر فحص نوع/امتداد الملف
+                const lowerName = (file.name || '').toLowerCase();
+                const isLikelyVideo = (file.type && file.type.indexOf('video/') === 0) ||
+                    /\.(mp4|webm|avi|mkv|mov|ogv)$/.test(lowerName);
+                const isLikelyAudio = (file.type && file.type.indexOf('audio/') === 0) ||
+                    /\.(mp3|wav|aac|ogg|m4a|flac)$/.test(lowerName);
+
+                if (!isLikelyVideo && !isLikelyAudio) {
+                    showMediaPlayerError('صيغة الملف غير مدعومة أو غير معروفة. الرجاء اختيار ملف فيديو أو صوت صالح.');
+                    return;
+                }
+
+                // تحرير أي Object URL سابق لتفادي تسرّب الذاكرة (Memory Leak)
+                if (mediaPlayerCurrentObjectUrl) {
+                    try { URL.revokeObjectURL(mediaPlayerCurrentObjectUrl); } catch (revokeErr) { /* تجاهل */ }
+                    mediaPlayerCurrentObjectUrl = null;
+                }
+
+                const objectUrl = URL.createObjectURL(file);
+                mediaPlayerCurrentObjectUrl = objectUrl;
+
+                const videoEl = document.getElementById('mp-video-element');
+                const audioEl = document.getElementById('mp-audio-element');
+                const emptyState = document.getElementById('mp-empty-state');
+                const controlsRow = document.getElementById('mp-controls-row');
+                if (!videoEl || !audioEl) return;
+
+                // إيقاف أي تشغيل سابق قبل تحميل الوسيط الجديد
+                try { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load(); } catch (e1) { /* تجاهل */ }
+                try { audioEl.pause(); audioEl.removeAttribute('src'); audioEl.load(); } catch (e2) { /* تجاهل */ }
+
+                if (isLikelyVideo) {
+                    mediaPlayerActiveElement = videoEl;
+                    videoEl.src = objectUrl;
+                    videoEl.style.display = 'block';
+                    audioEl.style.display = 'none';
+                } else {
+                    mediaPlayerActiveElement = audioEl;
+                    audioEl.src = objectUrl;
+                    audioEl.style.display = 'block';
+                    videoEl.style.display = 'none';
+                }
+
+                if (emptyState) emptyState.style.display = 'none';
+                if (controlsRow) controlsRow.style.display = 'flex';
+
+                mediaPlayerActiveElement.onloadedmetadata = function () {
+                    try {
+                        const seekbar = document.getElementById('mp-seekbar');
+                        const durationLabel = document.getElementById('mp-time-duration');
+                        const safeDuration = isFinite(mediaPlayerActiveElement.duration) ? mediaPlayerActiveElement.duration : 0;
+                        if (seekbar) seekbar.max = safeDuration;
+                        if (durationLabel) durationLabel.textContent = formatMediaPlayerTime(safeDuration);
+                    } catch (metaErr) {
+                        console.error('onloadedmetadata error:', metaErr);
+                    }
+                };
+
+                mediaPlayerActiveElement.onerror = function () {
+                    showMediaPlayerError('تعذّر تشغيل هذا الملف. قد تكون الصيغة غير مدعومة من متصفحك الحالي.');
+                };
+
+                mediaPlayerActiveElement.ontimeupdate = updateMediaPlayerSeekbarPosition;
+                mediaPlayerActiveElement.onended = updateMediaPlayerSeekbarPosition;
+
+            } catch (err) {
+                console.error('handleMediaPlayerFileSelected error:', err);
+                showMediaPlayerError('حدث خطأ غير متوقع أثناء تحميل ملف الوسائط.');
+            }
+        }
+
+        function updateMediaPlayerSeekbarPosition() {
+            try {
+                if (!mediaPlayerActiveElement) return;
+                const seekbar = document.getElementById('mp-seekbar');
+                const currentLabel = document.getElementById('mp-time-current');
+                if (seekbar && document.activeElement !== seekbar) {
+                    seekbar.value = mediaPlayerActiveElement.currentTime || 0;
+                }
+                if (currentLabel) {
+                    currentLabel.textContent = formatMediaPlayerTime(mediaPlayerActiveElement.currentTime);
+                }
+            } catch (err) {
+                console.error('updateMediaPlayerSeekbarPosition error:', err);
+            }
+        }
+
+        function formatMediaPlayerTime(totalSeconds) {
+            try {
+                if (!isFinite(totalSeconds) || totalSeconds < 0) return '00:00';
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = Math.floor(totalSeconds % 60);
+                return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            } catch (err) {
+                return '00:00';
+            }
+        }
+
+        function mediaPlayerPlay() {
+            try {
+                if (!mediaPlayerActiveElement) {
+                    showMediaPlayerError('الرجاء اختيار ملف وسائط أولاً قبل التشغيل.');
+                    return;
+                }
+                const playPromise = mediaPlayerActiveElement.play();
+                if (playPromise && typeof playPromise.catch === 'function') {
+                    playPromise.catch(function (playErr) {
+                        console.error('mediaPlayerPlay error:', playErr);
+                        showMediaPlayerError('تعذّر بدء التشغيل. حاول النقر على الزر مرة أخرى.');
+                    });
+                }
+            } catch (err) {
+                console.error('mediaPlayerPlay error:', err);
+            }
+        }
+
+        function mediaPlayerPause() {
+            try {
+                if (!mediaPlayerActiveElement) return;
+                mediaPlayerActiveElement.pause();
+            } catch (err) {
+                console.error('mediaPlayerPause error:', err);
+            }
+        }
+
+        function mediaPlayerStop() {
+            try {
+                if (!mediaPlayerActiveElement) return;
+                mediaPlayerActiveElement.pause();
+                mediaPlayerActiveElement.currentTime = 0;
+                updateMediaPlayerSeekbarPosition();
+            } catch (err) {
+                console.error('mediaPlayerStop error:', err);
+            }
+        }
+
+        function mediaPlayerSeek(newValue) {
+            try {
+                if (!mediaPlayerActiveElement) return;
+                const parsedValue = parseFloat(newValue);
+                if (!isFinite(parsedValue)) return;
+                mediaPlayerActiveElement.currentTime = parsedValue;
+                const currentLabel = document.getElementById('mp-time-current');
+                if (currentLabel) currentLabel.textContent = formatMediaPlayerTime(parsedValue);
+            } catch (err) {
+                console.error('mediaPlayerSeek error:', err);
+            }
+        }
+
+        // ==================================================================================
+        // NEWLY ADDED: فتح ملف وسائط (فيديو/صوت) مباشرة من رابط (URL) بدلاً من الرفع من الجهاز.
+        // يُحدَّد نوع الوسيط (فيديو/صوت) عبر امتداد الرابط، ومع محاولة تلقائية بديلة (Fallback) بالنوع
+        // الآخر مرة واحدة في حال فشل التشغيل بالنوع المفترض أولاً (مثلاً رابط بدون امتداد واضح).
+        // ==================================================================================
+        function handleMediaPlayerUrlLoad() {
+            try {
+                showMediaPlayerError('');
+                const urlInput = document.getElementById('mp-url-input');
+                if (!urlInput) return;
+                const rawUrl = (urlInput.value || '').trim();
+                if (!rawUrl) {
+                    showMediaPlayerError('الرجاء إدخال رابط صالح لملف فيديو أو صوت أولاً.');
+                    return;
+                }
+
+                let parsedUrl;
+                try {
+                    parsedUrl = new URL(rawUrl, window.location.href);
+                } catch (parseErr) {
+                    showMediaPlayerError('الرابط المُدخل غير صالح. تأكد من كتابته بشكل صحيح (يجب أن يبدأ بـ http أو https).');
+                    return;
+                }
+                if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+                    showMediaPlayerError('يُسمح فقط بروابط HTTP أو HTTPS.');
+                    return;
+                }
+
+                // تحرير أي Object URL سابق (من ملف محلي تم اختياره سابقاً) لتفادي تسرّب الذاكرة
+                if (mediaPlayerCurrentObjectUrl) {
+                    try { URL.revokeObjectURL(mediaPlayerCurrentObjectUrl); } catch (revokeErr) { /* تجاهل */ }
+                    mediaPlayerCurrentObjectUrl = null;
+                }
+
+                const videoEl = document.getElementById('mp-video-element');
+                const audioEl = document.getElementById('mp-audio-element');
+                const emptyState = document.getElementById('mp-empty-state');
+                const controlsRow = document.getElementById('mp-controls-row');
+                if (!videoEl || !audioEl) return;
+
+                try { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load(); } catch (e1) { /* تجاهل */ }
+                try { audioEl.pause(); audioEl.removeAttribute('src'); audioEl.load(); } catch (e2) { /* تجاهل */ }
+
+                const lowerPath = parsedUrl.pathname.toLowerCase();
+                const isLikelyAudioOnly = /\.(mp3|wav|aac|ogg|m4a|flac)$/.test(lowerPath);
+
+                // الافتراض الأساسي: عنصر الفيديو (يشمل تشغيل الصوت أيضاً)، إلا إذا كان الامتداد صوتياً بوضوح
+                const primaryElement = isLikelyAudioOnly ? audioEl : videoEl;
+                const secondaryElement = isLikelyAudioOnly ? videoEl : audioEl;
+
+                mediaPlayerActiveElement = primaryElement;
+                primaryElement.src = parsedUrl.href;
+                primaryElement.style.display = 'block';
+                secondaryElement.style.display = 'none';
+
+                if (emptyState) emptyState.style.display = 'none';
+                if (controlsRow) controlsRow.style.display = 'flex';
+
+                let didFallbackAttempt = false;
+
+                primaryElement.onloadedmetadata = function () {
+                    attachMediaPlayerUrlMetadataHandlers();
+                };
+                primaryElement.ontimeupdate = updateMediaPlayerSeekbarPosition;
+                primaryElement.onended = updateMediaPlayerSeekbarPosition;
+                primaryElement.onerror = function () {
+                    if (didFallbackAttempt) {
+                        showMediaPlayerError('تعذّر تحميل الوسائط من الرابط المُدخل. تأكد من صحة الرابط ودعم الخادم لمشاركته (CORS).');
+                        return;
+                    }
+                    // محاولة تلقائية واحدة بالنوع الآخر (فيديو/صوت) في حال عدم وضوح نوع الرابط
+                    didFallbackAttempt = true;
+                    try {
+                        primaryElement.removeAttribute('src');
+                        primaryElement.style.display = 'none';
+                        mediaPlayerActiveElement = secondaryElement;
+                        secondaryElement.src = parsedUrl.href;
+                        secondaryElement.style.display = 'block';
+                        secondaryElement.onloadedmetadata = attachMediaPlayerUrlMetadataHandlers;
+                        secondaryElement.ontimeupdate = updateMediaPlayerSeekbarPosition;
+                        secondaryElement.onended = updateMediaPlayerSeekbarPosition;
+                        secondaryElement.onerror = function () {
+                            showMediaPlayerError('تعذّر تحميل الوسائط من الرابط المُدخل. تأكد من صحة الرابط ودعم الخادم لمشاركته (CORS).');
+                        };
+                    } catch (fallbackErr) {
+                        console.error('handleMediaPlayerUrlLoad fallback error:', fallbackErr);
+                        showMediaPlayerError('تعذّر تحميل الوسائط من الرابط المُدخل.');
+                    }
+                };
+
+            } catch (err) {
+                console.error('handleMediaPlayerUrlLoad error:', err);
+                showMediaPlayerError('حدث خطأ غير متوقع أثناء محاولة تحميل الرابط.');
+            }
+        }
+
+        // دالة مساعدة مشتركة لضبط شريط التقدم/تسمية المدة عند تحميل وسائط من رابط (مستقلة تماماً عن
+        // منطق onloadedmetadata الخاص بالملفات المحلية في handleMediaPlayerFileSelected، دون أي تعديل عليه)
+        function attachMediaPlayerUrlMetadataHandlers() {
+            try {
+                if (!mediaPlayerActiveElement) return;
+                const seekbar = document.getElementById('mp-seekbar');
+                const durationLabel = document.getElementById('mp-time-duration');
+                const safeDuration = isFinite(mediaPlayerActiveElement.duration) ? mediaPlayerActiveElement.duration : 0;
+                if (seekbar) seekbar.max = safeDuration;
+                if (durationLabel) durationLabel.textContent = formatMediaPlayerTime(safeDuration);
+            } catch (err) {
+                console.error('attachMediaPlayerUrlMetadataHandlers error:', err);
+            }
+        }
+
+        // ==================================================================================
+        // NEWLY ADDED: تبديل وضع "ملء الشاشة" (Fullscreen) لنافذة مشغل الوسائط عبر النقر المزدوج
+        // (Double-Click) على شريط عنوان النافذة، أو عبر زر التكبير ⛶ المخصص. يتم حفظ الموضع/الحجم
+        // الأصليين (Position/Size) قبل التكبير واستعادتهما تلقائياً بدقة عند الخروج من وضع ملء الشاشة،
+        // دون أي تأثير على آلية السحب (Dragging) أو تغيير الحجم (Resize) الحالية لبقية النوافذ العائمة.
+        // ==================================================================================
+        let mediaPlayerIsFullscreen = false;
+        let mediaPlayerPreFullscreenState = null;
+
+        function toggleMediaPlayerFullscreen() {
+            try {
+                const widget = document.getElementById('media-player-widget');
+                if (!widget) return;
+
+                if (!mediaPlayerIsFullscreen) {
+                    mediaPlayerPreFullscreenState = {
+                        top: widget.style.top || '',
+                        left: widget.style.left || '',
+                        width: widget.style.width || '',
+                        height: widget.style.height || '',
+                        position: widget.style.position || '',
+                        zIndex: widget.style.zIndex || ''
+                    };
+                    widget.classList.add('mp-fullscreen');
+                    mediaPlayerIsFullscreen = true;
+                } else {
+                    widget.classList.remove('mp-fullscreen');
+                    if (mediaPlayerPreFullscreenState) {
+                        widget.style.top = mediaPlayerPreFullscreenState.top;
+                        widget.style.left = mediaPlayerPreFullscreenState.left;
+                        widget.style.width = mediaPlayerPreFullscreenState.width;
+                        widget.style.height = mediaPlayerPreFullscreenState.height;
+                        widget.style.position = mediaPlayerPreFullscreenState.position;
+                        widget.style.zIndex = mediaPlayerPreFullscreenState.zIndex;
+                    }
+                    mediaPlayerIsFullscreen = false;
+                }
+            } catch (err) {
+                console.error('toggleMediaPlayerFullscreen error:', err);
+            }
+        }
+
+        // ==================================================================================
+        // NEWLY ADDED: منطق "مسجل الحصة" (Class Screen Recorder Module) — تسجيل الشاشة + الصوت
+        // عبر getDisplayMedia / getUserMedia + MediaRecorder، مع إيقاف/استئناف تلقائي عند مغادرة/العودة
+        // للتبويب الحالي (Page Visibility API + blur/focus)، وتصدير الفيديو بصيغة MP4 (أو WebM كبديل
+        // متوافق في حال عدم دعم المتصفح الحالي لترميز MP4 أثناء التسجيل). معالجة شاملة للأخطاء بما في
+        // ذلك رفض المستخدم منح صلاحيات مشاركة الشاشة أو الميكروفون.
+        // ==================================================================================
+        let screenRecorderMediaRecorder = null;
+        let screenRecorderDisplayStream = null;
+        let screenRecorderAudioStream = null;
+        let screenRecorderChunks = [];
+        let screenRecorderBlob = null;
+        let screenRecorderMimeType = 'video/webm';
+        let screenRecorderWasAutoPaused = false; // للتفريق بين الإيقاف اليدوي والإيقاف التلقائي عند مغادرة التبويب
+
+        function openScreenRecorderWidget() {
+            try {
+                const overlay = document.getElementById('screen-recorder-overlay');
+                if (!overlay) return;
+                overlay.classList.remove('hidden');
+                overlay.style.display = 'flex';
+            } catch (err) {
+                console.error('openScreenRecorderWidget error:', err);
+            }
+        }
+
+        function closeScreenRecorderWidget() {
+            try {
+                const overlay = document.getElementById('screen-recorder-overlay');
+                if (!overlay) return;
+                overlay.classList.add('hidden');
+                overlay.style.display = 'none';
+            } catch (err) {
+                console.error('closeScreenRecorderWidget error:', err);
+            }
+        }
+
+        function showScreenRecorderError(message) {
+            try {
+                const errEl = document.getElementById('sr-error-msg');
+                if (!errEl) return;
+                if (!message) {
+                    errEl.style.display = 'none';
+                    errEl.textContent = '';
+                    return;
+                }
+                errEl.textContent = message;
+                errEl.style.display = 'block';
+            } catch (err) {
+                console.error('showScreenRecorderError error:', err);
+            }
+        }
+
+        function updateScreenRecorderStatusUI(state) {
+            try {
+                const badge = document.getElementById('sr-status-badge');
+                const statusText = document.getElementById('sr-status-text');
+                const btnStart = document.getElementById('sr-btn-start');
+                const btnStop = document.getElementById('sr-btn-stop');
+                const btnDownload = document.getElementById('sr-btn-download');
+                if (!badge || !statusText || !btnStart || !btnStop) return;
+
+                badge.classList.remove('sr-status-idle', 'sr-status-recording', 'sr-status-paused');
+
+                if (state === 'recording') {
+                    badge.classList.add('sr-status-recording');
+                    statusText.textContent = 'جارِ التسجيل الآن...';
+                    btnStart.disabled = true;
+                    btnStop.disabled = false;
+                } else if (state === 'paused') {
+                    badge.classList.add('sr-status-paused');
+                    statusText.textContent = 'التسجيل متوقف مؤقتاً (خارج التبويب)';
+                    btnStart.disabled = true;
+                    btnStop.disabled = false;
+                } else {
+                    badge.classList.add('sr-status-idle');
+                    statusText.textContent = 'جاهز للتسجيل';
+                    btnStart.disabled = false;
+                    btnStop.disabled = true;
+                }
+
+                if (btnDownload) btnDownload.disabled = !screenRecorderBlob;
+            } catch (err) {
+                console.error('updateScreenRecorderStatusUI error:', err);
+            }
+        }
+
+        function pickSupportedScreenRecorderMimeType() {
+            try {
+                const candidateMimeTypes = [
+                    'video/mp4;codecs=h264,aac',
+                    'video/mp4',
+                    'video/webm;codecs=vp9,opus',
+                    'video/webm;codecs=vp8,opus',
+                    'video/webm'
+                ];
+                if (typeof MediaRecorder === 'undefined' || typeof MediaRecorder.isTypeSupported !== 'function') {
+                    return 'video/webm';
+                }
+                for (let i = 0; i < candidateMimeTypes.length; i++) {
+                    if (MediaRecorder.isTypeSupported(candidateMimeTypes[i])) {
+                        return candidateMimeTypes[i];
+                    }
+                }
+                return 'video/webm';
+            } catch (err) {
+                console.error('pickSupportedScreenRecorderMimeType error:', err);
+                return 'video/webm';
+            }
+        }
+
+        async function startScreenRecording() {
+            try {
+                showScreenRecorderError('');
+
+                if (typeof navigator === 'undefined' || !navigator.mediaDevices ||
+                    typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
+                    showScreenRecorderError('عذراً، متصفحك الحالي لا يدعم خاصية تسجيل الشاشة (getDisplayMedia).');
+                    return;
+                }
+                if (typeof MediaRecorder === 'undefined') {
+                    showScreenRecorderError('عذراً، متصفحك الحالي لا يدعم واجهة MediaRecorder اللازمة للتسجيل.');
+                    return;
+                }
+
+                // 1) طلب صلاحية مشاركة الشاشة (فيديو + صوت النظام إن أمكن) — معالجة حالة رفض المستخدم للصلاحية
+                let displayStream;
+                try {
+                    displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                } catch (displayErr) {
+                    console.error('getDisplayMedia error:', displayErr);
+                    showScreenRecorderError('تم رفض صلاحية مشاركة الشاشة، أو تم إلغاء العملية. لا يمكن بدء التسجيل بدونها.');
+                    return;
+                }
+
+                // 2) طلب صلاحية الميكروفون (صوت) بشكل منفصل — في حال الرفض، يستمر التسجيل بصوت الشاشة فقط إن توفر
+                let micStream = null;
+                try {
+                    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch (micErr) {
+                    console.warn('getUserMedia (microphone) error:', micErr);
+                    showScreenRecorderError('تنبيه: تعذّر الوصول إلى الميكروفون (تم رفض الصلاحية)، سيتم التسجيل بدون صوت المايك.');
+                }
+
+                screenRecorderDisplayStream = displayStream;
+                screenRecorderAudioStream = micStream;
+
+                // دمج مسارات الفيديو + الصوت (صوت الشاشة/النظام إن وُجد + صوت الميكروفون إن مُنحت صلاحيته)
+                const combinedTracks = [];
+                displayStream.getVideoTracks().forEach(function (track) { combinedTracks.push(track); });
+                displayStream.getAudioTracks().forEach(function (track) { combinedTracks.push(track); });
+                if (micStream) {
+                    micStream.getAudioTracks().forEach(function (track) { combinedTracks.push(track); });
+                }
+                const combinedStream = new MediaStream(combinedTracks);
+
+                // إن أوقف المستخدم المشاركة من شريط المتصفح مباشرة (بدلاً من زر "إنهاء التسجيل")
+                displayStream.getVideoTracks().forEach(function (track) {
+                    track.onended = function () {
+                        try {
+                            if (screenRecorderMediaRecorder && screenRecorderMediaRecorder.state !== 'inactive') {
+                                stopScreenRecording();
+                            }
+                        } catch (endedErr) {
+                            console.error('screen share track onended error:', endedErr);
+                        }
+                    };
+                });
+
+                screenRecorderMimeType = pickSupportedScreenRecorderMimeType();
+                screenRecorderChunks = [];
+                screenRecorderBlob = null;
+
+                let recorder;
+                try {
+                    recorder = new MediaRecorder(combinedStream, { mimeType: screenRecorderMimeType });
+                } catch (recorderErr) {
+                    console.warn('MediaRecorder init with preferred mimeType failed, falling back to default:', recorderErr);
+                    try {
+                        recorder = new MediaRecorder(combinedStream);
+                        screenRecorderMimeType = recorder.mimeType || 'video/webm';
+                    } catch (fallbackErr) {
+                        console.error('MediaRecorder fallback init error:', fallbackErr);
+                        showScreenRecorderError('تعذّر تهيئة مسجّل الفيديو على هذا المتصفح.');
+                        stopAllScreenRecorderTracks();
+                        return;
+                    }
+                }
+
+                recorder.ondataavailable = function (event) {
+                    try {
+                        if (event.data && event.data.size > 0) {
+                            screenRecorderChunks.push(event.data);
+                        }
+                    } catch (dataErr) {
+                        console.error('ondataavailable error:', dataErr);
+                    }
+                };
+
+                recorder.onerror = function (event) {
+                    console.error('MediaRecorder error:', event && event.error);
+                    showScreenRecorderError('حدث خطأ أثناء عملية التسجيل. تم إيقاف التسجيل تلقائياً.');
+                    stopScreenRecording();
+                };
+
+                recorder.onstop = function () {
+                    try {
+                        screenRecorderBlob = new Blob(screenRecorderChunks, { type: screenRecorderMimeType });
+                        updateScreenRecorderStatusUI('idle');
+                    } catch (stopErr) {
+                        console.error('MediaRecorder onstop error:', stopErr);
+                    }
+                };
+
+                screenRecorderMediaRecorder = recorder;
+                recorder.start(1000); // تجميع البيانات كل ثانية لضمان عدم فقدان المقطع الأخير عند التوقف المفاجئ
+                screenRecorderWasAutoPaused = false;
+                updateScreenRecorderStatusUI('recording');
+
+            } catch (err) {
+                console.error('startScreenRecording error:', err);
+                showScreenRecorderError('حدث خطأ غير متوقع أثناء محاولة بدء التسجيل.');
+                stopAllScreenRecorderTracks();
+            }
+        }
+
+        function stopScreenRecording() {
+            try {
+                if (screenRecorderMediaRecorder && screenRecorderMediaRecorder.state !== 'inactive') {
+                    screenRecorderMediaRecorder.stop();
+                }
+                stopAllScreenRecorderTracks();
+            } catch (err) {
+                console.error('stopScreenRecording error:', err);
+                updateScreenRecorderStatusUI('idle');
+            }
+        }
+
+        function stopAllScreenRecorderTracks() {
+            try {
+                if (screenRecorderDisplayStream) {
+                    screenRecorderDisplayStream.getTracks().forEach(function (track) {
+                        try { track.stop(); } catch (e) { /* تجاهل */ }
+                    });
+                    screenRecorderDisplayStream = null;
+                }
+                if (screenRecorderAudioStream) {
+                    screenRecorderAudioStream.getTracks().forEach(function (track) {
+                        try { track.stop(); } catch (e) { /* تجاهل */ }
+                    });
+                    screenRecorderAudioStream = null;
+                }
+            } catch (err) {
+                console.error('stopAllScreenRecorderTracks error:', err);
+            }
+        }
+
+        function downloadRecordedVideo() {
+            try {
+                if (!screenRecorderBlob) {
+                    showScreenRecorderError('لا يوجد تسجيل جاهز للتحميل بعد.');
+                    return;
+                }
+                const isMp4 = /mp4/i.test(screenRecorderMimeType);
+                const fileExtension = isMp4 ? 'mp4' : 'webm';
+                if (!isMp4) {
+                    showScreenRecorderError('تنبيه: متصفحك لا يدعم تسجيل MP4 مباشرة، لذا تم تصدير الملف بصيغة WebM المتوافقة بدلاً من ذلك.');
+                }
+
+                const objectUrl = URL.createObjectURL(screenRecorderBlob);
+                const downloadLink = document.createElement('a');
+                downloadLink.href = objectUrl;
+                downloadLink.download = 'تسجيل_الحصة_' + Date.now() + '.' + fileExtension;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+
+                setTimeout(function () {
+                    try { URL.revokeObjectURL(objectUrl); } catch (e) { /* تجاهل */ }
+                }, 4000);
+            } catch (err) {
+                console.error('downloadRecordedVideo error:', err);
+                showScreenRecorderError('حدث خطأ أثناء محاولة تحميل الفيديو المسجّل.');
+            }
+        }
+
+        // --- Auto-Pause / Auto-Resume عبر Page Visibility API + blur/focus ---
+        // عند خروج المعلم من التبويب الحالي (تبديل تبويب / تصغير المتصفح / الانتقال لتطبيق آخر) يتم
+        // إيقاف التسجيل مؤقتاً تلقائياً (pause)، وعند العودة يُستأنف تلقائياً (resume) من حيث توقف،
+        // دون التأثير على أي منطق أو مستمع أحداث (Event Listener) آخر موجود مسبقاً في الصفحة.
+        function handleScreenRecorderVisibilityChange() {
+            try {
+                if (!screenRecorderMediaRecorder) return;
+                const isHidden = (document.visibilityState === 'hidden');
+                if (isHidden) {
+                    if (screenRecorderMediaRecorder.state === 'recording') {
+                        screenRecorderMediaRecorder.pause();
+                        screenRecorderWasAutoPaused = true;
+                        updateScreenRecorderStatusUI('paused');
+                    }
+                } else {
+                    if (screenRecorderMediaRecorder.state === 'paused' && screenRecorderWasAutoPaused) {
+                        screenRecorderMediaRecorder.resume();
+                        screenRecorderWasAutoPaused = false;
+                        updateScreenRecorderStatusUI('recording');
+                    }
+                }
+            } catch (err) {
+                console.error('handleScreenRecorderVisibilityChange error:', err);
+            }
+        }
+
+        function handleScreenRecorderWindowBlur() {
+            try {
+                if (!screenRecorderMediaRecorder) return;
+                if (screenRecorderMediaRecorder.state === 'recording') {
+                    screenRecorderMediaRecorder.pause();
+                    screenRecorderWasAutoPaused = true;
+                    updateScreenRecorderStatusUI('paused');
+                }
+            } catch (err) {
+                console.error('handleScreenRecorderWindowBlur error:', err);
+            }
+        }
+
+        function handleScreenRecorderWindowFocus() {
+            try {
+                if (!screenRecorderMediaRecorder) return;
+                if (screenRecorderMediaRecorder.state === 'paused' && screenRecorderWasAutoPaused) {
+                    screenRecorderMediaRecorder.resume();
+                    screenRecorderWasAutoPaused = false;
+                    updateScreenRecorderStatusUI('recording');
+                }
+            } catch (err) {
+                console.error('handleScreenRecorderWindowFocus error:', err);
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleScreenRecorderVisibilityChange);
+        window.addEventListener('blur', handleScreenRecorderWindowBlur);
+        window.addEventListener('focus', handleScreenRecorderWindowFocus);
     </script>
 </body>
 </html>
