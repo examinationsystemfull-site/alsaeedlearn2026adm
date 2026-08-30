@@ -1024,6 +1024,36 @@
         .wb-grid-cell.active { background: var(--accent-gold); border-color: var(--primary-emerald); }
 
         /* ============================================================================
+           NEWLY ADDED (Task 4 - Global Header: Professional Calculator): أنماط CSS خاصة
+           بلوحة مفاتيح الآلة الحاسبة الاحترافية داخل نافذتها المنبثقة. إضافة جديدة بالكامل،
+           لا تُعدِّل أو تحذف أي نمط سابق في الصفحة، ومتجاوبة تلقائياً عبر جميع أحجام الشاشات
+           بحكم اعتمادها على wb-modal-overlay/wb-modal-box المرنَين أصلاً.
+           ============================================================================ */
+        .calc-btn {
+            background: #f4eee1;
+            color: var(--primary-emerald);
+            border: 1px solid #e2d6bd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 12px 0;
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+        .calc-btn:hover { background: #ebe0c8; }
+        .calc-btn:active { transform: scale(0.95); }
+        .calc-btn-fn { background: rgba(197, 168, 128, 0.25); color: var(--primary-emerald); }
+        .calc-btn-fn:hover { background: var(--accent-gold); color: #fff; }
+        .calc-btn-op { background: var(--primary-emerald); color: #fff; }
+        .calc-btn-op:hover { background: var(--secondary-emerald, #0b3a26); }
+        .calc-btn-equals { background: var(--accent-gold); color: var(--primary-emerald); }
+        .calc-btn-equals:hover { background: #b0936b; }
+        @media (max-width: 480px) {
+            .calc-btn { font-size: 15px; padding: 10px 0; }
+            #calc-display { font-size: 22px !important; }
+        }
+
+        /* ============================================================================
            NEWLY ADDED (Media Player & Class Screen Recorder Modules): أنماط CSS لزري
            "مشغل الوسائط" و"مسجل الحصة" الجديدين في الشريط العلوي، ونافذتيهما العائمة/المنبثقة.
            إضافة جديدة بالكامل، لا تُعدِّل أو تحذف أي نمط سابق في الصفحة.
@@ -2499,6 +2529,12 @@
             <button type="button" class="btn-show-panel" id="btn-open-media-player" onclick="openMediaPlayerWidget()">🎬 مشغل الوسائط</button>
             <!-- NEWLY ADDED (Class Screen Recorder Module): زر "مسجل الحصة" — بجانب زر "نقاط التفاعل في الحصة" مباشرة، حصري لشاشة المعلم -->
             <button type="button" class="btn-show-panel" id="btn-open-screen-recorder" onclick="openScreenRecorderWidget()">🖥️ مسجل الحصة</button>
+            <!-- NEWLY ADDED (Task 4 - Global Header: Professional Calculator Button): زر "الآلة الحاسبة
+                 الاحترافية" — تمت إضافته داخل نفس شريط أزرار الإظهار الثابت (panel-show-buttons-bar) المشترك
+                 فعلياً بين جميع الأدوار الثلاثة (معلم/طالب/مساعد)، بنفس نمط وتنسيق باقي الأزرار (btn-show-panel)
+                 تماماً لضمان اتساق التصميم، وبنفس آلية flex-wrap المتجاوبة الحالية للشريط عبر جميع أحجام
+                 الشاشات (كمبيوتر/تابلت/موبايل) دون أي تعديل على تباعد أو ترتيب باقي الأزرار الموجودة مسبقاً. -->
+            <button type="button" class="btn-show-panel" id="btn-open-professional-calculator" onclick="openProfessionalCalculator()" title="فتح الآلة الحاسبة الاحترافية">🧮 الآلة الحاسبة</button>
         </div>
     </header>
 
@@ -2575,6 +2611,51 @@
 
             <div class="wb-modal-actions">
                 <button type="button" class="wb-modal-btn-secondary" onclick="closeScreenRecorderWidget()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================================================
+         NEWLY ADDED (Task 4 - Global Header: Professional Calculator): نافذة منبثقة (Modal) عامة ومشتركة
+         بين جميع الأدوار الثلاثة (معلم/طالب/مساعد) تحتوي آلة حاسبة احترافية بسيطة وآمنة، مبنية بالكامل بلغة
+         JavaScript الأصلية (Vanilla JS) بدون استخدام دالة eval() إطلاقاً تفادياً لأي ثغرة أمنية محتملة (Code
+         Injection)، وتعتمد بدلاً من ذلك على آلة حالة (State Machine) بسيطة تحاكي سلوك آلة حاسبة تقليدية
+         حقيقية (رقم سابق + عملية معلّقة + رقم حالي). تستخدم نفس نمط الأنماط البصرية الحالي للنوافذ المنبثقة
+         (wb-modal-overlay / wb-modal-box) المُستخدم مسبقاً في نوافذ إدراج الصورة/الجدول ومسجل الحصة، للحفاظ
+         الكامل على اتساق التصميم العام للمنصة. إضافة جديدة بالكامل ومستقلة تماماً، لا تُعدِّل أو تحذف أي
+         عنصر أو منطق سابق في الصفحة. -->
+    <div id="professional-calculator-overlay" class="wb-modal-overlay hidden" style="display:none;" onclick="if(event.target===this) closeProfessionalCalculator()">
+        <div class="wb-modal-box" style="max-width:330px;">
+            <div class="wb-modal-title">🧮 الآلة الحاسبة الاحترافية</div>
+            <div id="calc-display" style="background:var(--primary-emerald); color:var(--accent-gold); font-size:26px; font-weight:800; text-align:left; direction:ltr; padding:14px 12px; border-radius:10px; margin-bottom:12px; overflow-x:auto; white-space:nowrap; min-height:38px;" aria-live="polite">0</div>
+            <div id="calc-keypad" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;">
+                <button type="button" class="calc-btn calc-btn-fn" onclick="calcClearAll()">C</button>
+                <button type="button" class="calc-btn calc-btn-fn" onclick="calcBackspace()">⌫</button>
+                <button type="button" class="calc-btn calc-btn-fn" onclick="calcInputPercent()">%</button>
+                <button type="button" class="calc-btn calc-btn-op" onclick="calcChooseOperator('÷')">÷</button>
+
+                <button type="button" class="calc-btn" onclick="calcInputDigit('7')">7</button>
+                <button type="button" class="calc-btn" onclick="calcInputDigit('8')">8</button>
+                <button type="button" class="calc-btn" onclick="calcInputDigit('9')">9</button>
+                <button type="button" class="calc-btn calc-btn-op" onclick="calcChooseOperator('×')">×</button>
+
+                <button type="button" class="calc-btn" onclick="calcInputDigit('4')">4</button>
+                <button type="button" class="calc-btn" onclick="calcInputDigit('5')">5</button>
+                <button type="button" class="calc-btn" onclick="calcInputDigit('6')">6</button>
+                <button type="button" class="calc-btn calc-btn-op" onclick="calcChooseOperator('-')">−</button>
+
+                <button type="button" class="calc-btn" onclick="calcInputDigit('1')">1</button>
+                <button type="button" class="calc-btn" onclick="calcInputDigit('2')">2</button>
+                <button type="button" class="calc-btn" onclick="calcInputDigit('3')">3</button>
+                <button type="button" class="calc-btn calc-btn-op" onclick="calcChooseOperator('+')">+</button>
+
+                <button type="button" class="calc-btn" onclick="calcToggleSign()">±</button>
+                <button type="button" class="calc-btn" onclick="calcInputDigit('0')">0</button>
+                <button type="button" class="calc-btn" onclick="calcInputDecimalPoint()">.</button>
+                <button type="button" class="calc-btn calc-btn-equals" onclick="calcComputeResult()">=</button>
+            </div>
+            <div class="wb-modal-actions">
+                <button type="button" class="wb-modal-btn-secondary" onclick="closeProfessionalCalculator()">إغلاق</button>
             </div>
         </div>
     </div>
@@ -3001,7 +3082,7 @@
                         <option value="نشط">نشط</option>
                         <option value="غير نشط">غير نشط</option>
                     </select>
-                    <!-- NEWLY ADDED: شريط تصفية ذكي إضافي — المرحلة الدراسية / مستوى التفاعل / الدرجة من 10 / نطاق التاريخ -->
+                    <!-- NEWLY ADDED: شريط تصفية ذكي إضافي — المرحلة الدراسية / مستوى التفاعل / الدرجة من 100 / نطاق التاريخ -->
                     <input type="text" id="txt-report-filter-stage" oninput="renderDynamicReportTable()" placeholder="   تصفية حسب المرحلة الدراسية..." class="w-full p-2.5 border border-gray-300 rounded-lg text-xs outline-none focus:border-[#c5a880]">
                     <select id="sel-report-filter-engagement" onchange="renderDynamicReportTable()" class="w-full p-2.5 border border-gray-300 rounded-lg text-xs outline-none focus:border-[#c5a880] bg-white">
                         <option value="">مستوى التفاعل: الكل</option>
@@ -3010,10 +3091,28 @@
                         <option value="يحتاج تحفيز">يحتاج تحفيز</option>
                     </select>
                     <select id="sel-report-filter-assessment" onchange="renderDynamicReportTable()" class="w-full p-2.5 border border-gray-300 rounded-lg text-xs outline-none focus:border-[#c5a880] bg-white">
-                        <option value="">الدرجة من 10: الكل</option>
-                        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
-                        <option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+                        <option value="">الدرجة من 100: الكل</option>
                     </select>
+                    <!-- MODIFIED (Task 1 - Update Grade Scale): تم رفع نطاق قائمة تصفية "الدرجة" من (1-10) إلى (1-100).
+                         يتم توليد الخيارات ديناميكياً عبر السكربت أدناه فور تحميل الصفحة بدلاً من كتابة 100 عنصر
+                         <option> يدوياً داخل الـ HTML، مع الحفاظ الكامل على نفس معرّف العنصر (id) ونفس دالة
+                         onchange المستخدمة مسبقاً (renderDynamicReportTable) دون أي تعديل في منطقها. -->
+                    <script>
+                        (function populateReportAssessmentFilterOptions() {
+                            try {
+                                var assessmentFilterSelectEl = document.getElementById('sel-report-filter-assessment');
+                                if (!assessmentFilterSelectEl) return;
+                                for (var gradeOptionValue = 1; gradeOptionValue <= 100; gradeOptionValue++) {
+                                    var gradeOptionEl = document.createElement('option');
+                                    gradeOptionEl.value = String(gradeOptionValue);
+                                    gradeOptionEl.textContent = String(gradeOptionValue);
+                                    assessmentFilterSelectEl.appendChild(gradeOptionEl);
+                                }
+                            } catch (populateGradeFilterErr) {
+                                console.error('populateReportAssessmentFilterOptions error:', populateGradeFilterErr);
+                            }
+                        })();
+                    </script>
                     <div class="flex items-center gap-1">
                         <input type="date" id="date-report-from" onchange="renderDynamicReportTable()" title="من تاريخ" class="w-full p-2 border border-gray-300 rounded-lg text-[11px] outline-none focus:border-[#c5a880]">
                         <span class="text-[10px] text-gray-400">إلى</span>
@@ -3043,7 +3142,8 @@
                                 <th class="px-2 py-2 text-gray-700 font-bold min-w-[130px]">تاريخ الحصة/المحاضرة</th>
                                 <th class="px-2 py-2 text-gray-700 font-bold min-w-[150px]">النشاط/الحالة</th>
                                 <th class="px-2 py-2 text-gray-700 font-bold min-w-[120px]">مستوى التفاعل</th>
-                                <th class="px-2 py-2 text-gray-700 font-bold text-center">الدرجة من 10</th>
+                                <!-- MODIFIED (Task 1 - Update Grade Scale): تحديث نص عنوان العمود من "الدرجة من 10" إلى "الدرجة من 100" -->
+                                <th class="px-2 py-2 text-gray-700 font-bold text-center">الدرجة من 100</th>
                                 <th class="px-2 py-2 text-gray-700 font-bold min-w-[170px]">ملاحظات وتوصيات</th>
                                 <th id="th-report-actions" class="px-2 py-2 text-gray-700 font-bold text-center">الإجراءات</th>
                             </tr>
@@ -8640,7 +8740,8 @@
                                     <th style="border:1px solid #ccc; padding:6px;">عنوان الدرس</th>
                                     <th style="border:1px solid #ccc; padding:6px;">النشاط</th>
                                     <th style="border:1px solid #ccc; padding:6px;">مستوى التفاعل</th>
-                                    <th style="border:1px solid #ccc; padding:6px;">الدرجة من 10</th>
+                                    <!-- MODIFIED (Task 1 - Update Grade Scale): تحديث نص عمود الدرجة في قالب طباعة كتاب الإنجازات ليطابق النطاق الجديد (من 100) -->
+                                    <th style="border:1px solid #ccc; padding:6px;">الدرجة من 100</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -8805,6 +8906,52 @@
                 .replace(/"/g, '&quot;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;');
+        }
+
+        // ============================================================================================
+        // NEWLY ADDED (Task 2 & 3 - Link Recognition in Notes & Recommendations): دالة مساعدة عامة تقوم
+        // بتحويل أي رابط (URL) نصي عادي وارد ضمن نص حر (يبدأ بـ http:// أو https://) إلى وسم <a> فعلي قابل
+        // للنقر، مع تعيين خاصيتي الأمان target="_blank" و rel="noopener noreferrer" لمنع أي إمكانية لاستغلال
+        // الصفحة المفتوحة حديثاً للوصول إلى window.opener الخاص بالصفحة الأصلية (Tabnabbing). يتم أولاً تعقيم
+        // النص بالكامل عبر escapeHtmlAttr (لمنع حقن أي وسم HTML/JS ضار) قبل البحث عن الروابط واستبدالها،
+        // ثم يتم تمرير الناتج لاحقاً عبر sanitizeRichHtml (DOMPurify) في كل نقطة استخدام كطبقة حماية إضافية
+        // (Defense in Depth) قبل إدراجه فعلياً داخل الـ DOM عبر innerHTML. لا تُعدِّل هذه الدالة أو تحذف أي
+        // منطق أو دالة موجودة مسبقاً في الصفحة — إضافة جديدة ومستقلة بالكامل.
+        function linkifyPlainText(rawText) {
+            try {
+                const escapedText = escapeHtmlAttr(rawText);
+                if (!escapedText) return '';
+                const urlPattern = /((?:https?:\/\/)[^\s<>"'\u0600-\u06FF]+)/gi;
+                return escapedText.replace(urlPattern, function (matchedUrl) {
+                    let cleanUrl = matchedUrl;
+                    let trailingChars = '';
+                    // إزالة أي علامات ترقيم زائدة قد تلتصق خطأً بنهاية الرابط أثناء الكتابة الطبيعية (مثال: نقطة نهاية الجملة)
+                    const trailingPunctuationMatch = cleanUrl.match(/[.,;:!?)\]]+$/);
+                    if (trailingPunctuationMatch) {
+                        trailingChars = trailingPunctuationMatch[0];
+                        cleanUrl = cleanUrl.slice(0, cleanUrl.length - trailingChars.length);
+                    }
+                    if (!cleanUrl) return matchedUrl;
+                    return '<a href="' + cleanUrl + '" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline break-all">' + cleanUrl + '</a>' + trailingChars;
+                });
+            } catch (linkifyErr) {
+                console.error('linkifyPlainText error:', linkifyErr);
+                return escapeHtmlAttr(rawText);
+            }
+        }
+
+        // NEWLY ADDED (Task 2 - Enable Link Parsing in Teacher's Notes Field): تُستدعى لحظياً (oninput) من
+        // حقل "ملاحظات وتوصيات" الخاص بالمعلم لتحديث معاينة الرابط الحيّة الظاهرة أسفل الحقل مباشرة، دون
+        // الحاجة لإعادة رسم الجدول بالكامل، ودون أي تأثير على منطق الحفظ الفعلي في قاعدة البيانات (الذي
+        // يبقى حصرياً عبر onchange -> updateReportRowField كما كان مسبقاً تماماً).
+        function updateTeacherNotesLinkPreview(rowKey, rawValue) {
+            try {
+                const previewEl = document.getElementById('notes-link-preview-' + rowKey);
+                if (!previewEl) return;
+                previewEl.innerHTML = sanitizeRichHtml(linkifyPlainText(rawValue));
+            } catch (previewErr) {
+                console.error('updateTeacherNotesLinkPreview error:', previewErr);
+            }
         }
 
         // === تعقيم المحتوى الغني (Rich HTML) باستخدام مكتبة DOMPurify قبل أي إدراج داخل DOM عبر innerHTML ===
@@ -9018,7 +9165,7 @@
                 visibleRows = visibleRows.filter(row => (row.activity || '').trim() === activityFilterTerm);
             }
 
-            // --- NEWLY ADDED: شريط تصفية إضافي — المرحلة الدراسية / مستوى التفاعل / الدرجة من 10/ نطاق التاريخ ---
+            // --- NEWLY ADDED: شريط تصفية إضافي — المرحلة الدراسية / مستوى التفاعل / الدرجة من 100/ نطاق التاريخ ---
             const stageFilterEl = document.getElementById('txt-report-filter-stage');
             const engagementFilterEl = document.getElementById('sel-report-filter-engagement');
             const assessmentFilterEl = document.getElementById('sel-report-filter-assessment');
@@ -9075,8 +9222,9 @@
                         `<option value="${v}" ${v === row.interactionLevel ? 'selected' : ''}>${v}</option>`
                     ).join('');
 
+                    // MODIFIED (Task 1 - Update Grade Scale): تم رفع سقف خيارات قائمة الدرجة المنسدلة لكل صف من 10 إلى 100
                     let evalOptions = '';
-                    for (let n = 1; n <= 10; n++) {
+                    for (let n = 1; n <= 100; n++) {
                         evalOptions += `<option value="${n}" ${String(n) === String(row.formativeEval) ? 'selected' : ''}>${n}</option>`;
                     }
 
@@ -9130,7 +9278,13 @@
                                 </select>
                             </td>
                             <td class="px-2 py-2">
-                                <input type="text" value="${escapeHtmlAttr(row.notes)}" placeholder="ملاحظات وتوصيات..." class="p-1.5 border border-gray-300 rounded text-xs w-full" onchange="updateReportRowField('${row.key}', 'notes', this.value)">
+                                <!-- MODIFIED (Task 2 - Enable Link Parsing in Teacher's Notes Field): تم الحفاظ الكامل على
+                                     حقل الإدخال النصي الأصلي بنفس معرّفاته ودالة الحفظ (onchange -> updateReportRowField)
+                                     دون أي تعديل في منطقها، مع إضافة معاينة حيّة أسفل الحقل مباشرة (oninput) تعرض أي
+                                     رابط (URL) صالح تم كتابته كنص قابل للنقر فعلياً (target="_blank" و rel="noopener
+                                     noreferrer")، عبر linkifyPlainText + sanitizeRichHtml (Defense in Depth) -->
+                                <input type="text" value="${escapeHtmlAttr(row.notes)}" placeholder="ملاحظات وتوصيات..." class="p-1.5 border border-gray-300 rounded text-xs w-full" onchange="updateReportRowField('${row.key}', 'notes', this.value)" oninput="updateTeacherNotesLinkPreview('${row.key}', this.value)">
+                                <div id="notes-link-preview-${row.key}" class="text-[10px] text-blue-700 mt-1 break-all leading-relaxed">${sanitizeRichHtml(linkifyPlainText(row.notes))}</div>
                             </td>
                             <td class="px-2 py-2 text-center">
                                 <button type="button" onclick="deleteReportRow('${row.key}')" class="bg-red-500 hover:bg-red-600 text-white text-[10px] px-2 py-1 rounded font-bold transition-all">حذف</button>
@@ -9159,7 +9313,12 @@
                             <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.activity) || '-'}</td>
                             <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.interactionLevel) || '-'}</td>
                             <td class="px-2 py-2 text-center text-gray-600">${escapeHtmlAttr(row.formativeEval) || '-'}</td>
-                            <td class="px-2 py-2 text-gray-600">${escapeHtmlAttr(row.notes) || '-'}</td>
+                            <!-- MODIFIED (Task 3 - Render Active Hyperlinks in Student's Notes View): بدلاً من عرض
+                                 النص المُعقَّم فقط كنص عادي (escapeHtmlAttr)، يتم الآن تمرير المحتوى عبر linkifyPlainText
+                                 (الذي يقوم أولاً بتعقيم النص بالكامل ثم تحويل أي رابط URL صالح فيه إلى وسم <a> فعلي
+                                 قابل للنقر بأمان: target="_blank" و rel="noopener noreferrer")، ثم عبر sanitizeRichHtml
+                                 (DOMPurify) كطبقة حماية إضافية (Defense in Depth) قبل الإدراج داخل الـ DOM -->
+                            <td class="px-2 py-2 text-gray-600 break-all">${row.notes ? sanitizeRichHtml(linkifyPlainText(row.notes)) : '-'}</td>
                         </tr>`;
                 }
 
@@ -9206,7 +9365,7 @@
             { key: 'sessionDate', label: 'تاريخ الحصة/المحاضرة', default: true },
             { key: 'activity', label: 'النشاط/الحالة', default: true },
             { key: 'interactionLevel', label: 'مستوى التفاعل', default: true },
-            { key: 'formativeEval', label: 'الدرجة من 10', default: true },
+            { key: 'formativeEval', label: 'الدرجة من 100', default: true },
             { key: 'notes', label: 'ملاحظات وتوصيات', default: true }
         ];
 
@@ -9883,9 +10042,28 @@
         }
 
         // المعلم فقط: تحديث حقل واحد ضمن سجل تقييم موجود بالفعل (مزامنة لحظية فورية)
+        // MODIFIED (Task 1 - Update Grade Scale / Backend Validation): تمت إضافة تحقق دفاعي (Defense in
+        // Depth) خاص بحقل الدرجة (formativeEval) فقط، دون أي تأثير على باقي الحقول الأخرى، للتأكد من أن
+        // القيمة المُرسَلة للحفظ رقم صحيح ضمن النطاق الجديد المسموح به (1 إلى 100) قبل كتابتها في قاعدة
+        // البيانات — بما يحمي البيانات من أي قيمة غير متوقعة قد تصل لهذه الدالة من مصدر خارج واجهة القائمة
+        // المنسدلة نفسها (مثال: استدعاء يدوي أو تلاعب من خلال أدوات المطوّر)، دون كسر عملية الحفظ الطبيعية.
         function updateReportRowField(rowKey, field, value) {
             if (currentRole !== 'teacher' || !dbRef || !rowKey) return;
-            dbRef.child('lesson_reports').child(rowKey).update({ [field]: value }).catch(err => {
+            let sanitizedValue = value;
+            if (field === 'formativeEval') {
+                if (value === '' || value === null || value === undefined) {
+                    sanitizedValue = '';
+                } else {
+                    const numericGrade = Number(value);
+                    if (!Number.isFinite(numericGrade)) {
+                        console.error('updateReportRowField: قيمة درجة غير صالحة تم تجاهلها:', value);
+                        return;
+                    }
+                    const clampedGrade = Math.min(100, Math.max(1, Math.round(numericGrade)));
+                    sanitizedValue = String(clampedGrade);
+                }
+            }
+            dbRef.child('lesson_reports').child(rowKey).update({ [field]: sanitizedValue }).catch(err => {
                 console.error('updateReportRowField error:', err);
                 alert('حدث خطأ أثناء حفظ التعديل: ' + err.message);
             });
@@ -14522,6 +14700,193 @@
                 overlay.style.display = 'none';
             } catch (err) {
                 console.error('closeScreenRecorderWidget error:', err);
+            }
+        }
+
+        // ============================================================================================
+        // NEWLY ADDED (Task 4 - Global Header: Professional Calculator): منطق آلة حاسبة احترافية آمنة
+        // بالكامل، مبنية على آلة حالة بسيطة (رقم سابق / عملية معلّقة / رقم حالي) بدلاً من الاعتماد على
+        // eval() أو new Function() على أي نص مُدخَل، تفادياً تماماً لأي احتمال لثغرة حقن أو تنفيذ كود (Code
+        // Injection)، وهو ما يتوافق مع متطلبات التأمين البرمجي (Frontend Security) المطلوبة. تتم معالجة
+        // كل حالات الاستثناء المحتملة (القسمة على صفر، إدخال غير رقمي، إلغاء تحديد، تجاوز طول العرض...)
+        // بأمان دون أي توقف أو كسر في تنفيذ السكربت. إضافة جديدة بالكامل ومستقلة تماماً عن أي منطق آخر.
+        // ============================================================================================
+        let calcCurrentInput = '0';
+        let calcPreviousInput = null;
+        let calcPendingOperator = null;
+        let calcShouldResetOnNextDigit = false;
+
+        function openProfessionalCalculator() {
+            try {
+                const overlay = document.getElementById('professional-calculator-overlay');
+                if (!overlay) return;
+                calcClearAll();
+                overlay.classList.remove('hidden');
+                overlay.style.display = 'flex';
+            } catch (err) {
+                console.error('openProfessionalCalculator error:', err);
+            }
+        }
+
+        function closeProfessionalCalculator() {
+            try {
+                const overlay = document.getElementById('professional-calculator-overlay');
+                if (!overlay) return;
+                overlay.classList.add('hidden');
+                overlay.style.display = 'none';
+            } catch (err) {
+                console.error('closeProfessionalCalculator error:', err);
+            }
+        }
+
+        // يحدّث شاشة العرض بأمان، مع اقتصاص طول النص المعروض لمنع تجاوزه لعرض الصندوق في الحالات القصوى
+        function calcRefreshDisplay(textOverride) {
+            try {
+                const displayEl = document.getElementById('calc-display');
+                if (!displayEl) return;
+                let textToShow = (textOverride !== undefined) ? textOverride : calcCurrentInput;
+                textToShow = String(textToShow);
+                if (textToShow.length > 18) textToShow = textToShow.slice(0, 18) + '…';
+                displayEl.textContent = textToShow;
+            } catch (err) {
+                console.error('calcRefreshDisplay error:', err);
+            }
+        }
+
+        function calcClearAll() {
+            try {
+                calcCurrentInput = '0';
+                calcPreviousInput = null;
+                calcPendingOperator = null;
+                calcShouldResetOnNextDigit = false;
+                calcRefreshDisplay();
+            } catch (err) {
+                console.error('calcClearAll error:', err);
+            }
+        }
+
+        function calcInputDigit(digitChar) {
+            try {
+                if (calcShouldResetOnNextDigit) {
+                    calcCurrentInput = '0';
+                    calcShouldResetOnNextDigit = false;
+                }
+                // منع تجاوز طول معقول لعدد الخانات المُدخلة يدوياً حفاظاً على وضوح شاشة العرض
+                if (calcCurrentInput.replace('-', '').length >= 15) return;
+                if (calcCurrentInput === '0') {
+                    calcCurrentInput = digitChar;
+                } else {
+                    calcCurrentInput += digitChar;
+                }
+                calcRefreshDisplay();
+            } catch (err) {
+                console.error('calcInputDigit error:', err);
+            }
+        }
+
+        function calcInputDecimalPoint() {
+            try {
+                if (calcShouldResetOnNextDigit) {
+                    calcCurrentInput = '0';
+                    calcShouldResetOnNextDigit = false;
+                }
+                if (calcCurrentInput.indexOf('.') === -1) {
+                    calcCurrentInput += '.';
+                    calcRefreshDisplay();
+                }
+            } catch (err) {
+                console.error('calcInputDecimalPoint error:', err);
+            }
+        }
+
+        function calcBackspace() {
+            try {
+                if (calcShouldResetOnNextDigit) return;
+                if (calcCurrentInput.length <= 1 || (calcCurrentInput.length === 2 && calcCurrentInput.startsWith('-'))) {
+                    calcCurrentInput = '0';
+                } else {
+                    calcCurrentInput = calcCurrentInput.slice(0, -1);
+                }
+                calcRefreshDisplay();
+            } catch (err) {
+                console.error('calcBackspace error:', err);
+            }
+        }
+
+        function calcToggleSign() {
+            try {
+                if (calcCurrentInput === '0') return;
+                calcCurrentInput = calcCurrentInput.startsWith('-') ? calcCurrentInput.slice(1) : ('-' + calcCurrentInput);
+                calcRefreshDisplay();
+            } catch (err) {
+                console.error('calcToggleSign error:', err);
+            }
+        }
+
+        function calcInputPercent() {
+            try {
+                const numericValue = Number(calcCurrentInput);
+                if (!Number.isFinite(numericValue)) return;
+                calcCurrentInput = String(numericValue / 100);
+                calcRefreshDisplay();
+            } catch (err) {
+                console.error('calcInputPercent error:', err);
+            }
+        }
+
+        // ينفّذ العملية الحسابية المعلّقة فعلياً بين الرقم السابق والرقم الحالي، مع معالجة القسمة على صفر بأمان
+        function calcApplyPendingOperation(previousValue, currentValue, operatorSymbol) {
+            const numA = Number(previousValue);
+            const numB = Number(currentValue);
+            if (!Number.isFinite(numA) || !Number.isFinite(numB)) return NaN;
+            switch (operatorSymbol) {
+                case '+': return numA + numB;
+                case '-': return numA - numB;
+                case '×': return numA * numB;
+                case '÷': return (numB === 0) ? NaN : (numA / numB);
+                default: return numB;
+            }
+        }
+
+        function calcChooseOperator(operatorSymbol) {
+            try {
+                if (calcPendingOperator !== null && !calcShouldResetOnNextDigit) {
+                    const result = calcApplyPendingOperation(calcPreviousInput, calcCurrentInput, calcPendingOperator);
+                    if (!Number.isFinite(result)) {
+                        calcRefreshDisplay('خطأ');
+                        calcClearAll();
+                        return;
+                    }
+                    calcCurrentInput = String(result);
+                    calcRefreshDisplay();
+                }
+                calcPreviousInput = calcCurrentInput;
+                calcPendingOperator = operatorSymbol;
+                calcShouldResetOnNextDigit = true;
+            } catch (err) {
+                console.error('calcChooseOperator error:', err);
+            }
+        }
+
+        function calcComputeResult() {
+            try {
+                if (calcPendingOperator === null || calcPreviousInput === null) return;
+                const result = calcApplyPendingOperation(calcPreviousInput, calcCurrentInput, calcPendingOperator);
+                if (!Number.isFinite(result)) {
+                    calcRefreshDisplay('خطأ: القسمة على صفر غير ممكنة');
+                    calcPreviousInput = null;
+                    calcPendingOperator = null;
+                    calcShouldResetOnNextDigit = true;
+                    calcCurrentInput = '0';
+                    return;
+                }
+                calcCurrentInput = String(result);
+                calcPreviousInput = null;
+                calcPendingOperator = null;
+                calcShouldResetOnNextDigit = true;
+                calcRefreshDisplay();
+            } catch (err) {
+                console.error('calcComputeResult error:', err);
             }
         }
 
