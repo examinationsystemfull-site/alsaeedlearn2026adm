@@ -1110,6 +1110,37 @@
         #lesson-preview table.wb-editable-table td, #lesson-preview table.wb-editable-table th {
             border: 1px solid #94a3b8; padding: 6px 10px; min-width: 40px; min-height: 18px;
         }
+
+        /* ============================================================================
+           NEWLY ADDED (Free-Positioning Module): أنماط تحويل الجداول والصور المُدرجة
+           داخل السبورة الذكية إلى عناصر حرة التموضع (Free Drag & Drop) قابلة للتراكب
+           فوق/بجانب أي عنصر آخر، مع مقبض نقل مخصص ومقبض تحجيم للجداول. لا تُعدِّل هذه
+           الأنماط أياً من قواعد .wb-img-toolbar / .wb-img-resize-handle القائمة أعلاه،
+           بل تُعاد الاستفادة منها كما هي (بنفس المظهر) لصالح شريط أدوات الجدول ومقبض تحجيمه.
+           ============================================================================ */
+        .wb-free-el {
+            position: absolute;
+            cursor: default;
+        }
+        .wb-free-el img, .wb-free-el table.wb-editable-table { margin: 0 !important; }
+        #lesson-preview table.wb-editable-table.wb-selected-table { outline: 2px solid var(--accent-gold); }
+        .wb-move-handle {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-emerald);
+            color: var(--text-light);
+            border: 2px solid var(--accent-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: move;
+            pointer-events: all;
+            z-index: 34;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
         /* MODULE 1 (UPDATED): صندوق أدوات تنسيق الجدول (wb-table-toolbar) تم حذفه بالكامل بناءً على المتطلبات؛
            تبقى أداة "إدراج جدول" نفسها (النافذة + محدد الصفوف/الأعمدة) تعمل دون أي تغيير */
 
@@ -2534,9 +2565,12 @@
 
             <div class="sr-error-msg" id="sr-error-msg"></div>
             <div class="sr-hint-text">
-                ملاحظة: سيتم إيقاف التسجيل تلقائياً مؤقتاً عند مغادرتك لهذا التبويب أو تصغير المتصفح أو الانتقال
-                إلى تطبيق آخر، ويُستأنف تلقائياً من حيث توقف عند عودتك إلى هذه الشاشة. في حال عدم دعم متصفحك
-                الحالي لترميز MP4 أثناء التسجيل، سيتم تصدير الملف بصيغة WebM كبديل متوافق مع نفس المشغلات.
+                يتم التقاط الشاشة بدقة عالية (حتى Full HD) مع تسجيل تحركات مؤشر الفأرة وكل الخطوط
+                والرسومات والكتابات المُضافة على السبورة أثناء الشرح. سيتم إيقاف التسجيل تلقائياً مؤقتاً
+                عند مغادرتك لهذا التبويب أو تصغير المتصفح أو الانتقال إلى تطبيق آخر، ويُستأنف تلقائياً من
+                حيث توقف عند عودتك إلى هذه الشاشة. فور الضغط على "إنهاء التسجيل"، تتم معالجة الفيديو
+                وحفظه/تنزيله تلقائياً بصيغة MP4 (أو WebM كبديل متوافق في حال عدم دعم متصفحك الحالي لترميز
+                MP4 أثناء التسجيل)، مع إمكانية إعادة تنزيله يدوياً في أي وقت لاحق عبر الزر أدناه.
             </div>
 
             <div class="wb-modal-actions">
@@ -4706,25 +4740,38 @@
         let selectedWbImage = null;
         let wbImgDragState = null;
         let wbCropState = null;
+        // NEWLY ADDED (Free-Positioning Module): حالة الجدول المختار حالياً + حالة سحب/تحجيم الجدول
+        // + حالة السحب العامة (نقل) المشتركة بين الصور والجداول الحرة التموضع
+        let selectedWbTable = null;
+        let wbTableDragState = null;
+        let wbFreeElDragState = null;
 
         function initWhiteboardImageTools() {
             const editor = document.getElementById('lesson-preview');
             if (!editor) return;
 
-            // اختيار الصورة عند الضغط عليها (حصرياً للمعلم)
+            // اختيار الصورة أو الجدول عند الضغط عليه (حصرياً للمعلم)
+            // NEWLY ADDED (Free-Positioning Module): تمت إضافة فرع تحديد الجدول (table.wb-editable-table)
+            // إلى جانب فرع تحديد الصورة الأصلي، دون أي تعديل على منطق تحديد الصورة نفسه
             editor.addEventListener('click', (e) => {
                 if (currentRole !== 'teacher') return;
                 if (e.target && e.target.tagName === 'IMG') {
                     selectWhiteboardImage(e.target);
-                } else if (!e.target.closest('.wb-img-toolbar')) {
+                } else if (e.target && e.target.closest('table.wb-editable-table')) {
+                    selectWhiteboardTable(e.target.closest('table.wb-editable-table'));
+                } else if (!e.target.closest('.wb-img-toolbar') && !e.target.closest('.wb-move-handle')) {
                     deselectWhiteboardImage();
+                    deselectWhiteboardTable();
                 }
             });
 
             // إلغاء التحديد عند الضغط خارج السبورة بالكامل
             document.addEventListener('click', (e) => {
                 const wrapper = document.getElementById('whiteboard-image-tools-wrapper');
-                if (wrapper && !wrapper.contains(e.target)) deselectWhiteboardImage();
+                if (wrapper && !wrapper.contains(e.target)) {
+                    deselectWhiteboardImage();
+                    deselectWhiteboardTable(); // NEWLY ADDED (Free-Positioning Module)
+                }
             });
         }
 
@@ -4734,6 +4781,7 @@
         // --- يبني طبقة التراكب (مقابض التحجيم + شريط الأدوات) فوق الصورة المختارة حالياً ---
         function selectWhiteboardImage(img) {
             deselectWhiteboardImage();
+            deselectWhiteboardTable(); // NEWLY ADDED (Free-Positioning Module): إلغاء تحديد أي جدول مختار مسبقاً
             selectedWbImage = img;
             img.classList.add('wb-selected-img');
             renderWbImageOverlay();
@@ -4771,6 +4819,14 @@
             // MODULE 1 (NEWLY ADDED): قيم الشفافية الحالية للصورة المختارة، تُقرأ من الأنماط الحالية لتعبئة عناصر التحكم بشكل متسق
             const currentOpacity = selectedWbImage.style.opacity !== '' ? selectedWbImage.style.opacity : '1';
 
+            // NEWLY ADDED (Free-Positioning Module): يُعرض مقبض النقل الحر فقط إذا كانت الصورة مغلَّفة
+            // بعنصر حر التموضع (.wb-free-el) — أي أنها أُدرجت عبر أداة الإدراج الحديثة — حفاظاً على توافقية
+            // الصور القديمة المحفوظة مسبقاً في Firebase (قبل هذا التحديث) دون أي كسر لعرضها الحالي
+            const wbImgFreeBox = getWbFreeElOf(selectedWbImage);
+            const wbImgMoveHandleHtml = wbImgFreeBox
+                ? `<div class="wb-move-handle" style="top:${top - 12}px; left:${left - 12}px;" title="سحب لنقل الصورة بحرية" onmousedown="startWbFreeElMove(event, 'image')">✥</div>`
+                : '';
+
             overlay.innerHTML = `
                 <div class="wb-img-toolbar" style="top:${Math.max(0, top - 78)}px; left:${left}px;">
                     <button type="button" onclick="startWbImageCrop()">✂️ اقتصاص</button>
@@ -4791,6 +4847,7 @@
                     <button type="button" onclick="deselectWhiteboardImage()">✔️ تم</button>
                 </div>
                 ${corners.map(c => `<div class="wb-img-resize-handle ${c.cls}" style="top:${c.top}px; left:${c.left}px;" onmousedown="startWbImageResize(event, '${c.cls}')"></div>`).join('')}
+                ${wbImgMoveHandleHtml}
             `;
         }
 
@@ -4841,14 +4898,19 @@
         // (فعّال بشكل أساسي عند تراكب الصور فوق بعضها البعض داخل السبورة عبر تموضع حر)
         function bringWbImageToFront() {
             if (!selectedWbImage) return;
-            selectedWbImage.style.position = 'relative';
-            selectedWbImage.style.zIndex = '20';
+            // NEWLY ADDED (Free-Positioning Module): إن كانت الصورة مغلَّفة بعنصر حر (.wb-free-el)
+            // يُطبَّق ترتيب الطبقات على الغلاف نفسه (وهو صاحب سياق التكديس الفعلي بعد التحويل إلى
+            // عنصر حر التموضع)، وإلا يُحافَظ على السلوك القديم تماماً كما كان لضمان توافقية الصور المحفوظة سابقاً
+            const box = getWbFreeElOf(selectedWbImage);
+            if (box) { box.style.zIndex = '20'; }
+            else { selectedWbImage.style.position = 'relative'; selectedWbImage.style.zIndex = '20'; }
             triggerWhiteboardSyncToFirebase();
         }
         function sendWbImageToBack() {
             if (!selectedWbImage) return;
-            selectedWbImage.style.position = 'relative';
-            selectedWbImage.style.zIndex = '0';
+            const box = getWbFreeElOf(selectedWbImage);
+            if (box) { box.style.zIndex = '0'; }
+            else { selectedWbImage.style.position = 'relative'; selectedWbImage.style.zIndex = '0'; }
             triggerWhiteboardSyncToFirebase();
         }
 
@@ -5022,6 +5084,280 @@
         }
 
         // ==================================================================================
+        // NEWLY ADDED (Free-Positioning Module): وحدة برمجية جديدة ومستقلة بالكامل تتيح تحويل
+        // الجداول والصور المُدرجة حديثاً داخل السبورة الذكية (#lesson-preview) إلى عناصر حرة
+        // التموضع (position:absolute) قابلة للسحب والتراكب فوق أي عنصر آخر (نص/صورة/جدول)، مع
+        // مقبض نقل مخصص، ومقابض تحجيم للجداول، وأزرار سريعة لإضافة صفوف/أعمدة/خلايا للجدول.
+        // لا تُعدِّل هذه الوحدة أياً من الدوال أو الأنماط القائمة، وتتكامل معها فقط عبر نقاط
+        // ربط محدودة وصريحة (renderWbImageOverlay / bringWbImageToFront / sendWbImageToBack /
+        // insertWhiteboardImageAtCursor / confirmInsertWhiteboardTable) موثّقة أعلاه كل منها.
+        // ==================================================================================
+
+        // --- يعيد عنصر "الغلاف الحر" (.wb-free-el) الذي يحتضن عنصراً مُدرجاً (صورة/جدول)، أو null
+        //     إن لم يكن هذا العنصر قد حُوِّل إلى عنصر حر التموضع بعد (توافقية مع محتوى قديم محفوظ) ---
+        function getWbFreeElOf(el) {
+            try { return el && el.closest ? el.closest('.wb-free-el') : null; }
+            catch (e) { return null; }
+        }
+
+        // --- يحوّل عنصراً تم إدراجه للتو داخل السبورة (صورة أو جدول) إلى عنصر حر الحركة، عبر تغليفه
+        //     بـ <div class="wb-free-el"> مُموضع بشكل مطلق (position:absolute) عند نفس الإحداثيات
+        //     البصرية التي ظهر بها العنصر لحظة إدراجه، دون أي قفزة أو تغيير مفاجئ في مكانه الظاهر ---
+        function wrapAsWbFreeElement(el, typeClass) {
+            try {
+                const wrapper = getWbWrapper();
+                if (!wrapper || !el || !el.parentNode) return el;
+                const wrapRect = wrapper.getBoundingClientRect();
+                const elRect = el.getBoundingClientRect();
+                const top = Math.max(0, elRect.top - wrapRect.top);
+                const left = Math.max(0, elRect.left - wrapRect.left);
+
+                const box = document.createElement('div');
+                box.className = 'wb-free-el' + (typeClass ? (' ' + typeClass) : '');
+                box.style.top = top + 'px';
+                box.style.left = left + 'px';
+                box.style.zIndex = '1';
+
+                el.parentNode.insertBefore(box, el);
+                box.appendChild(el);
+                return box;
+            } catch (err) {
+                console.error('wrapAsWbFreeElement error:', err);
+                return el;
+            }
+        }
+
+        // --- بدء/تنفيذ/إنهاء عملية "النقل الحر" (Drag) — مشتركة بين الصور والجداول، تعمل على غلاف
+        //     العنصر الحر (.wb-free-el) وليس على العنصر الداخلي نفسه، حتى لا تتعارض مع التحرير
+        //     الطبيعي لمحتوى الجدول (كتابة نص داخل الخلايا) أو مع مقابض التحجيم/الاقتصاص الخاصة بالصورة ---
+        function startWbFreeElMove(e, kind) {
+            try {
+                e.preventDefault();
+                e.stopPropagation();
+                const targetEl = kind === 'table' ? selectedWbTable : selectedWbImage;
+                const box = getWbFreeElOf(targetEl);
+                const wrapper = getWbWrapper();
+                if (!box || !wrapper) return;
+                const wrapRect = wrapper.getBoundingClientRect();
+                const boxRect = box.getBoundingClientRect();
+                wbFreeElDragState = {
+                    kind,
+                    box,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    startTop: boxRect.top - wrapRect.top,
+                    startLeft: boxRect.left - wrapRect.left
+                };
+                document.addEventListener('mousemove', onWbFreeElMoveMove);
+                document.addEventListener('mouseup', onWbFreeElMoveEnd);
+            } catch (err) {
+                console.error('startWbFreeElMove error:', err);
+            }
+        }
+
+        function onWbFreeElMoveMove(e) {
+            try {
+                if (!wbFreeElDragState) return;
+                const wrapper = getWbWrapper();
+                const dx = e.clientX - wbFreeElDragState.startX;
+                const dy = e.clientY - wbFreeElDragState.startY;
+                let newTop = wbFreeElDragState.startTop + dy;
+                let newLeft = wbFreeElDragState.startLeft + dx;
+                newTop = Math.max(0, newTop);
+                newLeft = Math.max(0, newLeft);
+                if (wrapper) {
+                    const wrapRect = wrapper.getBoundingClientRect();
+                    const boxRect = wbFreeElDragState.box.getBoundingClientRect();
+                    newLeft = Math.min(newLeft, Math.max(0, wrapRect.width - Math.min(boxRect.width, 40)));
+                }
+                wbFreeElDragState.box.style.top = newTop + 'px';
+                wbFreeElDragState.box.style.left = newLeft + 'px';
+                if (wbFreeElDragState.kind === 'table') renderWbTableOverlay();
+                else renderWbImageOverlay();
+            } catch (err) {
+                console.error('onWbFreeElMoveMove error:', err);
+            }
+        }
+
+        function onWbFreeElMoveEnd() {
+            wbFreeElDragState = null;
+            document.removeEventListener('mousemove', onWbFreeElMoveMove);
+            document.removeEventListener('mouseup', onWbFreeElMoveEnd);
+            triggerWhiteboardSyncToFirebase();
+        }
+
+        // --- تحديد/إلغاء تحديد الجدول التفاعلي المختار حالياً، على غرار selectWhiteboardImage تماماً ---
+        function selectWhiteboardTable(table) {
+            try {
+                deselectWhiteboardImage();
+                deselectWhiteboardTable();
+                selectedWbTable = table;
+                table.classList.add('wb-selected-table');
+                renderWbTableOverlay();
+            } catch (err) {
+                console.error('selectWhiteboardTable error:', err);
+            }
+        }
+
+        function deselectWhiteboardTable() {
+            if (selectedWbTable) selectedWbTable.classList.remove('wb-selected-table');
+            selectedWbTable = null;
+            wbTableDragState = null;
+            if (!selectedWbImage) {
+                const overlay = getWbOverlay();
+                if (overlay) { overlay.innerHTML = ''; overlay.style.display = 'none'; }
+            }
+        }
+
+        // --- يبني طبقة التراكب فوق الجدول المختار: شريط أدوات (إضافة صف/عمود/خلية + ترتيب الطبقات)
+        //     + مقبض نقل حر + مقبض تحجيم واحد بالزاوية السفلية (يُكبِّر/يُصغِّر الجدول بأكمله بسلاسة) ---
+        function renderWbTableOverlay() {
+            const wrapper = getWbWrapper();
+            const overlay = getWbOverlay();
+            if (!wrapper || !overlay || !selectedWbTable) return;
+
+            const wrapRect = wrapper.getBoundingClientRect();
+            const tblRect = selectedWbTable.getBoundingClientRect();
+            const top = tblRect.top - wrapRect.top;
+            const left = tblRect.left - wrapRect.left;
+            const width = tblRect.width;
+            const height = tblRect.height;
+            const hasFreeBox = !!getWbFreeElOf(selectedWbTable);
+
+            overlay.style.display = 'block';
+            overlay.innerHTML = `
+                <div class="wb-img-toolbar" style="top:${Math.max(0, top - 40)}px; left:${left}px;">
+                    <button type="button" title="إضافة صف جديد" onclick="addWbTableRow()">➕ صف</button>
+                    <button type="button" title="إضافة عمود جديد" onclick="addWbTableColumn()">➕ عمود</button>
+                    <button type="button" title="إضافة خلية جديدة في آخر صف" onclick="addWbTableCell()">➕ خلية</button>
+                    <button type="button" onclick="bringWbTableToFront()">⬆️ للأمام</button>
+                    <button type="button" onclick="sendWbTableToBack()">⬇️ للخلف</button>
+                    <button type="button" onclick="deselectWhiteboardTable()">✔️ تم</button>
+                </div>
+                ${hasFreeBox ? `<div class="wb-move-handle" style="top:${top - 12}px; left:${left - 12}px;" title="سحب لنقل الجدول بحرية" onmousedown="startWbFreeElMove(event, 'table')">✥</div>` : ''}
+                <div class="wb-img-resize-handle se" style="top:${top + height - 7}px; left:${left + width - 7}px;" title="سحب لتحجيم الجدول" onmousedown="startWbTableResize(event)"></div>
+            `;
+        }
+
+        // --- إضافة صف جديد بنفس عدد أعمدة الجدول الحالي ---
+        function addWbTableRow() {
+            try {
+                if (!selectedWbTable) return;
+                const firstRow = selectedWbTable.querySelector('tr');
+                const colCount = firstRow ? firstRow.children.length : 1;
+                const tr = document.createElement('tr');
+                for (let c = 0; c < Math.max(1, colCount); c++) {
+                    const td = document.createElement('td');
+                    td.innerHTML = '&nbsp;';
+                    tr.appendChild(td);
+                }
+                selectedWbTable.appendChild(tr);
+                renderWbTableOverlay();
+                triggerWhiteboardSyncToFirebase();
+            } catch (err) {
+                console.error('addWbTableRow error:', err);
+            }
+        }
+
+        // --- إضافة عمود جديد لكل صفوف الجدول الحالي دفعة واحدة ---
+        function addWbTableColumn() {
+            try {
+                if (!selectedWbTable) return;
+                const rows = selectedWbTable.querySelectorAll('tr');
+                rows.forEach((tr) => {
+                    const td = document.createElement('td');
+                    td.innerHTML = '&nbsp;';
+                    tr.appendChild(td);
+                });
+                renderWbTableOverlay();
+                triggerWhiteboardSyncToFirebase();
+            } catch (err) {
+                console.error('addWbTableColumn error:', err);
+            }
+        }
+
+        // --- إضافة خلية واحدة فقط في نهاية آخر صف بالجدول (لا تؤثر على باقي الصفوف) ---
+        function addWbTableCell() {
+            try {
+                if (!selectedWbTable) return;
+                const rows = selectedWbTable.querySelectorAll('tr');
+                if (!rows.length) return;
+                const lastRow = rows[rows.length - 1];
+                const td = document.createElement('td');
+                td.innerHTML = '&nbsp;';
+                lastRow.appendChild(td);
+                renderWbTableOverlay();
+                triggerWhiteboardSyncToFirebase();
+            } catch (err) {
+                console.error('addWbTableCell error:', err);
+            }
+        }
+
+        // --- ترتيب طبقات الجدول: إحضاره للأمام أو إرساله للخلف مقارنة بباقي العناصر الحرة الأخرى ---
+        function bringWbTableToFront() {
+            if (!selectedWbTable) return;
+            const box = getWbFreeElOf(selectedWbTable);
+            if (box) box.style.zIndex = '20';
+            triggerWhiteboardSyncToFirebase();
+        }
+        function sendWbTableToBack() {
+            if (!selectedWbTable) return;
+            const box = getWbFreeElOf(selectedWbTable);
+            if (box) box.style.zIndex = '0';
+            triggerWhiteboardSyncToFirebase();
+        }
+
+        // --- تحجيم الجدول بأكمله عبر سحب مقبض الزاوية السفلية، باستخدام تحويل CSS (scale) موحّد
+        //     للأبعاد (نفس أسلوب rotate() المُستخدم مسبقاً مع الصور: القيمة تُقرأ من/تُكتب داخل
+        //     style.transform مباشرة، لضمان بقائها بعد المزامنة عبر Firebase وإعادة تحميل الصفحة) ---
+        function startWbTableResize(e) {
+            try {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!selectedWbTable) return;
+                const rect = selectedWbTable.getBoundingClientRect();
+                const match = /scale\(([\d.]+)\)/.exec(selectedWbTable.style.transform || '');
+                const startScale = match ? parseFloat(match[1]) : 1;
+                selectedWbTable.style.transformOrigin = 'top left';
+                wbTableDragState = {
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    startWidth: rect.width,
+                    startHeight: rect.height,
+                    startScale: startScale > 0 ? startScale : 1
+                };
+                document.addEventListener('mousemove', onWbTableResizeMove);
+                document.addEventListener('mouseup', onWbTableResizeEnd);
+            } catch (err) {
+                console.error('startWbTableResize error:', err);
+            }
+        }
+
+        function onWbTableResizeMove(e) {
+            try {
+                if (!wbTableDragState || !selectedWbTable) return;
+                const dx = e.clientX - wbTableDragState.startX;
+                const dy = e.clientY - wbTableDragState.startY;
+                const newWidth = Math.max(80, wbTableDragState.startWidth + dx);
+                const newHeight = Math.max(40, wbTableDragState.startHeight + dy);
+                const ratio = Math.max(newWidth / wbTableDragState.startWidth, newHeight / wbTableDragState.startHeight);
+                let newScale = wbTableDragState.startScale * ratio;
+                newScale = Math.max(0.3, Math.min(4, newScale));
+                selectedWbTable.style.transform = `scale(${newScale})`;
+                renderWbTableOverlay();
+            } catch (err) {
+                console.error('onWbTableResizeMove error:', err);
+            }
+        }
+
+        function onWbTableResizeEnd() {
+            wbTableDragState = null;
+            document.removeEventListener('mousemove', onWbTableResizeMove);
+            document.removeEventListener('mouseup', onWbTableResizeEnd);
+            triggerWhiteboardSyncToFirebase();
+        }
+
+        // ==================================================================================
         // MODULE 1 (NEWLY ADDED - Font Selector & Font Color Picker Tools): تطبَّق فوراً على
         // التحديد النصي الحالي داخل السبورة الذكية عبر execCommand، بنفس نمط applyWhiteboardHighlight
         // ==================================================================================
@@ -5120,6 +5456,9 @@
                 console.warn('insertWhiteboardImageAtCursor: تعذّر الإدراج عند المؤشر، تم الإدراج في نهاية السبورة', e);
                 editor.appendChild(img);
             }
+            // NEWLY ADDED (Free-Positioning Module): تحويل الصورة فور إدراجها إلى عنصر حر الحركة
+            // قابل للسحب بحرية فوق/بجانب أي عنصر آخر داخل السبورة، دون أي تأثير على مكانها الظاهر حالياً
+            try { wrapAsWbFreeElement(img, 'wb-free-image'); } catch (wrapErr) { console.error('wrapAsWbFreeElement(img) error:', wrapErr); }
             triggerWhiteboardSyncToFirebase();
         }
 
@@ -5259,32 +5598,58 @@
         }
 
         function confirmInsertWhiteboardTable() {
-            const rowsInput = document.getElementById('wb-table-rows-input');
-            const colsInput = document.getElementById('wb-table-cols-input');
-            const rows = Math.max(1, Math.min(20, parseInt(rowsInput && rowsInput.value, 10) || 1));
-            const cols = Math.max(1, Math.min(15, parseInt(colsInput && colsInput.value, 10) || 1));
-
-            let html = '<table class="wb-editable-table">';
-            for (let r = 0; r < rows; r++) {
-                html += '<tr>';
-                for (let c = 0; c < cols; c++) html += '<td>&nbsp;</td>';
-                html += '</tr>';
-            }
-            html += '</table><p><br></p>';
-
-            const editor = document.getElementById('lesson-preview');
-            if (!editor) return;
-            editor.focus();
             try {
-                const sel = window.getSelection();
-                if (sel && sel.rangeCount > 0 && editor.contains(sel.getRangeAt(0).commonAncestorContainer)) {
-                    document.execCommand('insertHTML', false, html);
-                } else {
-                    editor.insertAdjacentHTML('beforeend', html);
+                const rowsInput = document.getElementById('wb-table-rows-input');
+                const colsInput = document.getElementById('wb-table-cols-input');
+                const rows = Math.max(1, Math.min(20, parseInt(rowsInput && rowsInput.value, 10) || 1));
+                const cols = Math.max(1, Math.min(15, parseInt(colsInput && colsInput.value, 10) || 1));
+
+                const editor = document.getElementById('lesson-preview');
+                if (!editor) return;
+                editor.focus();
+
+                // NEWLY ADDED (Free-Positioning Module): بناء الجدول عبر DOM مباشرة بدلاً من سلسلة
+                // innerHTML كما في السابق، للحصول على مرجع فعلي للعنصر (table) وتمكين تحويله فوراً
+                // إلى عنصر حر الحركة بعد إدراجه — مع الحفاظ التام على نفس البنية والأصناف (classes)
+                // التي كانت تُنتَج سابقاً (table.wb-editable-table > tr > td) دون أي تغيير
+                const table = document.createElement('table');
+                table.className = 'wb-editable-table';
+                for (let r = 0; r < rows; r++) {
+                    const tr = document.createElement('tr');
+                    for (let c = 0; c < cols; c++) {
+                        const td = document.createElement('td');
+                        td.innerHTML = '&nbsp;';
+                        tr.appendChild(td);
+                    }
+                    table.appendChild(tr);
                 }
+
+                let inserted = false;
+                try {
+                    const sel = window.getSelection();
+                    if (sel && sel.rangeCount > 0) {
+                        const range = sel.getRangeAt(0);
+                        if (editor.contains(range.commonAncestorContainer)) {
+                            range.collapse(false);
+                            range.insertNode(table);
+                            inserted = true;
+                        }
+                    }
+                } catch (selErr) {
+                    console.warn('confirmInsertWhiteboardTable: تعذّر الإدراج عند موضع المؤشر', selErr);
+                }
+                if (!inserted) editor.appendChild(table);
+
+                // تحويل الجدول فور إدراجه إلى عنصر حر الحركة قابل للسحب/التحجيم بحرية فوق أي عنصر آخر
+                wrapAsWbFreeElement(table, 'wb-free-table');
+
+                // إبقاء فقرة فارغة في نهاية السبورة للسماح بمواصلة الكتابة بسهولة (كما كان الحال سابقاً)
+                const p = document.createElement('p');
+                p.innerHTML = '<br>';
+                editor.appendChild(p);
             } catch (e) {
-                console.warn('confirmInsertWhiteboardTable: تعذّر الإدراج عند المؤشر، تم الإدراج في نهاية السبورة', e);
-                editor.insertAdjacentHTML('beforeend', html);
+                console.error('confirmInsertWhiteboardTable error:', e);
+                showAdminToast('حدث خطأ غير متوقع أثناء إدراج الجدول.', 'error');
             }
             closeWbModal('wb-modal-insert-table');
             triggerWhiteboardSyncToFirebase();
@@ -14124,6 +14489,11 @@
         // للتبويب الحالي (Page Visibility API + blur/focus)، وتصدير الفيديو بصيغة MP4 (أو WebM كبديل
         // متوافق في حال عدم دعم المتصفح الحالي لترميز MP4 أثناء التسجيل). معالجة شاملة للأخطاء بما في
         // ذلك رفض المستخدم منح صلاحيات مشاركة الشاشة أو الميكروفون.
+        // NEWLY ADDED (Screen Recorder Quality Upgrade): تم رفع جودة الالتقاط إلى دقة Full HD مع تفعيل
+        // التقاط تحركات مؤشر الفأرة (cursor:'always')، ورفع معدل الإطارات والبت (Bitrate) لضمان تسجيل
+        // واضح وسلس لكل ما يحدث على الشاشة، بما في ذلك كل الخطوط/الرسومات/الكتابات التفاعلية المُضافة
+        // على السبورة الذكية (وهي مُلتقطة بطبيعتها ضمن تسجيل الشاشة/التبويب بأكمله)، بالإضافة إلى معالجة
+        // الفيديو وحفظه/تنزيله تلقائياً فور إيقاف التسجيل دون أي تدخل إضافي من المعلم.
         // ==================================================================================
         let screenRecorderMediaRecorder = null;
         let screenRecorderDisplayStream = null;
@@ -14133,12 +14503,56 @@
         let screenRecorderMimeType = 'video/webm';
         let screenRecorderWasAutoPaused = false; // للتفريق بين الإيقاف اليدوي والإيقاف التلقائي عند مغادرة التبويب
 
+        // NEWLY ADDED (Screen Recorder Compatibility Diagnostics): دالة تشخيص مشتركة تُعيد نص رسالة
+        // الخطأ المناسبة إن كانت خاصية تسجيل الشاشة غير متاحة حالياً لأي سبب، أو null إن كانت متاحة.
+        // تُستخدم عند فتح نافذة الأداة (لعرض تحذير فوري دون انتظار ضغط "بدء التسجيل") وعند محاولة البدء فعلياً.
+        function getScreenRecorderUnsupportedReason() {
+            try {
+                if (typeof window !== 'undefined' && window.isSecureContext === false) {
+                    return 'تسجيل الشاشة يتطلب فتح الصفحة عبر اتصال آمن (HTTPS) أو من "localhost". يبدو أنك تفتح الملف حالياً مباشرة من جهازك (file://) أو عبر رابط http:// غير آمن، لذا يمنع المتصفح هذه الخاصية تلقائياً لأسباب أمنية. الحل: ارفع الملف على استضافة تدعم HTTPS، أو افتحه عبر خادم محلي (localhost)، ثم أعد المحاولة.';
+                }
+                if (typeof window !== 'undefined' && window.self !== window.top) {
+                    return 'يبدو أن الصفحة مفتوحة حالياً داخل إطار معاينة مضمّن (iframe) لا يملك صلاحية تسجيل الشاشة. الرجاء فتح ملف الصفحة مباشرة في تبويب مستقل من المتصفح (وليس داخل نافذة معاينة مضمّنة)، ثم إعادة المحاولة.';
+                }
+                if (typeof navigator === 'undefined' || !navigator.mediaDevices ||
+                    typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
+                    const ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
+                    const isMobileLike = /Android|iPhone|iPad|iPod/i.test(ua);
+                    if (isMobileLike) {
+                        return 'عذراً، متصفحات الأجهزة المحمولة (آيفون / آيباد / أندرويد) لا تدعم حالياً خاصية تسجيل الشاشة من داخل المتصفح. الرجاء استخدام جهاز حاسوب (Windows أو Mac أو Linux) عبر متصفح حديث مثل Google Chrome أو Microsoft Edge.';
+                    }
+                    return 'عذراً، متصفحك الحالي لا يدعم خاصية تسجيل الشاشة (getDisplayMedia). جرّب تحديث المتصفح لآخر إصدار، أو استخدم Google Chrome أو Microsoft Edge أو Mozilla Firefox الحديث.';
+                }
+                if (typeof MediaRecorder === 'undefined') {
+                    return 'عذراً، متصفحك الحالي لا يدعم واجهة MediaRecorder اللازمة للتسجيل.';
+                }
+                return null;
+            } catch (err) {
+                console.error('getScreenRecorderUnsupportedReason error:', err);
+                return null;
+            }
+        }
+
         function openScreenRecorderWidget() {
             try {
                 const overlay = document.getElementById('screen-recorder-overlay');
                 if (!overlay) return;
                 overlay.classList.remove('hidden');
                 overlay.style.display = 'flex';
+                // NEWLY ADDED (Screen Recorder Compatibility Diagnostics): عرض تحذير فوري عند فتح النافذة
+                // إن كانت خاصية تسجيل الشاشة غير متاحة حالياً، دون انتظار ضغط المعلم لزر "بدء التسجيل"
+                const unsupportedReason = getScreenRecorderUnsupportedReason();
+                if (unsupportedReason) {
+                    showScreenRecorderError(unsupportedReason);
+                    const btnStart = document.getElementById('sr-btn-start');
+                    if (btnStart) btnStart.disabled = true;
+                } else {
+                    showScreenRecorderError('');
+                    const btnStart = document.getElementById('sr-btn-start');
+                    if (btnStart && (!screenRecorderMediaRecorder || screenRecorderMediaRecorder.state === 'inactive')) {
+                        btnStart.disabled = false;
+                    }
+                }
             } catch (err) {
                 console.error('openScreenRecorderWidget error:', err);
             }
@@ -14233,20 +14647,32 @@
             try {
                 showScreenRecorderError('');
 
-                if (typeof navigator === 'undefined' || !navigator.mediaDevices ||
-                    typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
-                    showScreenRecorderError('عذراً، متصفحك الحالي لا يدعم خاصية تسجيل الشاشة (getDisplayMedia).');
-                    return;
-                }
-                if (typeof MediaRecorder === 'undefined') {
-                    showScreenRecorderError('عذراً، متصفحك الحالي لا يدعم واجهة MediaRecorder اللازمة للتسجيل.');
+                // NEWLY ADDED (Screen Recorder Compatibility Diagnostics): استخدام دالة التشخيص المشتركة
+                // بدلاً من رسالة عامة واحدة، لتمييز السبب الفعلي (سياق غير آمن / iframe مضمّن / متصفح جوال
+                // لا يدعم الخاصية أصلاً / متصفح قديم فعلاً) وعرض حل مناسب له لكل حالة على حدة
+                const unsupportedReason = getScreenRecorderUnsupportedReason();
+                if (unsupportedReason) {
+                    showScreenRecorderError(unsupportedReason);
                     return;
                 }
 
                 // 1) طلب صلاحية مشاركة الشاشة (فيديو + صوت النظام إن أمكن) — معالجة حالة رفض المستخدم للصلاحية
+                // NEWLY ADDED (Screen Recorder Quality Upgrade): تحديد قيود فيديو صريحة لضمان التقاط
+                // كامل الشاشة بأعلى دقة ممكنة (Full HD)، مع تفعيل التقاط تحركات مؤشر الفأرة بشكل دائم
+                // (cursor: 'always')، ورفع معدل الإطارات (frameRate) لضمان تسجيل سلس وواضح لكل الخطوط
+                // والرسومات والكتابات التي تُضاف على السبورة/الشاشة أثناء الشرح دون أي تقطيع أو تشويش
                 let displayStream;
                 try {
-                    displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                    displayStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: {
+                            cursor: 'always',
+                            displaySurface: 'monitor',
+                            width: { ideal: 1920, max: 3840 },
+                            height: { ideal: 1080, max: 2160 },
+                            frameRate: { ideal: 30, max: 60 }
+                        },
+                        audio: true
+                    });
                 } catch (displayErr) {
                     console.error('getDisplayMedia error:', displayErr);
                     showScreenRecorderError('تم رفض صلاحية مشاركة الشاشة، أو تم إلغاء العملية. لا يمكن بدء التسجيل بدونها.');
@@ -14292,12 +14718,20 @@
                 screenRecorderBlob = null;
 
                 let recorder;
+                // NEWLY ADDED (Screen Recorder Quality Upgrade): تحديد معدل بت (Bitrate) مرتفع صراحة
+                // للفيديو والصوت لضمان وضوح كامل لكل التفاصيل الدقيقة (نصوص، خطوط رفيعة، رسومات السبورة)
+                // بدلاً من الاعتماد على القيمة الافتراضية المنخفضة للمتصفح والتي قد تُنتج تشويشاً في الحركة السريعة
+                const preferredRecorderOptions = {
+                    mimeType: screenRecorderMimeType,
+                    videoBitsPerSecond: 8000000,
+                    audioBitsPerSecond: 128000
+                };
                 try {
-                    recorder = new MediaRecorder(combinedStream, { mimeType: screenRecorderMimeType });
+                    recorder = new MediaRecorder(combinedStream, preferredRecorderOptions);
                 } catch (recorderErr) {
                     console.warn('MediaRecorder init with preferred mimeType failed, falling back to default:', recorderErr);
                     try {
-                        recorder = new MediaRecorder(combinedStream);
+                        recorder = new MediaRecorder(combinedStream, { videoBitsPerSecond: 8000000, audioBitsPerSecond: 128000 });
                         screenRecorderMimeType = recorder.mimeType || 'video/webm';
                     } catch (fallbackErr) {
                         console.error('MediaRecorder fallback init error:', fallbackErr);
@@ -14327,6 +14761,18 @@
                     try {
                         screenRecorderBlob = new Blob(screenRecorderChunks, { type: screenRecorderMimeType });
                         updateScreenRecorderStatusUI('idle');
+                        // NEWLY ADDED (Screen Recorder Auto-Save): معالجة الفيديو المسجَّل وحفظه/تنزيله
+                        // تلقائياً فور اكتمال التسجيل وإيقافه، دون الحاجة لأي تدخل إضافي من المعلم — مع
+                        // إبقاء زر "تصدير وتحميل الفيديو" يدوياً متاحاً أيضاً لإعادة التنزيل عند الحاجة
+                        try {
+                            downloadRecordedVideo();
+                            if (typeof showAdminToast === 'function') {
+                                showAdminToast('تمت معالجة تسجيل الحصة وحفظه/تنزيله تلقائياً بنجاح.', 'success');
+                            }
+                        } catch (autoSaveErr) {
+                            console.error('Auto-save recorded video error:', autoSaveErr);
+                            showScreenRecorderError('اكتمل التسجيل، لكن تعذّر حفظه تلقائياً. استخدم زر "تصدير وتحميل الفيديو" يدوياً.');
+                        }
                     } catch (stopErr) {
                         console.error('MediaRecorder onstop error:', stopErr);
                     }
