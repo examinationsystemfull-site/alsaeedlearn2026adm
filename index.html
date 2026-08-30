@@ -14503,56 +14503,12 @@
         let screenRecorderMimeType = 'video/webm';
         let screenRecorderWasAutoPaused = false; // للتفريق بين الإيقاف اليدوي والإيقاف التلقائي عند مغادرة التبويب
 
-        // NEWLY ADDED (Screen Recorder Compatibility Diagnostics): دالة تشخيص مشتركة تُعيد نص رسالة
-        // الخطأ المناسبة إن كانت خاصية تسجيل الشاشة غير متاحة حالياً لأي سبب، أو null إن كانت متاحة.
-        // تُستخدم عند فتح نافذة الأداة (لعرض تحذير فوري دون انتظار ضغط "بدء التسجيل") وعند محاولة البدء فعلياً.
-        function getScreenRecorderUnsupportedReason() {
-            try {
-                if (typeof window !== 'undefined' && window.isSecureContext === false) {
-                    return 'تسجيل الشاشة يتطلب فتح الصفحة عبر اتصال آمن (HTTPS) أو من "localhost". يبدو أنك تفتح الملف حالياً مباشرة من جهازك (file://) أو عبر رابط http:// غير آمن، لذا يمنع المتصفح هذه الخاصية تلقائياً لأسباب أمنية. الحل: ارفع الملف على استضافة تدعم HTTPS، أو افتحه عبر خادم محلي (localhost)، ثم أعد المحاولة.';
-                }
-                if (typeof window !== 'undefined' && window.self !== window.top) {
-                    return 'يبدو أن الصفحة مفتوحة حالياً داخل إطار معاينة مضمّن (iframe) لا يملك صلاحية تسجيل الشاشة. الرجاء فتح ملف الصفحة مباشرة في تبويب مستقل من المتصفح (وليس داخل نافذة معاينة مضمّنة)، ثم إعادة المحاولة.';
-                }
-                if (typeof navigator === 'undefined' || !navigator.mediaDevices ||
-                    typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
-                    const ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
-                    const isMobileLike = /Android|iPhone|iPad|iPod/i.test(ua);
-                    if (isMobileLike) {
-                        return 'عذراً، متصفحات الأجهزة المحمولة (آيفون / آيباد / أندرويد) لا تدعم حالياً خاصية تسجيل الشاشة من داخل المتصفح. الرجاء استخدام جهاز حاسوب (Windows أو Mac أو Linux) عبر متصفح حديث مثل Google Chrome أو Microsoft Edge.';
-                    }
-                    return 'عذراً، متصفحك الحالي لا يدعم خاصية تسجيل الشاشة (getDisplayMedia). جرّب تحديث المتصفح لآخر إصدار، أو استخدم Google Chrome أو Microsoft Edge أو Mozilla Firefox الحديث.';
-                }
-                if (typeof MediaRecorder === 'undefined') {
-                    return 'عذراً، متصفحك الحالي لا يدعم واجهة MediaRecorder اللازمة للتسجيل.';
-                }
-                return null;
-            } catch (err) {
-                console.error('getScreenRecorderUnsupportedReason error:', err);
-                return null;
-            }
-        }
-
         function openScreenRecorderWidget() {
             try {
                 const overlay = document.getElementById('screen-recorder-overlay');
                 if (!overlay) return;
                 overlay.classList.remove('hidden');
                 overlay.style.display = 'flex';
-                // NEWLY ADDED (Screen Recorder Compatibility Diagnostics): عرض تحذير فوري عند فتح النافذة
-                // إن كانت خاصية تسجيل الشاشة غير متاحة حالياً، دون انتظار ضغط المعلم لزر "بدء التسجيل"
-                const unsupportedReason = getScreenRecorderUnsupportedReason();
-                if (unsupportedReason) {
-                    showScreenRecorderError(unsupportedReason);
-                    const btnStart = document.getElementById('sr-btn-start');
-                    if (btnStart) btnStart.disabled = true;
-                } else {
-                    showScreenRecorderError('');
-                    const btnStart = document.getElementById('sr-btn-start');
-                    if (btnStart && (!screenRecorderMediaRecorder || screenRecorderMediaRecorder.state === 'inactive')) {
-                        btnStart.disabled = false;
-                    }
-                }
             } catch (err) {
                 console.error('openScreenRecorderWidget error:', err);
             }
@@ -14647,12 +14603,13 @@
             try {
                 showScreenRecorderError('');
 
-                // NEWLY ADDED (Screen Recorder Compatibility Diagnostics): استخدام دالة التشخيص المشتركة
-                // بدلاً من رسالة عامة واحدة، لتمييز السبب الفعلي (سياق غير آمن / iframe مضمّن / متصفح جوال
-                // لا يدعم الخاصية أصلاً / متصفح قديم فعلاً) وعرض حل مناسب له لكل حالة على حدة
-                const unsupportedReason = getScreenRecorderUnsupportedReason();
-                if (unsupportedReason) {
-                    showScreenRecorderError(unsupportedReason);
+                if (typeof navigator === 'undefined' || !navigator.mediaDevices ||
+                    typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
+                    showScreenRecorderError('عذراً، متصفحك الحالي لا يدعم خاصية تسجيل الشاشة (getDisplayMedia).');
+                    return;
+                }
+                if (typeof MediaRecorder === 'undefined') {
+                    showScreenRecorderError('عذراً، متصفحك الحالي لا يدعم واجهة MediaRecorder اللازمة للتسجيل.');
                     return;
                 }
 
