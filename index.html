@@ -1861,6 +1861,69 @@
         }
         .ve-ctrl-remove-btn:hover { background: #991b1b; }
 
+        /* ============================================================================
+           FEATURE (Freehand Vector Mask / Lasso Tool — أداة القص والقناع الحر الدقيق)
+           أنماط جديدة ومستقلة بالكامل (بادئة ve-mask- / ve-ctrl-mask-): لا تُغيّر أي نمط قائم لمنظومة
+           المؤثرات البصرية. زرا التبديل/إعادة الضبط داخل لوحة تحكم الصورة المخصصة، ومحرر الرسم المنبثق.
+           ============================================================================ */
+        .ve-ctrl-mask-btn {
+            width: 100%; background: #c5a880; color: #012015; border: none; border-radius: 8px;
+            padding: 7px 8px; font-size: 11px; font-weight: 800; cursor: pointer; text-align: center;
+            transition: background-color .15s ease, opacity .15s ease;
+        }
+        .ve-ctrl-mask-btn:hover:not(:disabled) { background: #b0936b; }
+        .ve-ctrl-mask-btn:disabled { opacity: .45; cursor: not-allowed; }
+        .ve-ctrl-mask-btn.ve-ctrl-mask-btn-active { background: #fbbf24; }
+
+        .ve-mask-editor-overlay {
+            position: fixed; inset: 0; z-index: 1000020; background: rgba(1, 32, 21, 0.72);
+            display: flex; align-items: center; justify-content: center; padding: 12px; direction: rtl;
+        }
+        .ve-mask-editor-box {
+            background: #ffffff; border-radius: 14px; border-top: 4px solid #c5a880;
+            box-shadow: 0 12px 44px rgba(0,0,0,.5); padding: 12px 14px 14px;
+            max-width: 98vw; max-height: 98vh; display: flex; flex-direction: column; gap: 10px;
+            overflow: auto;
+        }
+        .ve-mask-editor-header {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            font-weight: 800; font-size: 14px; color: #012015;
+        }
+        .ve-mask-close-btn {
+            background: #b91c1c; color: #fff; border: none; border-radius: 50%; width: 26px; height: 26px;
+            font-weight: 900; font-size: 12px; cursor: pointer; line-height: 1;
+        }
+        .ve-mask-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .ve-mask-mode-select {
+            font-size: 11px; font-weight: 700; padding: 6px 8px; border-radius: 8px;
+            border: 1px solid #cbd5e1; background: #fff; color: #012015; cursor: pointer;
+        }
+        .ve-mask-btn {
+            background: #e5e7eb; color: #374151; border: none; border-radius: 8px;
+            padding: 7px 12px; font-size: 11px; font-weight: 800; cursor: pointer;
+            transition: background-color .15s ease, opacity .15s ease;
+        }
+        .ve-mask-btn:hover:not(:disabled) { background: #d1d5db; }
+        .ve-mask-btn:disabled, .ve-mask-mode-select:disabled { opacity: .5; cursor: not-allowed; }
+        .ve-mask-btn.ve-mask-btn-apply { background: #012015; color: #ffffff; }
+        .ve-mask-btn.ve-mask-btn-apply:hover:not(:disabled) { background: #0b3a26; }
+        .ve-mask-btn.ve-mask-btn-cancel { background: #fee2e2; color: #991b1b; }
+        .ve-mask-stage-wrap { display: flex; justify-content: center; overflow: auto; }
+        .ve-mask-stage {
+            position: relative; line-height: 0; border: 2px dashed #c5a880; border-radius: 8px; overflow: hidden;
+            background-color: #ffffff;
+            background-image: conic-gradient(#e5e7eb 25%, #ffffff 0 50%, #e5e7eb 0 75%, #ffffff 0);
+            background-size: 16px 16px;
+        }
+        .ve-mask-base-canvas { display: block; }
+        .ve-mask-draw-canvas {
+            position: absolute; top: 0; left: 0; cursor: crosshair;
+            touch-action: none; user-select: none; -webkit-user-select: none;
+        }
+        .ve-mask-status { font-size: 11px; font-weight: 700; color: #475569; min-height: 16px; line-height: 1.6; }
+        .ve-mask-status.ve-mask-status-ok { color: #047857; }
+        .ve-mask-status.ve-mask-status-warn { color: #b91c1c; }
+
         /* === FEATURE (اقتطاع/قص الجزء المتحرك من صورة المؤثر) ===
            انتقال ناعم عند تبديل الجزء الظاهر (كامل/علوي/أوسط/سفلي) بحيث لا يظهر القص فجأة وبشكل مفاجئ */
         .ve-effect-visual-content { transition: clip-path .2s ease; }
@@ -2002,6 +2065,56 @@
         .ve-cloud-3d-visual {
             display: block; position: relative;
             filter: drop-shadow(0 3px 4px rgba(1,32,21,.18)) drop-shadow(0 10px 16px rgba(1,32,21,.22));
+        }
+
+        /* ============================================================================
+           FEATURE (2026 UPGRADE — إطار التحجيم التفاعلي Bounding Box + مقابض الزوايا الأربع)
+           يُدرَج الإطار داخل طبقة التحويل (.ve-effect-transform-layer) حول الصورة/الفيديو المرفوع مباشرةً،
+           فيدور ويعكس ويتلوّن معها. المقابض تُخفى افتراضياً (visibility) حتى لا تلتقط النقرات وهي غير
+           ظاهرة، وتظهر عند: تمرير المؤشر / فتح لوحة تحكم المؤثر (:has) / أثناء السحب، وتبقى ظاهرة دائماً
+           على الشاشات التي لا تدعم التمرير (hover:none). --ve-inv-scale يعاكس شريط "الحجم" كي يبقى حجم
+           المقابض ثابتاً بصرياً مهما كبّر المستخدم المؤثر أو صغّره.
+           ============================================================================ */
+        .ve-resize-frame {
+            position: relative; display: inline-flex; line-height: 0; touch-action: none;
+        }
+        .ve-resize-frame::after {
+            content: ''; position: absolute; inset: -3px; border: 2px dashed var(--accent-gold, #c5a880);
+            border-radius: 8px; pointer-events: none; visibility: hidden;
+        }
+        .ve-resize-handle {
+            position: absolute; width: 16px; height: 16px; border-radius: 50%;
+            background: #fff; border: 2.5px solid var(--accent-gold, #c5a880);
+            box-shadow: 0 1px 5px rgba(1,32,21,.4); z-index: 4; touch-action: none;
+            visibility: hidden; transform: translate(-50%, -50%) scale(var(--ve-inv-scale, 1));
+        }
+        .ve-resize-handle::before { /* منطقة لمس أكبر دون تكبير الشكل المرئي */
+            content: ''; position: absolute; inset: -10px; border-radius: 50%;
+        }
+        .ve-resize-handle-nw { top: 0;    left: 0;    cursor: nwse-resize; }
+        .ve-resize-handle-ne { top: 0;    left: 100%; cursor: nesw-resize; }
+        .ve-resize-handle-sw { top: 100%; left: 0;    cursor: nesw-resize; }
+        .ve-resize-handle-se { top: 100%; left: 100%; cursor: nwse-resize; }
+        .ve-floating-effect:hover .ve-resize-frame::after,
+        .ve-floating-effect:hover .ve-resize-handle,
+        .ve-floating-effect:has(.ve-controls-open) .ve-resize-frame::after,
+        .ve-floating-effect:has(.ve-controls-open) .ve-resize-handle,
+        .ve-floating-effect.ve-resizing .ve-resize-frame::after,
+        .ve-floating-effect.ve-resizing .ve-resize-handle { visibility: visible; }
+        @media (hover: none) {
+            .ve-resize-frame::after, .ve-resize-handle { visibility: visible; }
+        }
+        /* زر الإغلاق الأصلي يقع عند الزاوية العلوية اليسرى تماماً (نفس موضع المقبض NW)، فيبتلع النقرة عليه.
+           للمؤثرات التي تملك إطار تحجيم فقط يُنقل الزر إلى منتصف الحافة العلوية، دون المساس بباقي المؤثرات. */
+        .ve-floating-effect.ve-has-resize-frame > .ve-effect-close-btn {
+            top: -34px; left: 50%; transform: translateX(-50%);
+        }
+        .ve-resize-handle:focus-visible { outline: 3px solid #0b3a26; outline-offset: 2px; visibility: visible; }
+        .ve-floating-effect.ve-resizing, .ve-floating-effect.ve-resizing * { cursor: grabbing; user-select: none; }
+        /* عنصر الفيديو (WebM) يرث نفس مظهر الصورة المخصصة (حجم/توهج/زوايا) دون أي أزرار تحكم أصلية */
+        .ve-effect-video-visual { background: transparent; pointer-events: none; }
+        @media (prefers-reduced-motion: reduce) {
+            .ve-effect-video-visual, .ve-resize-handle { transition: none; }
         }
 
         .ve-picker-item-upload {
@@ -5485,7 +5598,7 @@
                     <span class="ve-picker-label">رفع صورة مخصصة</span>
                 </button>
                 <input type="file" id="visual-effect-image-upload-input" class="hidden"
-                       accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/gif,image/webp"
+                       accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/gif,image/webp,image/avif,video/webm,.avif,.webm"
                        multiple onchange="handleVisualEffectImageUpload(event)">
             </div>
             <div id="ve-upload-error-msg" style="display:none; margin-top:8px; font-size:11px; font-weight:700; color:#b91c1c; text-align:center;"></div>
@@ -18186,7 +18299,11 @@
                 cropTop: 0, cropRight: 0, cropBottom: 0, cropLeft: 0, // اقتصاص حر (%) لكل جهة
                 cropRegionPreset: 'full',
                 cloudEnabled: false,   // تفعيل السحابة النصية المدمجة والمرتبطة بهذه الصورة تحديداً
-                cloudText: ''
+                cloudText: '',
+                // === FEATURE (Freehand Vector Mask): حالة القناع الحر الخاصة بهذه الصورة تحديداً ===
+                freehandMaskApplied: false,   // هل طُبِّق قناع حر على هذه الصورة؟
+                freehandOriginalSrc: '',      // مصدر الصورة الأصلي قبل أول قناع (لإعادة الضبط)
+                freehandCurrentMaskUrl: ''    // رابط Blob الحالي للصورة المقنَّعة (لتحريره من الذاكرة عند الاستبدال/الإزالة)
             };
         }
 
@@ -18257,8 +18374,88 @@
         // ==================================================================================
         let __uploadedVisualEffectImages = []; // {id, src, name}
         let __uploadedImageIdCounter = 0;
-        const VISUAL_EFFECT_ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/gif', 'image/webp'];
-        const VISUAL_EFFECT_MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 ميجابايت كحد أقصى تحفظي لكل صورة
+        const VISUAL_EFFECT_ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/gif', 'image/webp', 'image/avif', 'video/webm'];
+        const VISUAL_EFFECT_MAX_IMAGE_BYTES = 50 * 1024 * 1024; // 50 ميجابايت كحد أقصى لكل ملف (تم رفعه من 20MB)
+        const VISUAL_EFFECT_MAX_IMAGE_ERROR_MSG = 'حجم الملف يتجاوز الحد الأقصى المسموح به (50 ميجابايت).';
+        // === FEATURE (2026 UPGRADE — دعم AVIF و WebM) ===
+        const VISUAL_EFFECT_ALLOWED_EXTENSIONS_REGEX = /\.(png|jpe?g|svg|gif|webp|avif|webm)$/i;
+        const VISUAL_EFFECT_ALLOWED_FORMATS_LABEL = 'PNG, JPEG, SVG, GIF, WebP, AVIF, WebM';
+        const VISUAL_EFFECT_PROBE_TIMEOUT_MS = 30000; // مهلة قصوى لفحص فك ترميز ملف كبير قبل اعتباره تالفاً
+        const VISUAL_EFFECT_MEDIA_BASE_LONG_SIDE_PX = 88; // الضلع الأطول الافتراضي للمعاينة (نفس مقاس الصورة الأصلي سابقاً)
+        const VISUAL_EFFECT_RESIZE_MIN_LONG_SIDE_PX = 32;
+        const VISUAL_EFFECT_RESIZE_MAX_LONG_SIDE_PX = 1200;
+
+        // يحدد نوع الوسائط (صورة/فيديو) من MIME أولاً ثم من الامتداد كبديل احتياطي (بعض الأنظمة تترك type فارغاً)
+        function detectVisualEffectMediaKind(file) {
+            try {
+                const type = ((file && file.type) || '').toLowerCase();
+                if (type.indexOf('video/') === 0) return 'video';
+                if (/\.webm$/i.test((file && file.name) || '')) return 'video';
+            } catch (err) { /* تجاهل */ }
+            return 'image';
+        }
+
+        function formatVisualEffectFileSizeMB(bytes) {
+            return (Number(bytes) / (1024 * 1024)).toFixed(1);
+        }
+
+        // رسالة تجاوز الحجم: تذكر اسم الملف وحجمه الفعلي والحد المسموح به ليفهم المستخدم السبب فوراً
+        function buildVisualEffectOversizeMessage(file) {
+            return 'الملف "' + ((file && file.name) || '') + '" حجمه ' + formatVisualEffectFileSizeMB(file && file.size) +
+                   ' ميجابايت. ' + VISUAL_EFFECT_MAX_IMAGE_ERROR_MSG;
+        }
+
+        // يفحص إمكانية فك ترميز الملف فعلياً (صورة أو فيديو WebM) قبل تسجيله، ويُرجع أبعاده الطبيعية.
+        // يحمي من الملفات التالفة، ومن صيغة غير مدعومة في المتصفح الحالي (مثل AVIF في متصفح قديم)،
+        // ومن ملف WebM صوتي فقط (لا يحتوي مسار فيديو)، مع مهلة قصوى تمنع تعليق العملية.
+        function probeVisualEffectMedia(objectUrl, mediaKind, onReady, onFail) {
+            let settled = false;
+            let probeEl = null;
+            const finish = function (callback, payload) {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timeoutId);
+                try {
+                    if (probeEl && mediaKind === 'video') { probeEl.removeAttribute('src'); probeEl.load(); }
+                } catch (releaseErr) { /* تجاهل */ }
+                try { callback(payload); } catch (cbErr) { console.error('probeVisualEffectMedia callback error:', cbErr); }
+            };
+            const timeoutId = setTimeout(function () { finish(onFail, 'timeout'); }, VISUAL_EFFECT_PROBE_TIMEOUT_MS);
+            try {
+                if (mediaKind === 'video') {
+                    probeEl = document.createElement('video');
+                    probeEl.preload = 'metadata';
+                    probeEl.muted = true;
+                    probeEl.playsInline = true;
+                    probeEl.onloadedmetadata = function () {
+                        if (!probeEl.videoWidth || !probeEl.videoHeight) { finish(onFail, 'no-video-track'); return; }
+                        finish(onReady, { mediaKind: 'video', naturalWidth: probeEl.videoWidth, naturalHeight: probeEl.videoHeight });
+                    };
+                    probeEl.onerror = function () { finish(onFail, 'decode'); };
+                    probeEl.src = objectUrl;
+                } else {
+                    probeEl = new Image();
+                    probeEl.decoding = 'async';
+                    probeEl.onload = function () {
+                        finish(onReady, { mediaKind: 'image', naturalWidth: probeEl.naturalWidth || 0, naturalHeight: probeEl.naturalHeight || 0 });
+                    };
+                    probeEl.onerror = function () { finish(onFail, 'decode'); };
+                    probeEl.src = objectUrl;
+                }
+            } catch (probeErr) {
+                console.error('probeVisualEffectMedia error:', probeErr);
+                finish(onFail, 'decode');
+            }
+        }
+
+        function buildVisualEffectDecodeFailureMessage(file, reason) {
+            const name = (file && file.name) || '';
+            if (reason === 'no-video-track') return 'ملف WebM "' + name + '" لا يحتوي على مسار فيديو (صوت فقط).';
+            if (reason === 'timeout') return 'انتهت مهلة قراءة "' + name + '"؛ الملف كبير أو تالف، جرّب ملفاً أصغر.';
+            if (/\.avif$/i.test(name)) return 'تعذّرت قراءة "' + name + '": الملف تالف أو أن متصفحك لا يدعم صيغة AVIF.';
+            if (/\.webm$/i.test(name)) return 'تعذّرت قراءة "' + name + '": الملف تالف أو أن متصفحك لا يدعم هذا الترميز من WebM.';
+            return 'تعذّرت قراءة الصورة "' + name + '" (الملف تالف أو غير مدعوم).';
+        }
 
         // يفتح منتقي ملفات الجهاز عبر النقر البرمجي على حقل الإدخال المخفي المرتبط ببطاقة "رفع صورة مخصصة"
         function triggerVisualEffectImageUpload() {
@@ -18305,14 +18502,37 @@
                         const fileType = (file.type || '').toLowerCase();
                         const isAllowedType = VISUAL_EFFECT_ALLOWED_IMAGE_TYPES.indexOf(fileType) !== -1;
                         // بعض المتصفحات/الأجهزة قد لا تُعبّئ خاصية type لملفات svg. بديل احتياطي: فحص الامتداد.
-                        const hasKnownImageExtension = /\.(png|jpe?g|svg|gif|webp)$/i.test(file.name || '');
+                        const hasKnownImageExtension = VISUAL_EFFECT_ALLOWED_EXTENSIONS_REGEX.test(file.name || '');
                         if (!isAllowedType && !hasKnownImageExtension) {
-                            showVisualEffectUploadError('صيغة الملف "' + (file.name || '') + '" غير مدعومة. الصيغ المدعومة: PNG, JPEG, SVG, GIF, WebP.');
+                            notifyVisualEffectUploadError('صيغة الملف "' + (file.name || '') + '" غير مدعومة. الصيغ المدعومة: ' + VISUAL_EFFECT_ALLOWED_FORMATS_LABEL + '.');
                             return;
                         }
-                        if (file.size > VISUAL_EFFECT_MAX_IMAGE_BYTES) {
-                            showVisualEffectUploadError('حجم الصورة "' + file.name + '" كبير جداً (الحد الأقصى 5 ميجابايت).');
+                        // فحص الحجم قبل أي معالجة: file.size <= 20 * 1024 * 1024 (20 ميجابايت)
+                        if (file.size === 0) {
+                            notifyVisualEffectUploadError('الملف "' + (file.name || '') + '" فارغ ولا يمكن استخدامه كصورة.');
                             return;
+                        }
+                        if (!(file.size <= VISUAL_EFFECT_MAX_IMAGE_BYTES)) {
+                            notifyVisualEffectUploadError(buildVisualEffectOversizeMessage(file));
+                            return;
+                        }
+
+                        // مسار سريع للصور الكبيرة (حتى 20MB): Blob URL بدل تحويل Base64 ضخم، مع التحقق من صلاحية فك ترميز الصورة
+                        // قبل تسجيلها. إن لم يتوفر أو فشل إنشاء الرابط يُستخدم FileReader الأصلي أدناه كبديل كما كان.
+                        if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+                            let quickObjectUrl = null;
+                            try { quickObjectUrl = URL.createObjectURL(file); } catch (urlErr) { quickObjectUrl = null; }
+                            if (quickObjectUrl) {
+                                const detectedMediaKind = detectVisualEffectMediaKind(file);
+                                probeVisualEffectMedia(quickObjectUrl, detectedMediaKind, function (mediaMeta) {
+                                    try { registerUploadedVisualEffectImage(quickObjectUrl, file.name, mediaMeta); }
+                                    catch (regErr) { console.error('handleVisualEffectImageUpload register error:', regErr); }
+                                }, function (failReason) {
+                                    try { URL.revokeObjectURL(quickObjectUrl); } catch (revokeErr) { /* تجاهل */ }
+                                    notifyVisualEffectUploadError(buildVisualEffectDecodeFailureMessage(file, failReason));
+                                });
+                                return;
+                            }
                         }
 
                         const reader = new FileReader();
@@ -18323,7 +18543,7 @@
                                     showVisualEffectUploadError('تعذّرت قراءة الصورة "' + file.name + '".');
                                     return;
                                 }
-                                registerUploadedVisualEffectImage(dataUrl, file.name);
+                                registerUploadedVisualEffectImage(dataUrl, file.name, { mediaKind: detectVisualEffectMediaKind(file) });
                             } catch (onloadErr) {
                                 console.error('handleVisualEffectImageUpload onload error:', onloadErr);
                             }
@@ -18351,13 +18571,14 @@
         // يسجّل صورة مرفوعة جديدة في حالة التطبيق (Array) دون مسح أي مؤثر افتراضي حالي، يبني لها معرّفاً
         // فريداً وإعداداً خاصاً بها داخل VISUAL_EFFECT_PRESETS (بنفس آلية باقي المؤثرات)، يضيف بطاقتها
         // ديناميكياً داخل شبكة الاختيار، ثم يعرضها فوراً كمؤثر عائم فوق الشاشة تماماً كباقي البطاقات.
-        function registerUploadedVisualEffectImage(dataUrl, fileName) {
+        function registerUploadedVisualEffectImage(dataUrl, fileName, mediaMeta) {
             try {
                 __uploadedImageIdCounter += 1;
                 const imageId = 'img-' + __uploadedImageIdCounter;
                 const safeLabel = (fileName && String(fileName).trim()) || ('صورة مخصصة ' + __uploadedImageIdCounter);
 
-                const imageRecord = { id: imageId, src: dataUrl, name: safeLabel };
+                const isVideoMedia = !!(mediaMeta && mediaMeta.mediaKind === 'video');
+                const imageRecord = { id: imageId, src: dataUrl, name: safeLabel, mediaKind: isVideoMedia ? 'video' : 'image' };
                 __uploadedVisualEffectImages.push(imageRecord);
 
                 // تسجيل إعداد المؤثر الخاص بهذه الصورة داخل نفس بنية الإعدادات الافتراضية المستخدمة لكل
@@ -18365,6 +18586,9 @@
                 VISUAL_EFFECT_PRESETS[imageId] = {
                     isCustomImage: true,
                     imageSrc: dataUrl,
+                    isCustomVideo: isVideoMedia,
+                    naturalWidth: (mediaMeta && mediaMeta.naturalWidth) || 0,
+                    naturalHeight: (mediaMeta && mediaMeta.naturalHeight) || 0,
                     animName: 've-anim-cloud-float',
                     defaultSpeed: 3,
                     label: safeLabel
@@ -18403,10 +18627,19 @@
                     removeUploadedVisualEffectImage(imageRecord.id);
                 };
 
-                const thumb = document.createElement('img');
+                const isVideoThumb = imageRecord.mediaKind === 'video';
+                const thumb = document.createElement(isVideoThumb ? 'video' : 'img');
                 thumb.className = 've-picker-item-custom-thumb';
-                thumb.src = imageRecord.src;
-                thumb.alt = imageRecord.name;
+                if (isVideoThumb) {
+                    thumb.muted = true;
+                    thumb.playsInline = true;
+                    thumb.preload = 'metadata';
+                    thumb.setAttribute('aria-label', imageRecord.name);
+                    thumb.src = imageRecord.src;
+                } else {
+                    thumb.src = imageRecord.src;
+                    thumb.alt = imageRecord.name;
+                }
 
                 const label = document.createElement('span');
                 label.className = 've-picker-label';
@@ -18433,6 +18666,16 @@
         // أي مؤثرات من هذه الصورة تكون معروضة بالفعل فوق الشاشة (تبقى كما هي حتى يُغلقها المعلم يدوياً)
         function removeUploadedVisualEffectImage(imageId) {
             try {
+                // تحرير الذاكرة: إن كان المصدر Blob URL ولا يوجد مؤثر معروض حالياً يستخدمه، يُلغى الرابط (مهم لملفات حتى 50MB)
+                try {
+                    const removedPreset = VISUAL_EFFECT_PRESETS[imageId];
+                    const removedSrc = removedPreset && removedPreset.imageSrc;
+                    if (removedSrc && typeof removedSrc === 'string' && removedSrc.indexOf('blob:') === 0) {
+                        const stillInUse = Array.from(document.querySelectorAll('#visual-effects-layer img, #visual-effects-layer video'))
+                            .some(function (el) { return el.getAttribute('src') === removedSrc; });
+                        if (!stillInUse) URL.revokeObjectURL(removedSrc);
+                    }
+                } catch (revokeErr) { /* تجاهل */ }
                 __uploadedVisualEffectImages = __uploadedVisualEffectImages.filter(function (img) { return img.id !== imageId; });
                 delete VISUAL_EFFECT_PRESETS[imageId];
                 const cardEl = document.getElementById('ve-picker-card-' + imageId);
@@ -18517,15 +18760,55 @@
                     // داخل الصورة، بخلاف box-shadow). حركة الطفو/التحكم بالحجم والسرعة/السحب والإفلات/زر
                     // الإغلاق تبقى كما هي بلا أي تعديل لأنها مُطبَّقة على العناصر المحيطة (body/scaleBox/wrapper)
                     // وليس على نوع المحتوى الداخلي، فترثها الصورة تلقائياً كما ترثها بقية المؤثرات تماماً.
-                    const customImage = document.createElement('img');
-                    customImage.src = preset.imageSrc;
-                    customImage.alt = preset.label || 'صورة مخصصة';
-                    customImage.className = 've-effect-image-visual ve-effect-visual-content';
-                    customImage.draggable = false;
+                    const isCustomVideo = !!preset.isCustomVideo;
+                    const customImage = document.createElement(isCustomVideo ? 'video' : 'img');
+                    customImage.className = 've-effect-image-visual ve-effect-visual-content' + (isCustomVideo ? ' ve-effect-video-visual' : '');
+                    if (isCustomVideo) {
+                        // WebM: يُعرض كحلقة صامتة تلقائية التشغيل (شرط سياسات Autoplay في المتصفحات) بلا أدوات تحكم أصلية
+                        customImage.muted = true;
+                        customImage.defaultMuted = true;
+                        customImage.loop = true;
+                        customImage.autoplay = true;
+                        customImage.playsInline = true;
+                        customImage.controls = false;
+                        customImage.disablePictureInPicture = true;
+                        customImage.preload = 'auto';
+                        customImage.setAttribute('aria-label', preset.label || 'فيديو مخصص');
+                        customImage.src = preset.imageSrc;
+                        try {
+                            const playPromise = customImage.play();
+                            if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(function () { /* سيبدأ عند أول تفاعل */ });
+                        } catch (playErr) { /* تجاهل */ }
+                    } else {
+                        customImage.src = preset.imageSrc;
+                        customImage.alt = preset.label || 'صورة مخصصة';
+                        customImage.draggable = false;
+                    }
                     customImage.onerror = function () {
-                        console.error('spawnVisualEffect: تعذّر عرض الصورة المخصصة →', preset.label);
+                        console.error('spawnVisualEffect: تعذّر عرض الوسائط المخصصة →', preset.label);
+                        if (typeof notifyVisualEffectUploadError === 'function') {
+                            notifyVisualEffectUploadError('تعذّر عرض "' + (preset.label || 'الملف') + '" داخل المعاينة.');
+                        }
                     };
-                    transformLayer.appendChild(customImage);
+
+                    // === FEATURE (2026 UPGRADE — إطار التحجيم التفاعلي) ===
+                    // الأبعاد الابتدائية تتبع نسبة الملف الأصلية (لا مربع 88×88 ثابت) كي يطابق الإطار الصورة تماماً
+                    // ويبقى تحجيمها لاحقاً دون تشويه. عند غياب الأبعاد من الفحص المسبق تُضبط عند اكتمال التحميل.
+                    if (preset.naturalWidth > 0 && preset.naturalHeight > 0) {
+                        applyVisualEffectMediaBaseSize(customImage, preset.naturalWidth, preset.naturalHeight);
+                    } else {
+                        applyVisualEffectMediaBaseSize(customImage, 0, 0);
+                        customImage.addEventListener(isCustomVideo ? 'loadedmetadata' : 'load', function () {
+                            const nw = isCustomVideo ? customImage.videoWidth : customImage.naturalWidth;
+                            const nh = isCustomVideo ? customImage.videoHeight : customImage.naturalHeight;
+                            if (customImage.dataset.veUserSized !== '1') applyVisualEffectMediaBaseSize(customImage, nw, nh);
+                        }, { once: true });
+                    }
+                    const resizeFrame = document.createElement('div');
+                    resizeFrame.className = 've-resize-frame';
+                    resizeFrame.appendChild(customImage);
+                    attachVisualEffectResizeHandles(wrapper, resizeFrame, customImage);
+                    transformLayer.appendChild(resizeFrame);
                 } else {
                     const mainEmojiSpan = document.createElement('span');
 
@@ -18698,6 +18981,14 @@
                             '<input type="range" class="ve-ctrl-crop-left-input" min="0" max="45" step="1" value="0">' +
                         '</div>' +
                     '</div>' +
+                    // === FEATURE (Freehand Vector Mask / Lasso Tool) — للصور المخصصة المرفوعة فقط ===
+                    (preset.isCustomImage && !preset.isCustomVideo ?
+                        (
+                            '<div class="ve-ctrl-section-label">🖊️ القص الحر الدقيق (Freehand Mask)</div>' +
+                            '<button type="button" class="ve-ctrl-mask-btn ve-ctrl-mask-toggle-btn">✂️ تفعيل القص الحر</button>' +
+                            '<button type="button" class="ve-ctrl-mask-btn ve-ctrl-mask-reset-btn" disabled>↺ إعادة ضبط القناع</button>'
+                        ) : ''
+                    ) +
                     // === FEATURE (2026 UPGRADE — السحابة النصية المدمجة والقابلة للتحرير) ===
                     // لا تُضاف لمؤثر "السحابة" الافتراضي (cloud) لأن له أصلاً سحابة نصية مدمجة خاصة به
                     (effectType !== 'cloud' ?
@@ -18729,11 +19020,27 @@
                 const cropBottomSlider = controls.querySelector('.ve-ctrl-crop-bottom-input');
                 const cropLeftSlider = controls.querySelector('.ve-ctrl-crop-left-input');
                 const cloudToggleInput = controls.querySelector('.ve-ctrl-cloud-toggle-input');
+                // === FEATURE (Freehand Vector Mask): زرا التبديل وإعادة الضبط (null لغير الصور المخصصة) ===
+                const maskToggleBtn = controls.querySelector('.ve-ctrl-mask-toggle-btn');
+                const maskResetBtn = controls.querySelector('.ve-ctrl-mask-reset-btn');
+                if (maskToggleBtn) {
+                    maskToggleBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        toggleVisualEffectFreehandMode(effectId);
+                    });
+                }
+                if (maskResetBtn) {
+                    maskResetBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        resetVisualEffectFreehandMask(effectId);
+                    });
+                }
 
                 // يضبط الحجم على scaleBox (الغلاف غير المتحرك) بدلاً من body، فلا يتعارض مع الـ Animation إطلاقاً
                 scaleSlider.addEventListener('input', function () {
                     const safeScale = Math.max(0.1, Number(this.value) || 1);
                     scaleBox.style.transform = 'scale(' + safeScale + ')';
+                    wrapper.style.setProperty('--ve-inv-scale', String(1 / safeScale));
                 });
                 speedSlider.addEventListener('input', function () {
                     const safeSpeed = Math.max(0.2, Number(this.value) || preset.defaultSpeed);
@@ -18831,7 +19138,8 @@
                 [
                     scaleSlider, speedSlider, regionSelect, panelRemoveBtn, controls,
                     rotationSlider, flipHInput, flipVInput, hueSlider, saturationSlider, brightnessSlider,
-                    cropTopSlider, cropRightSlider, cropBottomSlider, cropLeftSlider, cloudToggleInput
+                    cropTopSlider, cropRightSlider, cropBottomSlider, cropLeftSlider, cloudToggleInput,
+                    maskToggleBtn, maskResetBtn
                 ].forEach(function (el) {
                     if (!el) return;
                     el.addEventListener('mousedown', function (e) { e.stopPropagation(); });
@@ -18851,6 +19159,162 @@
                 });
             } catch (err) {
                 console.error('spawnVisualEffect error:', err);
+            }
+        }
+
+        // ==================================================================================
+        // FEATURE (2026 UPGRADE — التحجيم التفاعلي للصور/الفيديو المرفوع عبر Bounding Box بأربعة مقابض)
+        // • Pointer Events + setPointerCapture: سحب موحّد للفأرة واللمس والقلم بلا تكرار منطق.
+        // • AbortController: إزالة كل مستمعات السحب دفعة واحدة عند الانتهاء/الإلغاء (لا تسريبات).
+        // • التحجيم يعتمد على نسبة بُعد المؤشر عن مركز الإطار (Uniform Scale) فيحافظ على نسبة العرض/الارتفاع
+        //   تلقائياً، ويعمل من أي زاوية وبأي زاوية دوران/انعكاس/تكبير مطبَّق على المؤثر لأن القياس بإحداثيات الشاشة.
+        // • يُعدَّل مقاس عنصر الوسائط نفسه (width/height) وليس transform، فلا يتعارض مع حركة الطفو ولا مع
+        //   شريط "الحجم" (scale) ولا مع التدوير/الاقتصاص؛ ويُعاد ضبط left/top للحفاظ على نفس المركز البصري.
+        // ==================================================================================
+        function applyVisualEffectMediaBaseSize(mediaEl, naturalW, naturalH) {
+            try {
+                if (!mediaEl) return;
+                const longSide = VISUAL_EFFECT_MEDIA_BASE_LONG_SIDE_PX;
+                let w = longSide, hgt = longSide;
+                if (naturalW > 0 && naturalH > 0) {
+                    const ratio = naturalW / naturalH;
+                    if (ratio >= 1) { w = longSide; hgt = longSide / ratio; }
+                    else { hgt = longSide; w = longSide * ratio; }
+                }
+                mediaEl.style.width = Math.max(16, w) + 'px';
+                mediaEl.style.height = Math.max(16, hgt) + 'px';
+            } catch (err) {
+                console.error('applyVisualEffectMediaBaseSize error:', err);
+            }
+        }
+
+        function attachVisualEffectResizeHandles(wrapperEl, frameEl, mediaEl) {
+            try {
+                wrapperEl.classList.add('ve-has-resize-frame');
+                ['nw', 'ne', 'sw', 'se'].forEach(function (corner) {
+                    const handle = document.createElement('div');
+                    handle.className = 've-resize-handle ve-resize-handle-' + corner;
+                    handle.setAttribute('role', 'button');
+                    handle.setAttribute('tabindex', '0');
+                    handle.setAttribute('aria-label', 'مقبض تغيير حجم الصورة من الزاوية');
+                    handle.dataset.corner = corner;
+
+                    // منع وصول الضغط إلى makeVisualEffectDraggable (المربوطة على body عبر mousedown/touchstart)
+                    // حتى لا يتحول التحجيم إلى سحب للمؤثر أو إلى "نقرة" تفتح/تغلق لوحة التحكم
+                    handle.addEventListener('mousedown', function (e) { e.stopPropagation(); e.preventDefault(); });
+                    handle.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+                    handle.addEventListener('click', function (e) { e.stopPropagation(); });
+
+                    handle.addEventListener('pointerdown', function (downEvent) {
+                        startVisualEffectResize(downEvent, handle, wrapperEl, frameEl, mediaEl);
+                    });
+
+                    // إتاحة التحجيم بلوحة المفاتيح (سهم أعلى/يمين = تكبير، أسفل/يسار = تصغير) لتحقيق إمكانية الوصول
+                    handle.addEventListener('keydown', function (keyEvent) {
+                        const grow = (keyEvent.key === 'ArrowUp' || keyEvent.key === 'ArrowRight' || keyEvent.key === '+');
+                        const shrink = (keyEvent.key === 'ArrowDown' || keyEvent.key === 'ArrowLeft' || keyEvent.key === '-');
+                        if (!grow && !shrink) return;
+                        keyEvent.preventDefault();
+                        keyEvent.stopPropagation();
+                        resizeVisualEffectMediaByFactor(wrapperEl, mediaEl, grow ? 1.08 : 1 / 1.08);
+                    });
+
+                    frameEl.appendChild(handle);
+                });
+            } catch (err) {
+                console.error('attachVisualEffectResizeHandles error:', err);
+            }
+        }
+
+        // يطبّق معامل تحجيم منتظم على مقاس عنصر الوسائط مع تثبيت المركز البصري وحدود دنيا/عليا آمنة
+        function resizeVisualEffectMediaByFactor(wrapperEl, mediaEl, factor, baseState) {
+            try {
+                const startW = baseState ? baseState.startW : mediaEl.offsetWidth;
+                const startH = baseState ? baseState.startH : mediaEl.offsetHeight;
+                if (!startW || !startH) return;
+                const longStart = Math.max(startW, startH);
+                const newLong = Math.min(VISUAL_EFFECT_RESIZE_MAX_LONG_SIDE_PX, Math.max(VISUAL_EFFECT_RESIZE_MIN_LONG_SIDE_PX, longStart * factor));
+                const uniform = newLong / longStart;
+
+                const layoutWBefore = wrapperEl.offsetWidth;
+                const layoutHBefore = wrapperEl.offsetHeight;
+                const leftBefore = baseState ? baseState.startLeft : (parseFloat(wrapperEl.style.left) || wrapperEl.getBoundingClientRect().left);
+                const topBefore = baseState ? baseState.startTop : (parseFloat(wrapperEl.style.top) || wrapperEl.getBoundingClientRect().top);
+                const layoutWRef = baseState ? baseState.layoutW : layoutWBefore;
+                const layoutHRef = baseState ? baseState.layoutH : layoutHBefore;
+
+                mediaEl.style.width = (startW * uniform) + 'px';
+                mediaEl.style.height = (startH * uniform) + 'px';
+                mediaEl.dataset.veUserSized = '1';
+
+                // تثبيت المركز: الغلاف position:fixed ومثبَّت من الزاوية العلوية اليسرى، لذا يُزاح نصف فرق المقاس
+                const deltaW = wrapperEl.offsetWidth - layoutWRef;
+                const deltaH = wrapperEl.offsetHeight - layoutHRef;
+                wrapperEl.style.left = (leftBefore - deltaW / 2) + 'px';
+                wrapperEl.style.top = (topBefore - deltaH / 2) + 'px';
+            } catch (err) {
+                console.error('resizeVisualEffectMediaByFactor error:', err);
+            }
+        }
+
+        function startVisualEffectResize(downEvent, handleEl, wrapperEl, frameEl, mediaEl) {
+            try {
+                if (downEvent.pointerType === 'mouse' && downEvent.button !== 0) return;
+                downEvent.preventDefault();
+                downEvent.stopPropagation();
+
+                const frameRect = frameEl.getBoundingClientRect();
+                const centerX = frameRect.left + frameRect.width / 2;
+                const centerY = frameRect.top + frameRect.height / 2;
+                const startDistance = Math.hypot(downEvent.clientX - centerX, downEvent.clientY - centerY);
+                if (!(startDistance > 4) || !mediaEl.offsetWidth || !mediaEl.offsetHeight) return;
+
+                const baseState = {
+                    startW: mediaEl.offsetWidth,
+                    startH: mediaEl.offsetHeight,
+                    layoutW: wrapperEl.offsetWidth,
+                    layoutH: wrapperEl.offsetHeight,
+                    startLeft: parseFloat(wrapperEl.style.left) || wrapperEl.getBoundingClientRect().left,
+                    startTop: parseFloat(wrapperEl.style.top) || wrapperEl.getBoundingClientRect().top
+                };
+
+                try { handleEl.setPointerCapture(downEvent.pointerId); } catch (captureErr) { /* المستمعات على document تكفي كبديل */ }
+                wrapperEl.classList.add('ve-resizing');
+                wrapperEl.style.zIndex = String(++highestZIndex);
+
+                const abortController = new AbortController();
+                const listenerOptions = { signal: abortController.signal };
+                let pendingFrame = null;
+                let lastMoveEvent = null;
+
+                const applyLatest = function () {
+                    pendingFrame = null;
+                    if (!lastMoveEvent) return;
+                    const distance = Math.hypot(lastMoveEvent.clientX - centerX, lastMoveEvent.clientY - centerY);
+                    resizeVisualEffectMediaByFactor(wrapperEl, mediaEl, distance / startDistance, baseState);
+                };
+                const finish = function () {
+                    if (pendingFrame) { cancelAnimationFrame(pendingFrame); applyLatest(); }
+                    abortController.abort();
+                    wrapperEl.classList.remove('ve-resizing');
+                    try { handleEl.releasePointerCapture(downEvent.pointerId); } catch (releaseErr) { /* تجاهل */ }
+                };
+
+                document.addEventListener('pointermove', function (moveEvent) {
+                    if (moveEvent.pointerId !== downEvent.pointerId) return;
+                    lastMoveEvent = moveEvent;
+                    if (!pendingFrame) pendingFrame = requestAnimationFrame(applyLatest); // دمج الحركات في إطار رسم واحد
+                }, listenerOptions);
+                document.addEventListener('pointerup', function (upEvent) {
+                    if (upEvent.pointerId === downEvent.pointerId) finish();
+                }, listenerOptions);
+                document.addEventListener('pointercancel', function (cancelEvent) {
+                    if (cancelEvent.pointerId === downEvent.pointerId) finish();
+                }, listenerOptions);
+                window.addEventListener('blur', finish, listenerOptions);
+            } catch (err) {
+                console.error('startVisualEffectResize error:', err);
+                try { wrapperEl.classList.remove('ve-resizing'); } catch (cleanupErr) { /* تجاهل */ }
             }
         }
 
@@ -19075,6 +19539,722 @@
             }
         });
 
+        // ==================================================================================
+        // FEATURE (Freehand Vector Mask / Lasso Tool — أداة القص والقناع الحر الدقيق):
+        // إضافة مستقلة تماماً فوق نظام المؤثرات البصرية الحالي، لا تُعدِّل أي دالة أو سلوك قائم
+        // (السحب/التحجيم/السرعة/التدوير/الألوان/الاقتصاص الحر بالأشرطة/السحابة النصية)، وتخص فقط
+        // "الصور المخصصة" المرفوعة (preset.isCustomImage) لأنها الوحيدة ذات مصدر نقطي (Raster).
+        //
+        // آلية العمل:
+        //  1) زر "تفعيل القص الحر" في لوحة تحكم الصورة يفتح محرراً منبثقاً بحجم كبير يعرض الصورة الحالية
+        //     مع طبقة رسم شفافة (HTML5 Canvas) فوقها — لأن الصورة العائمة على الشاشة صغيرة ومتحركة ولا
+        //     تصلح للتتبع الدقيق لحدود جسم/كائن.
+        //  2) يرسم المستخدم مساراً حراً (Lasso) بالفأرة/اللمس/القلم عبر Pointer Events (تفاعل موحّد)،
+        //     مع خط إرشادي مزدوج (هالة داكنة + خط أبيض) ونقطة بداية خضراء ومؤشر تقاطع دقيق، وعند رفع
+        //     الإصبع/الفأرة يُغلق المسار تلقائياً (Closed Loop) ويُظلَّل الجزء الذي سيُخفى قبل التأكيد.
+        //  3) "تأكيد التطبيق" يرسم الصورة على Canvas بدقتها الأصلية (بحد أقصى 4096px للضلع الأطول حفاظاً
+        //     على الأداء مع الصور الكبيرة حتى 20MB) داخل clip() للمسار (إبقاء الداخل أو تفريغه)، ثم يستبدل
+        //     مصدر الصورة على الشاشة بنتيجة PNG شفافة الخلفية. تُخزَّن الصورة الأصلية لهذا المؤثر تحديداً.
+        //  4) "إعادة ضبط" تستعيد الصورة الأصلية كما رُفعت، دون التأثير على أي مؤثر آخر.
+        // النقاط تُخزَّن بإحداثيات نسبية (0-1) فتبقى صحيحة عند تغيّر حجم النافذة أو دقة الإخراج.
+        // ==================================================================================
+        const VE_MASK_MAX_OUTPUT_DIMENSION = 4096;   // أقصى ضلع (px) لناتج القناع لضمان سلاسة الأداء مع الصور الكبيرة
+        const VE_MASK_MIN_POINT_DISTANCE_PX = 1.5;   // أدنى مسافة بين نقطتين متتاليتين أثناء الرسم (تقليل الضجيج)
+        const VE_MASK_MAX_POINTS = 6000;             // سقف نقاط المسار الواحد لمنع تضخم الذاكرة
+        const VE_MASK_MIN_POINTS_TO_CLOSE = 8;       // أدنى عدد نقاط لاعتبار المسار صالحاً للإغلاق
+        const VE_MASK_MIN_AREA_RATIO = 0.0005;       // أدنى مساحة للمسار كنسبة من مساحة الصورة
+        let __veMaskEditor = null;                   // حالة المحرر المفتوح حالياً (محرر واحد فقط في آنٍ واحد)
+
+        // إشعار عائم موحّد لهذه الميزة (يعتمد على showAdminToast القائمة أصلاً، ويتجاهل بأمان عند غيابها)
+        function notifyVisualEffectMask(message, type) {
+            try {
+                if (typeof showAdminToast === 'function') showAdminToast(message, type || 'success');
+            } catch (err) {
+                console.error('notifyVisualEffectMask error:', err);
+            }
+        }
+
+        // خطأ رفع صورة: رسالة نصية أسفل شبكة الاختيار (السلوك الحالي) + إشعار عائم (Toast) مرئي فوق كل النوافذ
+        function notifyVisualEffectUploadError(message) {
+            try { showVisualEffectUploadError(message); } catch (err) { console.error('notifyVisualEffectUploadError inline error:', err); }
+            notifyVisualEffectMask(message, 'error');
+        }
+
+        // يُرجع عناصر <img> الفعلية للصورة المخصصة داخل غلاف مؤثر معيّن
+        function getVisualEffectMaskImageEls(effectId) {
+            const wrapperEl = document.getElementById(effectId);
+            return wrapperEl ? Array.from(wrapperEl.querySelectorAll('img.ve-effect-image-visual')) : [];
+        }
+
+        function revokeVisualEffectBlobUrl(url) {
+            try {
+                if (url && typeof url === 'string' && url.indexOf('blob:') === 0 && typeof URL !== 'undefined' && URL.revokeObjectURL) {
+                    URL.revokeObjectURL(url);
+                }
+            } catch (err) { /* تجاهل */ }
+        }
+
+        // تحديث نص/حالة زري القص الحر داخل لوحة تحكم المؤثر بحسب حالة المحرر والقناع الحاليين
+        function updateVisualEffectFreehandUi(effectId) {
+            try {
+                const wrapperEl = document.getElementById(effectId);
+                if (!wrapperEl) return;
+                const state = __visualEffectInstanceState[effectId];
+                const toggleBtn = wrapperEl.querySelector('.ve-ctrl-mask-toggle-btn');
+                const resetBtn = wrapperEl.querySelector('.ve-ctrl-mask-reset-btn');
+                const isActive = !!(__veMaskEditor && __veMaskEditor.effectId === effectId);
+                if (toggleBtn) {
+                    toggleBtn.textContent = isActive ? '✖ إلغاء وضع القص الحر' : '✂️ تفعيل القص الحر';
+                    toggleBtn.classList.toggle('ve-ctrl-mask-btn-active', isActive);
+                }
+                if (resetBtn) resetBtn.disabled = !(state && state.freehandMaskApplied);
+            } catch (err) {
+                console.error('updateVisualEffectFreehandUi error:', err);
+            }
+        }
+
+        // تفعيل/إلغاء وضع القص الحر للمؤثر (زر التبديل في لوحة التحكم)
+        function toggleVisualEffectFreehandMode(effectId) {
+            try {
+                if (__veMaskEditor && __veMaskEditor.effectId === effectId) {
+                    closeVisualEffectFreehandEditor();
+                    return;
+                }
+                openVisualEffectFreehandEditor(effectId);
+            } catch (err) {
+                console.error('toggleVisualEffectFreehandMode error:', err);
+            }
+        }
+
+        function setVisualEffectFreehandStatus(editor, message, tone) {
+            try {
+                if (!editor || !editor.statusEl) return;
+                editor.statusEl.textContent = message || '';
+                editor.statusEl.className = 've-mask-status' + (tone ? (' ve-mask-status-' + tone) : '');
+            } catch (err) { /* تجاهل */ }
+        }
+
+        function syncVisualEffectFreehandButtons(editor) {
+            try {
+                if (!editor) return;
+                const canApply = !!(editor.closed && editor.points.length >= 3 && editor.img && !editor.busy);
+                if (editor.applyBtn) editor.applyBtn.disabled = !canApply;
+                [editor.clearBtn, editor.resetBtn, editor.modeSelect].forEach(function (el) {
+                    if (el) el.disabled = !!editor.busy;
+                });
+            } catch (err) { /* تجاهل */ }
+        }
+
+        // مساحة المضلع بإحداثيات نسبية (Shoelace) — تُستخدم لرفض المسارات شبه المسطحة/الصغيرة جداً
+        function computeVisualEffectMaskPolygonArea(points) {
+            let sum = 0;
+            for (let i = 0; i < points.length; i++) {
+                const a = points[i];
+                const b = points[(i + 1) % points.length];
+                sum += (a.x * b.y) - (b.x * a.y);
+            }
+            return Math.abs(sum) / 2;
+        }
+
+        // يبني ويعرض نافذة محرر القص الحر لمؤثر صورة مخصصة
+        function openVisualEffectFreehandEditor(effectId) {
+            try {
+                closeVisualEffectFreehandEditor();
+
+                const state = __visualEffectInstanceState[effectId];
+                const imgEls = getVisualEffectMaskImageEls(effectId);
+                if (!state || !imgEls.length) {
+                    notifyVisualEffectMask('أداة القص الحر متاحة للصور المخصصة المرفوعة فقط.', 'warning');
+                    return;
+                }
+                const baseSrc = imgEls[0].currentSrc || imgEls[0].src;
+                if (!baseSrc) {
+                    notifyVisualEffectMask('تعذّر تحديد مصدر الصورة الحالية للقص.', 'error');
+                    return;
+                }
+
+                const overlay = document.createElement('div');
+                overlay.className = 've-mask-editor-overlay';
+                overlay.setAttribute('role', 'dialog');
+                overlay.setAttribute('aria-modal', 'true');
+                overlay.setAttribute('aria-label', 'القص الحر الدقيق للصورة');
+                overlay.innerHTML =
+                    '<div class="ve-mask-editor-box">' +
+                        '<div class="ve-mask-editor-header">' +
+                            '<span>✂️ القص الحر الدقيق (Freehand Mask)</span>' +
+                            '<button type="button" class="ve-mask-close-btn" title="إلغاء وضع القص الحر">✕</button>' +
+                        '</div>' +
+                        '<div class="ve-mask-toolbar">' +
+                            '<select class="ve-mask-mode-select" title="نمط القناع">' +
+                                '<option value="keep">إبقاء داخل المسار (إخفاء الخارج)</option>' +
+                                '<option value="remove">تفريغ داخل المسار (إخفاء الداخل)</option>' +
+                            '</select>' +
+                            '<button type="button" class="ve-mask-btn ve-mask-btn-apply" disabled>✔️ تأكيد التطبيق</button>' +
+                            '<button type="button" class="ve-mask-btn ve-mask-btn-clear">🧹 مسح المسار</button>' +
+                            '<button type="button" class="ve-mask-btn ve-mask-btn-reset" title="استعادة الصورة الأصلية كما رُفعت">↺ إعادة ضبط</button>' +
+                            '<button type="button" class="ve-mask-btn ve-mask-btn-cancel">✖ إلغاء وضع القص الحر</button>' +
+                        '</div>' +
+                        '<div class="ve-mask-stage-wrap">' +
+                            '<div class="ve-mask-stage">' +
+                                '<canvas class="ve-mask-base-canvas"></canvas>' +
+                                '<canvas class="ve-mask-draw-canvas"></canvas>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="ve-mask-status" role="status" aria-live="polite"></div>' +
+                    '</div>';
+                document.body.appendChild(overlay);
+
+                const editor = {
+                    effectId: effectId,
+                    overlay: overlay,
+                    baseSrc: baseSrc,
+                    img: null,
+                    points: [],
+                    isDrawing: false,
+                    closed: false,
+                    busy: false,
+                    hover: null,
+                    activePointerId: null,
+                    dispW: 0, dispH: 0, dpr: 1,
+                    rafId: 0,
+                    baseCanvas: overlay.querySelector('.ve-mask-base-canvas'),
+                    drawCanvas: overlay.querySelector('.ve-mask-draw-canvas'),
+                    statusEl: overlay.querySelector('.ve-mask-status'),
+                    modeSelect: overlay.querySelector('.ve-mask-mode-select'),
+                    applyBtn: overlay.querySelector('.ve-mask-btn-apply'),
+                    clearBtn: overlay.querySelector('.ve-mask-btn-clear'),
+                    resetBtn: overlay.querySelector('.ve-mask-btn-reset'),
+                    onKeyDown: null,
+                    onResize: null
+                };
+                __veMaskEditor = editor;
+
+                // أزرار التحكم
+                overlay.querySelector('.ve-mask-close-btn').addEventListener('click', closeVisualEffectFreehandEditor);
+                overlay.querySelector('.ve-mask-btn-cancel').addEventListener('click', closeVisualEffectFreehandEditor);
+                editor.applyBtn.addEventListener('click', applyVisualEffectFreehandMask);
+                editor.clearBtn.addEventListener('click', function () { clearVisualEffectFreehandPath(editor); });
+                editor.resetBtn.addEventListener('click', function () { resetVisualEffectFreehandFromEditor(editor); });
+                editor.modeSelect.addEventListener('change', function () { scheduleVisualEffectFreehandRedraw(editor); });
+
+                // تفاعل الرسم (فأرة + لمس + قلم) عبر Pointer Events
+                const drawCanvas = editor.drawCanvas;
+                const toNormalizedPoint = function (ev) {
+                    const rect = drawCanvas.getBoundingClientRect();
+                    const w = rect.width || 1;
+                    const h = rect.height || 1;
+                    return {
+                        x: Math.max(0, Math.min(1, (ev.clientX - rect.left) / w)),
+                        y: Math.max(0, Math.min(1, (ev.clientY - rect.top) / h))
+                    };
+                };
+                const appendPoint = function (p) {
+                    if (editor.points.length >= VE_MASK_MAX_POINTS) return;
+                    const last = editor.points[editor.points.length - 1];
+                    if (last) {
+                        const dx = (p.x - last.x) * editor.dispW;
+                        const dy = (p.y - last.y) * editor.dispH;
+                        if ((dx * dx + dy * dy) < (VE_MASK_MIN_POINT_DISTANCE_PX * VE_MASK_MIN_POINT_DISTANCE_PX)) return;
+                    }
+                    editor.points.push(p);
+                };
+                const finishStroke = function () {
+                    if (!editor.isDrawing) return;
+                    editor.isDrawing = false;
+                    editor.activePointerId = null;
+                    const validShape = editor.points.length >= VE_MASK_MIN_POINTS_TO_CLOSE &&
+                        computeVisualEffectMaskPolygonArea(editor.points) >= VE_MASK_MIN_AREA_RATIO;
+                    if (validShape) {
+                        editor.closed = true;
+                        setVisualEffectFreehandStatus(editor, 'تم إغلاق المسار تلقائياً. راجع التظليل ثم اضغط "تأكيد التطبيق" (أو Enter)، أو ارسم مساراً جديداً للاستبدال.', 'ok');
+                    } else {
+                        editor.points = [];
+                        editor.closed = false;
+                        setVisualEffectFreehandStatus(editor, 'المسار قصير أو صغير جداً. ارسم حول الجزء المطلوب بحركة أوضح.', 'warn');
+                    }
+                    syncVisualEffectFreehandButtons(editor);
+                    scheduleVisualEffectFreehandRedraw(editor);
+                };
+
+                drawCanvas.addEventListener('pointerdown', function (e) {
+                    try {
+                        if (editor.busy || !editor.img) return;
+                        if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        e.preventDefault();
+                        try { drawCanvas.setPointerCapture(e.pointerId); } catch (capErr) { /* تجاهل */ }
+                        editor.activePointerId = e.pointerId;
+                        editor.isDrawing = true;
+                        editor.closed = false;
+                        editor.points = [toNormalizedPoint(e)];
+                        setVisualEffectFreehandStatus(editor, 'جارٍ رسم المسار... اترك الفأرة/الإصبع لإغلاق المسار تلقائياً.', '');
+                        syncVisualEffectFreehandButtons(editor);
+                        scheduleVisualEffectFreehandRedraw(editor);
+                    } catch (err) {
+                        console.error('freehand pointerdown error:', err);
+                    }
+                });
+                drawCanvas.addEventListener('pointermove', function (e) {
+                    try {
+                        editor.hover = (e.pointerType === 'touch') ? null : toNormalizedPoint(e);
+                        if (editor.isDrawing && e.pointerId === editor.activePointerId) {
+                            e.preventDefault();
+                            const coalesced = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : null;
+                            const sampleList = (coalesced && coalesced.length) ? coalesced : [e];
+                            sampleList.forEach(function (ev) { appendPoint(toNormalizedPoint(ev)); });
+                        }
+                        scheduleVisualEffectFreehandRedraw(editor);
+                    } catch (err) {
+                        console.error('freehand pointermove error:', err);
+                    }
+                });
+                drawCanvas.addEventListener('pointerup', function (e) {
+                    try {
+                        if (editor.isDrawing && e.pointerId === editor.activePointerId) {
+                            appendPoint(toNormalizedPoint(e));
+                            finishStroke();
+                        }
+                    } catch (err) {
+                        console.error('freehand pointerup error:', err);
+                    }
+                });
+                drawCanvas.addEventListener('pointercancel', function () { try { finishStroke(); } catch (err) { console.error('freehand pointercancel error:', err); } });
+                drawCanvas.addEventListener('pointerleave', function () {
+                    editor.hover = null;
+                    scheduleVisualEffectFreehandRedraw(editor);
+                });
+                // منع قائمة السياق/التمرير أثناء الرسم باللمس
+                drawCanvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+                // اختصارات لوحة المفاتيح: Escape للإغلاق، Enter لتأكيد التطبيق عند اكتمال المسار
+                editor.onKeyDown = function (e) {
+                    try {
+                        if (e.key === 'Escape') { e.preventDefault(); closeVisualEffectFreehandEditor(); }
+                        else if (e.key === 'Enter' && editor.applyBtn && !editor.applyBtn.disabled) { e.preventDefault(); applyVisualEffectFreehandMask(); }
+                    } catch (err) { console.error('freehand keydown error:', err); }
+                };
+                document.addEventListener('keydown', editor.onKeyDown);
+
+                // إعادة ضبط أبعاد اللوحة عند تغيير حجم النافذة (النقاط نسبية فتبقى صحيحة)
+                editor.onResize = function () {
+                    try {
+                        if (editor.img) layoutVisualEffectFreehandEditor(editor);
+                    } catch (err) { console.error('freehand resize error:', err); }
+                };
+                window.addEventListener('resize', editor.onResize);
+
+                // تحميل الصورة (Blob/Data URL محلي، فلا مشاكل CORS) ثم رسمها
+                setVisualEffectFreehandStatus(editor, 'جارٍ تحميل الصورة...', '');
+                syncVisualEffectFreehandButtons(editor);
+                const loader = new Image();
+                loader.onload = function () {
+                    try {
+                        if (__veMaskEditor !== editor) return;
+                        editor.img = loader;
+                        layoutVisualEffectFreehandEditor(editor);
+                        setVisualEffectFreehandStatus(editor, 'ارسم بالفأرة أو باللمس حول الجزء الذي تريد إبقاءه (مثل حدود الجسم)، وسيُغلق المسار تلقائياً عند الإفلات.', '');
+                        syncVisualEffectFreehandButtons(editor);
+                    } catch (err) {
+                        console.error('freehand image onload error:', err);
+                        notifyVisualEffectMask('تعذّر تجهيز محرر القص الحر لهذه الصورة.', 'error');
+                        closeVisualEffectFreehandEditor();
+                    }
+                };
+                loader.onerror = function () {
+                    notifyVisualEffectMask('تعذّر تحميل الصورة داخل محرر القص الحر.', 'error');
+                    if (__veMaskEditor === editor) closeVisualEffectFreehandEditor();
+                };
+                loader.src = baseSrc;
+
+                updateVisualEffectFreehandUi(effectId);
+            } catch (err) {
+                console.error('openVisualEffectFreehandEditor error:', err);
+                try { closeVisualEffectFreehandEditor(); } catch (closeErr) { /* تجاهل */ }
+            }
+        }
+
+        // يضبط أبعاد لوحتي العرض والرسم لتناسب حجم الشاشة الحالي مع دعم الشاشات عالية الكثافة (DPR)
+        function layoutVisualEffectFreehandEditor(editor) {
+            const img = editor.img;
+            if (!img) return;
+            const naturalW = img.naturalWidth || img.width;
+            const naturalH = img.naturalHeight || img.height;
+            if (!naturalW || !naturalH) throw new Error('صورة بأبعاد غير صالحة');
+
+            const stageMaxW = Math.max(160, Math.min(940, (window.innerWidth || 800) - 64));
+            const stageMaxH = Math.max(160, (window.innerHeight || 600) - 270);
+            const fitScale = Math.min(stageMaxW / naturalW, stageMaxH / naturalH, 3); // السماح بتكبير الصور الصغيرة حتى 3x لدقة أعلى بالتتبع
+            const dispW = Math.max(1, Math.round(naturalW * fitScale));
+            const dispH = Math.max(1, Math.round(naturalH * fitScale));
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            [editor.baseCanvas, editor.drawCanvas].forEach(function (canvas) {
+                canvas.width = Math.max(1, Math.round(dispW * dpr));
+                canvas.height = Math.max(1, Math.round(dispH * dpr));
+                canvas.style.width = dispW + 'px';
+                canvas.style.height = dispH + 'px';
+            });
+            editor.dispW = dispW;
+            editor.dispH = dispH;
+            editor.dpr = dpr;
+
+            const baseCtx = editor.baseCanvas.getContext('2d');
+            if (baseCtx) {
+                baseCtx.clearRect(0, 0, editor.baseCanvas.width, editor.baseCanvas.height);
+                baseCtx.imageSmoothingEnabled = true;
+                baseCtx.imageSmoothingQuality = 'high';
+                baseCtx.drawImage(img, 0, 0, editor.baseCanvas.width, editor.baseCanvas.height);
+            }
+            drawVisualEffectFreehandOverlay(editor);
+        }
+
+        // تجميع طلبات إعادة الرسم في إطار واحد (requestAnimationFrame) لضمان سلاسة الرسم دون بطء
+        function scheduleVisualEffectFreehandRedraw(editor) {
+            try {
+                if (!editor || editor.rafId) return;
+                editor.rafId = requestAnimationFrame(function () {
+                    editor.rafId = 0;
+                    if (__veMaskEditor === editor) drawVisualEffectFreehandOverlay(editor);
+                });
+            } catch (err) {
+                console.error('scheduleVisualEffectFreehandRedraw error:', err);
+            }
+        }
+
+        // يرسم المسار/التظليل/المؤشرات على طبقة الرسم الشفافة
+        function drawVisualEffectFreehandOverlay(editor) {
+            try {
+                const canvas = editor.drawCanvas;
+                const ctx = canvas ? canvas.getContext('2d') : null;
+                if (!ctx || !editor.dispW || !editor.dispH) return;
+                const W = editor.dispW;
+                const H = editor.dispH;
+                const pts = editor.points;
+                const mode = editor.modeSelect ? editor.modeSelect.value : 'keep';
+
+                ctx.setTransform(editor.dpr, 0, 0, editor.dpr, 0, 0);
+                ctx.clearRect(0, 0, W, H);
+
+                if (pts.length) {
+                    const tracePath = function () {
+                        ctx.moveTo(pts[0].x * W, pts[0].y * H);
+                        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * W, pts[i].y * H);
+                    };
+
+                    // تظليل المعاينة قبل التأكيد: تعتيم الجزء الذي سيُخفى فعلياً
+                    if (editor.closed && pts.length >= 3) {
+                        ctx.save();
+                        ctx.beginPath();
+                        if (mode === 'keep') ctx.rect(0, 0, W, H);
+                        tracePath();
+                        ctx.closePath();
+                        if (mode === 'keep') {
+                            ctx.fillStyle = 'rgba(1, 32, 21, 0.62)';
+                            ctx.fill('evenodd');
+                        } else {
+                            ctx.fillStyle = 'rgba(220, 38, 38, 0.38)';
+                            ctx.fill();
+                        }
+                        ctx.restore();
+                    }
+
+                    // الخط الإرشادي المزدوج (هالة داكنة + خط أبيض) ليظهر بوضوح فوق أي لون
+                    ctx.save();
+                    ctx.lineJoin = 'round';
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    tracePath();
+                    if (editor.closed) ctx.closePath();
+                    ctx.lineWidth = 5;
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)';
+                    ctx.stroke();
+                    ctx.lineWidth = 2.2;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+
+                    // خط إغلاق متقطع يوضح كيف سيُغلق المسار أثناء الرسم
+                    if (editor.isDrawing && pts.length > 2) {
+                        ctx.beginPath();
+                        ctx.setLineDash([6, 6]);
+                        ctx.moveTo(pts[pts.length - 1].x * W, pts[pts.length - 1].y * H);
+                        ctx.lineTo(pts[0].x * W, pts[0].y * H);
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+
+                    // نقطة البداية
+                    ctx.beginPath();
+                    ctx.arc(pts[0].x * W, pts[0].y * H, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#22c55e';
+                    ctx.fill();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                // مؤشر تقاطع دقيق (High-Precision Cursor) عند التحويم بالفأرة/القلم
+                if (editor.hover && !editor.busy) {
+                    const hx = editor.hover.x * W;
+                    const hy = editor.hover.y * H;
+                    ctx.save();
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                    ctx.shadowBlur = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(hx - 9, hy); ctx.lineTo(hx + 9, hy);
+                    ctx.moveTo(hx, hy - 9); ctx.lineTo(hx, hy + 9);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(hx, hy, 1.6, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fill();
+                    ctx.restore();
+                }
+            } catch (err) {
+                console.error('drawVisualEffectFreehandOverlay error:', err);
+            }
+        }
+
+        // مسح المسار المرسوم فقط (دون المساس بأي قناع مُطبَّق سابقاً على الصورة)
+        function clearVisualEffectFreehandPath(editor) {
+            try {
+                if (!editor || editor.busy) return;
+                editor.points = [];
+                editor.closed = false;
+                editor.isDrawing = false;
+                setVisualEffectFreehandStatus(editor, 'تم مسح المسار. ارسم مساراً جديداً.', '');
+                syncVisualEffectFreehandButtons(editor);
+                scheduleVisualEffectFreehandRedraw(editor);
+            } catch (err) {
+                console.error('clearVisualEffectFreehandPath error:', err);
+            }
+        }
+
+        // تحويل Canvas إلى رابط صورة PNG (Blob URL للأداء مع الصور الكبيرة، مع بديل Data URL احتياطي)
+        function canvasToVisualEffectImageUrl(canvas, callback) {
+            const fallbackToDataUrl = function () {
+                try { callback(canvas.toDataURL('image/png')); }
+                catch (err) { console.error('canvasToVisualEffectImageUrl dataURL error:', err); callback(null); }
+            };
+            try {
+                if (canvas.toBlob && typeof URL !== 'undefined' && URL.createObjectURL) {
+                    canvas.toBlob(function (blob) {
+                        if (blob) {
+                            try { callback(URL.createObjectURL(blob)); return; }
+                            catch (urlErr) { console.error('createObjectURL error:', urlErr); }
+                        }
+                        fallbackToDataUrl();
+                    }, 'image/png');
+                } else {
+                    fallbackToDataUrl();
+                }
+            } catch (err) {
+                console.error('canvasToVisualEffectImageUrl error:', err);
+                fallbackToDataUrl();
+            }
+        }
+
+        // تأكيد التطبيق (Apply Mask): تنفيذ القص الفعلي على الصورة بدقتها الأصلية واستبدال مصدرها على الشاشة
+        function applyVisualEffectFreehandMask() {
+            const editor = __veMaskEditor;
+            if (!editor || editor.busy) return;
+            try {
+                if (!editor.closed || editor.points.length < 3 || !editor.img) {
+                    setVisualEffectFreehandStatus(editor, 'ارسم مساراً مغلقاً أولاً ثم اضغط "تأكيد التطبيق".', 'warn');
+                    return;
+                }
+                const effectId = editor.effectId;
+                if (!__visualEffectInstanceState[effectId] || !getVisualEffectMaskImageEls(effectId).length) {
+                    notifyVisualEffectMask('لم يعد المؤثر موجوداً على الشاشة.', 'warning');
+                    closeVisualEffectFreehandEditor();
+                    return;
+                }
+
+                editor.busy = true;
+                syncVisualEffectFreehandButtons(editor);
+                setVisualEffectFreehandStatus(editor, 'جارٍ تطبيق القناع، يرجى الانتظار...', '');
+
+                const mode = editor.modeSelect ? editor.modeSelect.value : 'keep';
+                const pts = editor.points.slice();
+                const srcImg = editor.img;
+
+                const failMask = function (message) {
+                    editor.busy = false;
+                    if (__veMaskEditor === editor) {
+                        setVisualEffectFreehandStatus(editor, message, 'warn');
+                        syncVisualEffectFreehandButtons(editor);
+                    }
+                    notifyVisualEffectMask(message, 'error');
+                };
+
+                // تأخير قصير لإتاحة رسم رسالة "جارٍ التطبيق" قبل بدء المعالجة الثقيلة على الصور الكبيرة
+                setTimeout(function () {
+                    try {
+                        const naturalW = srcImg.naturalWidth || srcImg.width;
+                        const naturalH = srcImg.naturalHeight || srcImg.height;
+                        const longest = Math.max(naturalW, naturalH);
+                        const shrink = longest > VE_MASK_MAX_OUTPUT_DIMENSION ? (VE_MASK_MAX_OUTPUT_DIMENSION / longest) : 1;
+                        const outW = Math.max(1, Math.round(naturalW * shrink));
+                        const outH = Math.max(1, Math.round(naturalH * shrink));
+
+                        const workCanvas = document.createElement('canvas');
+                        workCanvas.width = outW;
+                        workCanvas.height = outH;
+                        const ctx = workCanvas.getContext('2d');
+                        if (!ctx) throw new Error('تعذّر إنشاء سياق الرسم');
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+
+                        ctx.save();
+                        ctx.beginPath();
+                        if (mode === 'remove') ctx.rect(0, 0, outW, outH); // مستطيل خارجي + المسار بقاعدة even-odd = تفريغ الداخل
+                        ctx.moveTo(pts[0].x * outW, pts[0].y * outH);
+                        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * outW, pts[i].y * outH);
+                        ctx.closePath();
+                        if (mode === 'remove') ctx.clip('evenodd'); else ctx.clip();
+                        ctx.drawImage(srcImg, 0, 0, outW, outH);
+                        ctx.restore();
+
+                        // في وضع "إبقاء الداخل" نقصّ الناتج على الحدود المحيطة بالمسار لإزالة الفراغ الشفاف الزائد
+                        let resultCanvas = workCanvas;
+                        if (mode !== 'remove') {
+                            let minX = 1, minY = 1, maxX = 0, maxY = 0;
+                            pts.forEach(function (p) {
+                                if (p.x < minX) minX = p.x;
+                                if (p.y < minY) minY = p.y;
+                                if (p.x > maxX) maxX = p.x;
+                                if (p.y > maxY) maxY = p.y;
+                            });
+                            const bx = Math.max(0, Math.floor(minX * outW));
+                            const by = Math.max(0, Math.floor(minY * outH));
+                            const bw = Math.max(1, Math.min(outW - bx, Math.ceil(maxX * outW) - bx));
+                            const bh = Math.max(1, Math.min(outH - by, Math.ceil(maxY * outH) - by));
+                            if (bw < outW || bh < outH) {
+                                const trimCanvas = document.createElement('canvas');
+                                trimCanvas.width = bw;
+                                trimCanvas.height = bh;
+                                const trimCtx = trimCanvas.getContext('2d');
+                                if (trimCtx) {
+                                    trimCtx.drawImage(workCanvas, bx, by, bw, bh, 0, 0, bw, bh);
+                                    resultCanvas = trimCanvas;
+                                }
+                            }
+                        }
+
+                        canvasToVisualEffectImageUrl(resultCanvas, function (newUrl) {
+                            try {
+                                if (!newUrl) { failMask('تعذّر إنشاء الصورة الناتجة (قد تكون الذاكرة غير كافية). جرّب صورة أصغر.'); return; }
+
+                                const liveState = __visualEffectInstanceState[effectId];
+                                const liveImgEls = getVisualEffectMaskImageEls(effectId);
+                                if (!liveState || !liveImgEls.length) {
+                                    // أُزيل المؤثر أثناء المعالجة: تنظيف الرابط المؤقت وإغلاق المحرر بهدوء
+                                    revokeVisualEffectBlobUrl(newUrl);
+                                    editor.busy = false;
+                                    if (__veMaskEditor === editor) closeVisualEffectFreehandEditor();
+                                    return;
+                                }
+
+                                // حفظ الصورة الأصلية لهذا المؤثر تحديداً عند أول تطبيق فقط (لإعادة الضبط لاحقاً)
+                                if (!liveState.freehandOriginalSrc) liveState.freehandOriginalSrc = editor.baseSrc;
+                                const previousMaskUrl = liveState.freehandCurrentMaskUrl;
+
+                                liveImgEls.forEach(function (imgEl) { imgEl.src = newUrl; });
+                                liveState.freehandCurrentMaskUrl = newUrl;
+                                liveState.freehandMaskApplied = true;
+                                if (previousMaskUrl && previousMaskUrl !== newUrl) revokeVisualEffectBlobUrl(previousMaskUrl);
+
+                                editor.busy = false;
+                                if (__veMaskEditor === editor) closeVisualEffectFreehandEditor();
+                                updateVisualEffectFreehandUi(effectId);
+                                notifyVisualEffectMask('تم تطبيق القص الحر على الصورة بنجاح.', 'success');
+                            } catch (applyErr) {
+                                console.error('applyVisualEffectFreehandMask finalize error:', applyErr);
+                                failMask('حدث خطأ أثناء تطبيق القناع على الصورة.');
+                            }
+                        });
+                    } catch (procErr) {
+                        console.error('applyVisualEffectFreehandMask processing error:', procErr);
+                        failMask('تعذّر تطبيق القناع على هذه الصورة.');
+                    }
+                }, 30);
+            } catch (err) {
+                console.error('applyVisualEffectFreehandMask error:', err);
+                editor.busy = false;
+                syncVisualEffectFreehandButtons(editor);
+            }
+        }
+
+        // إعادة ضبط القناع (Reset Mask): استعادة الصورة الأصلية لهذا المؤثر كما رُفعت
+        function resetVisualEffectFreehandMask(effectId, options) {
+            try {
+                const state = __visualEffectInstanceState[effectId];
+                if (!state || !state.freehandMaskApplied || !state.freehandOriginalSrc) return false;
+                const originalSrc = state.freehandOriginalSrc;
+                getVisualEffectMaskImageEls(effectId).forEach(function (imgEl) { imgEl.src = originalSrc; });
+                const currentMaskUrl = state.freehandCurrentMaskUrl;
+                state.freehandCurrentMaskUrl = '';
+                state.freehandMaskApplied = false;
+                revokeVisualEffectBlobUrl(currentMaskUrl);
+                updateVisualEffectFreehandUi(effectId);
+                if (!options || !options.silent) notifyVisualEffectMask('تمت استعادة الصورة الأصلية.', 'success');
+                return true;
+            } catch (err) {
+                console.error('resetVisualEffectFreehandMask error:', err);
+                return false;
+            }
+        }
+
+        // زر "إعادة ضبط" داخل المحرر: يمسح المسار ويستعيد الأصل إن كان هناك قناع مُطبَّق، ثم يعيد تحميل المحرر بالأصل
+        function resetVisualEffectFreehandFromEditor(editor) {
+            try {
+                if (!editor || editor.busy) return;
+                const effectId = editor.effectId;
+                const restored = resetVisualEffectFreehandMask(effectId, { silent: true });
+                if (restored) {
+                    notifyVisualEffectMask('تمت استعادة الصورة الأصلية.', 'success');
+                    openVisualEffectFreehandEditor(effectId); // إعادة فتح المحرر لعرض الصورة الأصلية
+                } else {
+                    clearVisualEffectFreehandPath(editor);
+                }
+            } catch (err) {
+                console.error('resetVisualEffectFreehandFromEditor error:', err);
+            }
+        }
+
+        // إغلاق المحرر (إلغاء وضع القص الحر) وتنظيف مستمعي الأحداث والموارد المؤقتة
+        function closeVisualEffectFreehandEditor() {
+            const editor = __veMaskEditor;
+            if (!editor) return;
+            __veMaskEditor = null;
+            try {
+                if (editor.onKeyDown) document.removeEventListener('keydown', editor.onKeyDown);
+                if (editor.onResize) window.removeEventListener('resize', editor.onResize);
+                if (editor.rafId) cancelAnimationFrame(editor.rafId);
+                if (editor.overlay && editor.overlay.parentNode) editor.overlay.parentNode.removeChild(editor.overlay);
+            } catch (err) {
+                console.error('closeVisualEffectFreehandEditor error:', err);
+            }
+            updateVisualEffectFreehandUi(editor.effectId);
+        }
+
+        // تنظيف موارد القناع (رابط Blob المؤقت + المحرر المفتوح) عند إزالة مؤثر من الشاشة
+        function releaseVisualEffectMaskResources(effectId) {
+            try {
+                if (__veMaskEditor && __veMaskEditor.effectId === effectId) closeVisualEffectFreehandEditor();
+                const state = __visualEffectInstanceState[effectId];
+                if (state && state.freehandCurrentMaskUrl) {
+                    revokeVisualEffectBlobUrl(state.freehandCurrentMaskUrl);
+                    state.freehandCurrentMaskUrl = '';
+                }
+            } catch (err) {
+                console.error('releaseVisualEffectMaskResources error:', err);
+            }
+        }
+
         function removeVisualEffect(effectId) {
             try {
                 const el = document.getElementById(effectId);
@@ -19084,6 +20264,7 @@
             } finally {
                 // === FEATURE (2026 UPGRADE) === تنظيف حالة الصورة المستقلة الخاصة بهذا المؤثر تحديداً بعد
                 // إزالته من الشاشة، لمنع أي تراكم غير محدود لبيانات الحالة (Memory) عبر الجلسة الواحدة
+                try { releaseVisualEffectMaskResources(effectId); } catch (maskCleanupErr) { /* تجاهل */ }
                 try { delete __visualEffectInstanceState[effectId]; } catch (cleanupErr) { /* تجاهل */ }
             }
         }
@@ -19099,6 +20280,7 @@
                 // المؤثرات من الشاشة معاً، بنفس فلسفة التنظيف أعلاه
                 try {
                     Object.keys(__visualEffectInstanceState).forEach(function (key) {
+                        try { releaseVisualEffectMaskResources(key); } catch (maskCleanupErr) { /* تجاهل */ }
                         delete __visualEffectInstanceState[key];
                     });
                 } catch (cleanupErr) { /* تجاهل */ }
